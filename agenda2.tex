@@ -1,0 +1,49 @@
+\documentclass[11pt,agenda]{meetingmins}
+\setcommittee{SGX Project Meeting \#2}
+\setdate{July 7, 2016}
+
+\begin{document}
+	\maketitle
+	\section{What we have done}
+		\begin{items}
+			\item OpenSGX
+			\begin{items}
+				\item Master branch was broken, spent time resolving the issue by reverting commits that introduced the bugs. Ended up studying the extended assembler and their implementation of SGX instructions in QEMU
+				\item Experimented with intra/remote attestation after the aforementioned issues were resolved. Ran the demo successfully 
+			\end{items}
+			\item NGINX + LibreSSL
+			\begin{items}
+				\item Created a script to build NGINX from sources and link it to libreSSL
+				\item Figured out how to generate self-signed certificates for testing the HTTPS enabled server
+				\item Started sifting through NGINX + LibreSSL source code to identify areas that need to be partitioned
+				\item Found a patch for Open/LibreSSL that separates the private key handling into a separate process (neverbleed). Interface provided to web-facing process is decrypt/encrypt, however, but perhaps the code may be a useful reference	  
+			\end{items}
+			\item Performance Evaluation
+			\begin{items}
+				\item Re-read the Haven paper and read the paper released by the OpenSGX team from GeorgiaTech. Both employ a very similar technique to performance evaluation, they counted the number of cycles that their program consumes without SGX and compared it against the program with SGX instructions. They make an assumption about the number of cycles consumed by an SGX instruction and calculate the overhead based on that
+			\end{items}
+		\end{items}
+	\section{What we want to discuss}
+		\begin{items}
+			\item OpenSGX
+			\begin{items}
+				\item The Linux SDK from Intel has been released, we had a look at it and, while similar to the Windows SDK, it feels under-documented and there are very few samples for us to go by.
+			\end{items}
+			\item NGINX + LibreSSL
+			\begin{items}
+				\item Going through the code and identifying manually areas that need to be partitioned is proving to be a difficult task. Having gone through the Wedge paper, we are aware of the possibility of memory-profiling and permissive modes enabling us to make this a more systematic task. We were curious as to what technique would be efficient given our time constraint.
+			\end{items}
+			\item Performance Evaluation
+			\begin{items}
+				\item We are fairly confident that we can calculate overhead if we make assumptions, similar to the case of Haven, about the number of cycles that an SGX instruction consumes. However, we are still uncertain about how an end-to-end evaluation would be carried out.
+			\end{items}
+		\end{items}
+	\section{what we are planning to do next week}
+		\begin{items}
+			\item 
+			Continue work on identifying the partition within NGINX + LibreSSL that would enable us to guard the private key.
+			\item 
+			Make concrete the code for provisioning the private key. We currently have a sample that is provided with the OpenSGX platform, but we need to tweak slightly to fit our needs
+		\end{items}
+
+\end{document}
