@@ -22,4 +22,13 @@ key allows an adversary to do the following:
 	\item Masquerade as the server and fool a client into disclosing sensitive information such as passwords
 \end{itemize}
 In all cases, a compromised key voids the confidentially and integrity guarantees of SSL/TLS. 
+
+The goal of this project is to secure the private key in the face of:
+\begin{enumerate}
+	\item An adversary who exploits the server application 
+	\item A malicious cloud provider 
+	\item An adversary with an exploit for the underlying operating system
+\end{enumerate} 
+The first point has been extensively addressed in previous works including Wedge and OKWS; % need to reference these/adjust this sentence
+the latter two have been discussed in recent works such as Haven. 						   % could link to previous works here...
 \end{document} 
