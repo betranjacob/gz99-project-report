@@ -1,7 +1,25 @@
 \documentclass[../main.tex]{subfiles}
- 
+
 \begin{document}
-\textbf{Hello world!}
- 
-Hello, here is some text without a meaning.  This... 
-\end{document}
+With the recent surge in privacy concerns, employing SSL/TLS to secure communications in the middle of the network has become common place. 
+SSL/TLS offers guarantees of confidentiality and integrity provided that a private key's secrecy is maintained. Yet, SSL/TLS was designed 
+assuming that its user trusts the hardware and OS of the machine on which the key is held. 
+
+While this assumption is perfectly valid in the case where a person is running an SSL/TLS enabled service on their own machines, many web
+applications are now hosted by third party cloud service providers such as Amazon Web Services, Heroku, Digital Ocean \&c. Moreover, to offer 
+SSL/TLS, the private key must also be stored with the web application on these service providers' machines. This implies that a server administrator 
+using the aforementioned services is trusting the cloud-provider, including any personnel with physical/administrative access to the machines, and the underlying OS
+to maintain the secrecy of the sensitive key material. Such a wide trust surface makes it difficult to maintain the privacy of critical
+secrets.
+
+Consider a case where the cloud provider is not malicious; a vulnerability within their platform could lead to leaking the private key
+if exploited by an adversary. Moreover, if the cloud provider is indeed malicious they could simply read your private key from the hard disk if stored 
+unencrypted, or mount some form of memory sniffing attack to read the key from the web server's memory since data in RAM is unencrypted. A compromised private 
+key allows an adversary to do the following:
+\begin{itemize}
+	\item Decrypt past, stored, communication between the web server and a client (assuming a cipher that does not provide perfect forward secrecy is in use)
+	\item Decrypt any ongoing communication between the web server and a client
+	\item Masquerade as the server and fool a client into disclosing sensitive information such as passwords
+\end{itemize}
+In all cases, a compromised key voids the confidentially and integrity guarantees of SSL/TLS. 
+\end{document} 

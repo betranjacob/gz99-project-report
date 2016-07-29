@@ -3,45 +3,43 @@
 \usepackage[english]{babel}
 \usepackage{graphicx}
 \usepackage{float}
+\usepackage{subfiles}
+\usepackage{blindtext}
 
 \graphicspath{{images/}{../images/}}
- 
-\usepackage{subfiles}
- 
-\usepackage{blindtext}
 
 \title{SGX Project}
 \author{Team Awesome}
 
 \begin{document}
 
-	\maketitle
+\maketitle
 
-	\newpage
+\newpage
 
-	\tableofcontents
+\tableofcontents
 
-	\newpage
+\newpage
 
-	\section{Introduction}
-		\subfile{sections/introduction.tex}
-	\newpage
+\section{Introduction}
+\subfile{sections/introduction.tex}
+\newpage
 
-	\section{Background}
-		\subfile{sections/background.tex}
-		\subfile{sections/remote-attestation.tex}
-	\newpage
+\section{Background}
+\subfile{sections/background.tex}
 
-	\section{Design}
-		\subfile{sections/design.tex}
-	\newpage
+\newpage
 
-	\section{Project Management}
-		\subfile{sections/management.tex}
-	\newpage
+\section{Design}
+\subfile{sections/design.tex}
+\newpage
 
-	\section{Conclusion}
-		\subfile{sections/conclusion.tex}
-	\newpage
+\section{Project Management}
+\subfile{sections/management.tex}
+\newpage
+
+\section{Conclusion}
+\subfile{sections/conclusion.tex}
+\newpage
 
 \end{document}
