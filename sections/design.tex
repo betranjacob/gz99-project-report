@@ -11,7 +11,6 @@
 	the interface has to be carefully designed, allowing the handshake to complete correctly while not exposing the long term private key through an oracle.
 
 	%TODO: introduce this better to make it clear that there are 2 different handshakes; I only went into some detail here, definitely need more depth
-	%TODO: definitely need to define the threat model somewhere before here for this to make sense
 	
 	Take for example an interface where the non-trusted component supplies \texttt{(ServerRandom, ClientRandom, \{PremasterSecret\}$_K$)}. Such an interface, while maintaining the secrecy of
 	the private key's bits, would allow an adversary capable of exploiting the non-trusted component to generate the symmetric keys for previously eavesdropped sessions.

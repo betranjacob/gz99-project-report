@@ -1,0 +1,22 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+\subsection{Threat model} % reference this to the developer reference
+We consider a threat model similar to the one presented in Haven []. Our TCB
+includes a correctly implemented and SGX enabled CPU and all instructions
+executing and data resident within an enclave. Therefore, we assume an attacker
+cannot access the SGX processor key provisioned by Intel itself, which is used
+to generate subsequent cryptographic keys that preserve the confidentiality,
+integrity and authenticity of an enclave.
+
+An adversary can take full control of everything beyond the TCB. That is, we
+assume all software executing on the platform (outside of the enclave), the
+underlying operating system, the hypervisor, all firmware and the BIOS are
+potentially compromized. Side-channel attacks that originate from other sources
+such as CPU cache timing information (L1, L2, L3), power consumption or other
+entropy source are considered as out of scope of this work. Finally, we assume
+an attacker may act as man-in-the-middle to eavesdrop active sessions and,
+as further analyzed in the Limitations section, launch a denial-of-service
+attack, though without compromizing any secret isolation guarantees of our
+design.
+\end{document}
