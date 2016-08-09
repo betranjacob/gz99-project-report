@@ -53,6 +53,11 @@ The steps involved in the attestation process are as follows (illustrated in Fig
 \end{figure}
 
 However, the process outlined above takes no steps to verify the challenging entity to the trusted component. In an effort to authenticate the
-challenger, we added the following steps to the attestation/provisioning process outlined above.  
+challenger, we utilize a combination of asymmetric cryptography and SGX's guarantees.
+%This needs more detail, but it contains the most important  pieces of information
+First, the server-administrator, before shipping the server program to the cloud-provider, stores the public key for the challenger within the 
+text-area of the trusted component. The reason for this comes from realizing that doing so binds the public key to the identity of the trusted component, and
+as a result, the SGX-enabled CPU would not start the trusted-component if the public key has been tampered with. All that remains now is for challenger to sign
+the long term private key with their own key, enabling the trusted-component to verify it using the challenger's public-key that was shipped along with the server-program.
 
 \end{document}
