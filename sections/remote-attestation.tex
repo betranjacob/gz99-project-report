@@ -12,11 +12,13 @@ send the long term private key to the server in a secure fashion. Loosely, the r
 	      trustworthy hardware.
 	\item The mechanism allows us to setup a secure channel, ensuring that the only entities privy to the private key 
 	      are the server application and the server administrator.
+	\item The mechanism allows for the verification of the entity providing the private key. If this requirement were not in place, the mechanism could 	  allow any arbitrary entity to authenticate with the server and provide their own private key. Observe that such an attack does not compromise
+	the security of the long-term secret, but makes it possible to render the server useless (if the matching public certificate is not placed onto the server, verifying the server's hostname, then clients will reject connections to the server under the SSL/TLS protocol). % make this into a footnote?
 \end{itemize} 
-The first and second requirement are met by a process called inter-platform attestation.
-\subsection{Inter-platform attestation} %reference(https://software.intel.com/en-us/articles/innovative-technology-for-cpu-based-attestation-and-sealing)
+The first and second requirement are met by a process called inter-platform attestation, outlined by Intel in [PLACEHOLDER] and summarized in the following section.
+\subsection{Inter-platform attestation and secret provisioning} %reference(https://software.intel.com/en-us/articles/innovative-technology-for-cpu-based-attestation-and-sealing)
 Inter-platform attestation is a mechanism that can be invoked by an entity, referred to as the challenger, running on one platform
-to verify an enclave running on another, remote, platform. This process is enables the challenger to verify the following about the remote enclave:
+to verify an enclave running on another, remote, platform. This process enables the challenger to verify the following about the remote enclave:
 \begin{enumerate}
 	\item The contents of the enclave's pages (code, data, stack and heap) upon creation (after the ECREATE instruction completes)
 	\item The identity of the entity that signed the enclave 
@@ -50,5 +52,7 @@ The steps involved in the attestation process are as follows (illustrated in Fig
 	\label{fig:attest}
 \end{figure}
 
+However, the process outlined above takes no steps to verify the challenging entity to the trusted component. In an effort to authenticate the
+challenger, we added the following steps to the attestation/provisioning process outlined above.  
 
 \end{document}
