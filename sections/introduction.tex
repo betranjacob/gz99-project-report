@@ -1,7 +1,7 @@
 \documentclass[../main.tex]{subfiles}
 
 \begin{document}
-With the recent surge in privacy concerns, employing SSL/TLS to secure communications in the middle of the network has become common place. 
+With the recent surge in privacy concerns employing SSL/TLS to secure communications in the middle of the network has become common place. 
 SSL/TLS offers guarantees of confidentiality and integrity provided that a private key's secrecy is maintained. Yet, SSL/TLS was designed 
 assuming that its user trusts the hardware and OS of the machine on which the key is held. 
 
@@ -9,11 +9,10 @@ While this assumption is perfectly valid in the case where a person is running a
 applications are now hosted by third party cloud service providers such as Amazon Web Services, Heroku, Digital Ocean \&c. Moreover, to offer 
 SSL/TLS, the private key must also be stored with the web application on these service providers' machines. This implies that a server administrator 
 using the aforementioned services is trusting the cloud-provider, including any personnel with physical/administrative access to the machines, and the underlying OS
-to maintain the secrecy of the sensitive key material. Such a wide trust surface makes it difficult to maintain the privacy of critical
-secrets.
+to maintain the secrecy of the sensitive key material. Such a wide trust surface makes it difficult to maintain the privacy of critical secrets.
 
-Consider a case where the cloud provider is not malicious; a vulnerability within their platform could lead to leaking the private key
-if exploited by an adversary. Moreover, if the cloud provider is indeed malicious they could simply read your private key from the hard disk if stored 
+Consider a case where the cloud provider is not malicious; a vulnerability within their platform could lead to leaking the private key,
+if exploited by an adversary. Moreover, if the cloud provider is indeed malicious they could simply read your private key from the hard disk, if stored 
 unencrypted, or mount some form of memory sniffing attack to read the key from the web server's memory since data in RAM is unencrypted. A compromised private 
 key allows an adversary to do the following:
 \begin{itemize}
@@ -23,12 +22,15 @@ key allows an adversary to do the following:
 \end{itemize}
 In all cases, a compromised key voids the confidentially and integrity guarantees of SSL/TLS. 
 
-The goal of this project is to secure the private key in the face of:
-\begin{enumerate}
-	\item An adversary who exploits the server application 
-	\item A malicious cloud provider 
-	\item An adversary with an exploit for the underlying operating system
-\end{enumerate} 
-The first point has been extensively addressed in previous works including Wedge and OKWS; % need to reference these/adjust this sentence
-the latter two have been discussed in recent works such as Haven. 						   % could link to previous works here...
+Our project aims to break this assumption by refactoring legacy web servers to secure the private key in the face of: An adversary who is capable of exploiting the server application, 
+a malicious cloud provider, and an adversary with an exploit for the underlying operating system. 
+
+The remainder of this report is divided as follows: Section~\ref{sec:background} provides an overview of previous work and technologies underlying our project,
+Section~\ref{sec:design} discusses the design of the system that we implemented to meet the above-stated goals, Section~\ref{sec:implementation} highlights
+some of the implementation considerations that we had to make in realizing the system that we designed, Section~\ref{sec:projectmgmt} details the managerial
+aspects of this project, and, finally, Section~\ref{sec:conclusion} offers areas where this project could be improved, and concludes this report.
+
+%The first of these goals 
+%has been extensively addressed in previous works including Wedge~\cite{Bittau08} and OKWS~\cite{Krohn2004}; 
+%the latter two have hardly been addressed before, and are key points in recent works such as Haven~\cite{Baumann14}. 						
 \end{document} 

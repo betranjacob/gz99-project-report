@@ -9,7 +9,10 @@
 \usepackage{subfiles}
 \usepackage{blindtext}
 \usepackage{lsc}
+\usepackage[sorting=none, backend=biber]{biblatex}
+\usepackage{csquotes}
 
+\bibliography{references.bib}
 \graphicspath{{images/}{../images/}}
 
 \title{SGX Project}
@@ -36,20 +39,29 @@
 \newpage
 
 \section{Background}
+\label{sec:background}
 \subfile{sections/background.tex}
-
 \newpage
 
 \section{Design}
+\label{sec:design}
 \subfile{sections/design.tex}
 \newpage
 
+\section{Implementation}
+\label{sec:implementation}
+\subfile{sections/implementation.tex}
+
 \section{Project Management}
+\label{sec:projectmgmt}
 \subfile{sections/management.tex}
 \newpage
 
 \section{Conclusion}
+\label{sec:conclusion}
 \subfile{sections/conclusion.tex}
 \newpage
+
+\printbibliography
 
 \end{document}
