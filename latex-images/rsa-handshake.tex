@@ -77,8 +77,8 @@
 					\lscAsyn{clntkeyx}{hot}{\texttt{ClientKeyExchange\{premaster\_secret\}$_K$}}
 					\lscAsyn{clntchngcipher}{hot}{\texttt{ClientChangeCipherSpec}}
 					\lscAsyn{clntfinish}{hot}{\texttt{MAC<master\_secret, all messages>}}
-					\lscAsyn{getsesskey}{hot}{\texttt{GetSessionKeys\{premaster\_secret\}$_K$}}
-					\lscAsyn{sesskey}{hot}{\texttt{SessionKeyBlock}}
+					\lscAsyn{getsesskey}{hot}{\texttt{GetMasterSecret\{premaster\_secret\}$_K$}}
+					\lscAsyn{sesskey}{hot}{\texttt{MasterSecret}}
 					\lscAsyn{srvrfinish}{hot}{\texttt{MAC<master\_secret, all messages>}}
 					\lscAsyn{srvrchngcipher}{hot}{\texttt{ServerChangeCipherSpec}}
 				\end{Lsc}
