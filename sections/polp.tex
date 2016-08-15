@@ -18,13 +18,25 @@ Wedge~\cite{Bittau08} that was used to refactor Apache, by enforcing PoLP,
 securing the private key in the face of an adversary who is capable of
 exploiting the web server application. First, we list the attacks possible
 against a monolithic web server and then detail how the design implemented
-with Wedge resolved these vulnerabilities.
+with Wedge resolved these vulnerabilities. We only consider a threat model 
+where the adversary is capable of passively eavesdropping on secure
+communication channels. We did not consider the second threat model, detailed in
+the Wedge paper, where an attacker is capable of actively modifying packets in
+flight between the web server and client because the solution presented in the
+Wedge paper does not hold if we remove the assumption that the OS and cloud
+provider are trusted as the web server's user-level processes (dynamic content
+generation scripts, databases \&c.) need to parse web request data in the
+clear, and as a consequence, even if we secure the encrypt/decrypt interface
+using the solution in the Wedge paper, the data would be available in the
+non-privileged process's memory. This is further discussed in 
+Section~\ref{sec:design}.
 
-\paragraph{Possible Attacks}
+\subsubsection*{Possible Attacks}
 
-There are two main types of attacks that may be mounted by an adversary capable
-of exploiting \textit{only} the network facing component of the web server
-application:
+There are two main attacks that may be mounted by an adversary capable of
+exploiting \textit{only} the network facing component of the web server
+application and passively eavesdropping on packets exchanged between the server
+and the client:
 
 \begin{enumerate}     
 	\item The adversary could leak the private key from
@@ -36,12 +48,12 @@ application:
 	\begin{figure}[H]
 		\centering
 		\includegraphics[scale=0.15]{images/attack1.png}
-		\label{fig:attack1}
 		\caption{Exploiting the network facing component to leak the
 		private key}
+		\label{fig:attack1} 
 	\end{figure}
 
-	%add a foot note explaining the naive session key generation
+	%add a foot note explaining the naive session key generation?
 	\item The adversary may record traffic exchanged over the SSL/TLS channel
 	and then exploit a naive session key generation interface to acquire the
 	session keys used in that exchange. This exploit only works if the cipher
@@ -54,11 +66,25 @@ application:
 	\begin{figure}[H]
 		\centering
 		\includegraphics[scale=0.15]{images/attack2.png}
-		\label{fig:attack2}
 		\caption{Exploiting the network facing component and the naive 
 		session key generation interface to generate session keys for
 		eavesdropped session}
+		\label{fig:attack2}
 	\end{figure}
 \end{enumerate}
+
+\subsubsection*{Proposed Solution} 
+The solution proposed in the Wedge paper is through partitioning the session key
+generation code into its own logical compartment \footnote{This compartment
+called an sthread in Wedge's nomenclature} that executes at a high privilege
+level. This partitioning can be seen in Figure~\ref{fig:wedge-partition}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.25]{images/compartment_01.png}
+	\caption{Partitioning Scheme to protect against leaking the private 
+	key~\cite{Bittau08}}
+	\label{fig:wedge-partition}
+\end{figure}
 
 \end{document}
