@@ -66,10 +66,10 @@ send out to a man in the middle, outside of the compromised machine. However,
 this only permits the leakage of current (and cached) sessions keys.\\
 
 \noindent
-One could prefer this option for performance resons - such design puts less
-burdeon on the enclave program. In particular the role of the enclave can
+One could prefer this option for performance reasons - such design puts less
+burden on the enclave program. In particular the role of the enclave can
 finish after the master secret is computed from server and client randoms and
-premaster secret. This is because a pseudorandom function (PRF) lies between
+pre-master secret. This is because a pseudo-random function (PRF) lies between
 master secret and the input values so no information can be learned about the
 private key. The derivation of session keys and encryption / decryption of
 messages can be left unaltered in the untrusted program.
@@ -82,11 +82,11 @@ interface is presented to the untrusted component. The enclave performs the
 cryptographic operations using stored state accessed by the session\_id. This
 prevents the compromised OS from leaking the session keys to a different
 machine, but requires a more complicated and expensive design. If the attacker
-is leaking ton of data out of the server, it may be more easily noticable than
+is leaking ton of data out of the server, it may be more easily noticeable than
 if the session keys are exported outside of the server once.\\
 
 \noindent
-Now the symetric cipher context and initization valuse (initization vector, )
+Now the symmetric cipher context and initialization values (initialization vector, )
 needs to be transferred to the enclave. The symmetric keys are used to encrypt
 the finished handshake messages. The performance cost is increased since now
 at least 4 context switches between untrusted and trusted processes are
