@@ -21,16 +21,17 @@ against a monolithic web server and then detail how the design implemented
 with Wedge resolved these vulnerabilities. 
 
 We only consider a threat model where the adversary is capable of passively
-eavesdropping on secure communication channels. We did not consider the second
-threat model, detailed in the Wedge paper, where an attacker is capable of
-actively modifying packets in flight between the web server and client because
-the solution presented in the Wedge paper does not hold if we remove the
-assumption that the OS and cloud provider are trusted as the web server's user-
-level processes (dynamic content generation scripts, databases \&c.) need to
-parse web request data in the clear, and as a consequence, even if we secure the
-encrypt/decrypt interface using the solution in the Wedge paper, the data would
-be available in the non-privileged process's memory. This is further discussed
-in  Section~\ref{sec:design}.
+eavesdropping on secure communication channels, and exploiting unprivileged
+components of the server. We did not consider the second threat model
+detailed in the Wedge paper, wherein an attacker is capable of actively
+modifying packets exchanged between the web server and client, because the
+solution presented in there does not hold if we remove the assumption that the
+OS and cloud provider are trusted. A consequence of the web server's user-level
+processes (dynamic content generation scripts, databases \&c.) requiring plain-
+text to complete their tasks, thus, even if we secure the encrypt/decrypt
+interface using the solution in the Wedge paper, the data would be available in
+the non-privileged process's memory. This is further discussed in
+Section~\ref{sec:design}.
 
 \subsubsection*{Possible Attacks}
 
@@ -56,11 +57,15 @@ and the client:
 
 	%add a foot note explaining the naive session key generation?
 	\item The adversary may record traffic exchanged over the SSL/TLS channel
-	and then exploit a naive session key generation interface to acquire the
-	session keys used in that exchange. This exploit only works if the cipher
-	used is one that does not offer perfect forward secrecy (PFS). The session
-	key generation operations require use of the private key, but the adversary
-	does not need to learn the key to complete this attack. However, th attack
+	and then exploit a naive session key generation interface to acquire the 
+	session keys used in that exchange. A naive interface is one that accepts
+	\crandom, \srandom, and \premaster~ where $K$ is the web server's public key.
+	Such an interface allows an adversary, after exploiting the unprivileged
+	component, to generate any previously eavesdropped session's symmetric key 
+	(assuming a cipher that does not provide the property of perfect forward
+	secrecy) and is, therefore, no different to having read access to the private
+	key from the adversary's perspective. This exploit only works if the cipher
+	used is one that does not offer perfect forward secrecy (PFS), and it
 	only affects the single session which was eavesdropped. The attack is
 	illustrated in Figure~\ref{fig:attack2}.
 
@@ -76,9 +81,9 @@ and the client:
 
 \subsubsection*{Proposed Solution} 
 The solution proposed in the Wedge paper is through partitioning the session key
-generation code into its own logical compartment \footnote{This compartment
-called an sthread in Wedge's nomenclature} that executes at a high privilege
-level. This partitioning can be seen in Figure~\ref{fig:wedge-partition}.
+generation code into its own logical compartment \footnote{This compartment is
+called an sthread in Wedge's nomenclature} that executes at high privilege.
+This partitioning can be seen in Figure~\ref{fig:wedge-partition}. 
 
 \begin{figure}[H]
 	\centering
@@ -87,5 +92,23 @@ level. This partitioning can be seen in Figure~\ref{fig:wedge-partition}.
 	key~\cite{Bittau08}}
 	\label{fig:wedge-partition}
 \end{figure}
+
+The low privilege worker process does not have possess to the private key, but
+must rely on an interface to the session key generation process. The interface
+takes \crandom~ and \premaster~ as arguments, both of which are provided by the
+client, while the high privilege component generates a fresh \srandom~ upon
+invoking the interface. The freshness property ensures that, even if an
+adversary exploits the worker process, previous session keys cannot be generated
+by simply invoking the session key generation interface. 
+
+While this design secures the private key against the previously described
+adversary, it is not, by itself, sufficient to secure the key against an
+adversary capable of exploiting the operating system, and may, therefore,
+leak the key from the privileged component's memory space, or from a malicious
+cloud-provider with full access to the physical machine and is capable of
+reading the key from disk \footnote{Even if the key is encrypted on disk, the
+decryption key must be present in the plain-text binary file for the privileged
+component or in the process's memory, at runtime, in plain-text}. To secure the
+key against the aforementioned adversaries, we utilized SGX. 
 
 \end{document}
