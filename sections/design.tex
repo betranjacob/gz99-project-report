@@ -45,7 +45,7 @@ computed on every invocation.
 %maintain the secrecy of an SSL/TLS private key in the face of a passive
 %eavesdropper how can exploit the server application's network facing
 %process. We use it to secure the private key against an adversary who can
-%exploit the underlying operating system and/or a malicious cloud provider.
+%exploit the underlying operating system and / or a malicious cloud provider.
 
 \noindent
 \\We consider two scenarios that slightly change the exchange of messages with the enclave during the handshake:
@@ -77,7 +77,7 @@ messages can be left unaltered in the untrusted program.
 \paragraph{Session keys hidden within the enclave}
 
 One may want to further protect the key material by requiring that the session
-keys themselves do not leave the enclave. Instead an encrypt/decrypt oracle
+keys themselves do not leave the enclave. Instead an encrypt / decrypt oracle
 interface is presented to the untrusted component. The enclave performs the
 cryptographic operations using stored state accessed by the session\_id. This
 prevents the compromised OS from leaking the session keys to a different
@@ -107,5 +107,7 @@ processing (plain-text in, cipher-text out of an enclave).\\
 \noindent
 Also every handshake now needs 6 (TODO: ???) more context switches during
 digest update.
+
+\subfile{latex-images/session-keys-inside.tex}
 
 \end{document}
