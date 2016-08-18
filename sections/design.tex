@@ -61,9 +61,13 @@ computed on every invocation.
 
 If our sole goal is to protect the long term, private key then we may decide
 it is safe to keep the active sessions' keys outside of the TCB. This allows
-the compromised OS to use the keys as it pleases - i.e. dump all of them and
-send out to a man in the middle, outside of the compromised machine. However,
-this only permits the leakage of current (and cached) sessions keys.\\
+the compromised OS to use the keys as it pleases. It can just read them out
+from memory and send to a man in the middle (on a different to compromised
+machine). MITM could then decrypt previously captured traffic. This method it
+is possible to leak current (and cached) sessions keys. Old, captured sessions
+for which session keys have been deleted can no longer be recovered. However,
+if the OS persists to be malicious it can always monitor future (current)
+connections.\\
 
 \noindent
 One could prefer this option for performance reasons - such design puts less
@@ -72,7 +76,7 @@ finish after the master secret is computed from server and client randoms and
 pre-master secret. This is because a pseudo-random function (PRF) lies between
 master secret and the input values so no information can be learned about the
 private key. The derivation of session keys and encryption / decryption of
-messages can be left unaltered in the untrusted program.
+messages can be left unaltered in the untrusted program and therefore less \'context\' switches to the enclave would be required.
 
 \paragraph{Session keys hidden within the enclave}
 
@@ -81,9 +85,10 @@ keys themselves do not leave the enclave. Instead an encrypt / decrypt oracle
 interface is presented to the untrusted component. The enclave performs the
 cryptographic operations using stored state accessed by the session\_id. This
 prevents the compromised OS from leaking the session keys to a different
-machine, but requires a more complicated and expensive design.
-One can imagine that if the attacker is leaking ton of data out of the server,
-it may be more easily noticeable than if the session keys are exported outside of the server once.\\
+machine, but requires a more complicated and expensive design. One can imagine
+that if the attacker is leaking ton of data out of the server, it may be more
+easily noticeable than if the session keys are exported outside of the server
+once.\\
 
 \noindent
 If we decide to keep our session keys in the enclave apart from providing a
