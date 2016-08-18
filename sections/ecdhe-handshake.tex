@@ -1,0 +1,116 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+\paragraph{Forward Secrecy and ECDHE Handshake}
+In RSA key exchange process, all the messages exchanged between server and
+client can be compromised if the server’s private key is ever disclosed. In
+specific, an active attacker who has recorded all the data communication
+between the server and client for a certain period of time and stores it until
+such a time he has access to the private key. The adversary can now decrypt
+all the historic data using the compromised private key. This is possible
+because the attacker will have access to all the seeds ( Client Random, Server
+random and Pre-Master secret ) required to generate the symmetric session keys
+This capability to decode historic data at any point of time in the future
+pose a serious threat to the secure communication over the cyberspace.\\
+
+\noindent
+Forward secrecy is a feature in the key arrangement protocol, which guarantees
+that the symmetric encryption keys can not be compromised even if the long
+term key ( server private key ) is compromised. To achieve forward secrecy we
+employed elliptic curve diffie-hellman(EC-DHE) key exchange mechanism. Most of
+the web servers prefer elliptic curves variant over standard DHE as it yields
+better performance with lesser number of key bits[1]. DHE handshake uses
+private key only to authenticate the server and generates fresh set of
+symmetric keys for every new session. The keys are computed from random EC
+parameters, which is never reused and also deleted once the session has ended.
+Hence in ECDHE Private keys will not affect the confidentiality of the past
+conversations, albeit part of the initial handshake. The private key will
+never aid the attacker as it was only used to authenticate the server identity
+If in case the attacker managed to attain the shared secret, he can only
+decrypt messages from that particular session. No previous or future
+sessionswould be compromised.\\
+
+\noindent
+We have partitioned the standard EC-DHE handshake implementation in Libressl
+and separated it into two components. One network facing component is deemed
+untrusted and is running as a part of nginx web server process. The other part
+resides inside the trusted SGX enclave and runs as an independent process.
+Both the components of the server communicate via a list of fine grained API’s
+wrapped over a named pipe IPC interface.\\
+
+\noindent
+The handshake process is carried out in two different phases, one to
+authenticate the server identity and other to establish the pre master secret.
+Figure~\ref{fig:ecdhe_handshake}) illustrates the messages exchanges between
+client and server’s trusted and untrusted compartments.\\
+
+\noindent
+A Https client can initiate the handshake by sending a “client hello” enclosed
+with a random number and a list of Elliptic curves it supports. Upon receiving
+this request, the nginx server initialises a new session in the enclave (TODO:
+Add info related to session cache/resumption.?) and configures the random
+number received from the client. The server random seed is generated inside
+the enclave. This will accord to additional security to the system by
+preventing an adversary from exploiting the untrusted component of the server
+and by influencing a session key generation based on random seeds of his
+choice. Enclave code maintains separate state for each session and will not
+accept server random as an input argument in any API interfaces. After
+obtaining the server random, it is sent to the client as part of the “Server
+Hello” message together with Server Public key certificate and a list of
+server preferred ciphers.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.4]{EC-DHE-Handshake.png}
+	\caption{EC-DHE Handshake}
+	\label{fig:ecdhe_handshake}
+\end{figure}
+
+\noindent
+In the second phase of DH key exchange, the server will pick one of the client
+supported elliptic curves and send the curve id to the enclave. In the enclave
+we will generate both the public and private part of the EC-DH parameters
+based on the chosen curve id. Only the public part of the DH param is exposed
+to the nginx server process and the private part is kept secret within the
+enclave. This ensures additional security to the system by making the enclave
+completely abstain from accepting any server side seeds pertaining the shared
+secret generation.\\
+
+\noindent
+In order to prove, that the server has control of the private key and DH
+params, the Server has to produce a digital signature. In our design this is
+computed within the enclave. This will include Client Random, Server Random
+and Public DH Params signed using server private key. Server sends the ECDHE
+parameter (in clear) together with Signature to the client as part of the
+“Server Key Exchange” message. Client verifies this message using the server
+public key. If the verification is successful , the client generates its part
+of EC params and sends it to the server as part of “Client Key Exchange”
+message.\\
+
+\noindent
+After receiving the “Client Key Exchange” message, the server will attain all
+the required seeds to launch the shared key generation process. The keys are
+calculated in a three level process. First a Pre-Master key is computed from
+Client Public ECDHE param and Server ECDHE params(both Private and Public).
+The pre-master is then used as one of the seed along with Client Random and
+Server Random for the shared Master secret generation. Server will finally
+generate the symmetric session keys with the associated MACs and
+Initialisation vectors from the master secret. All the three steps of key
+generation processes is securely performed within the enclave.\\
+
+\noindent
+The client will then send a “Change Cipher Spec” message to indicate it will
+use the newly generated keys to hash and encrypt further messages. The
+handshake is complete from the client end after sending a “Finished” message
+containing a hash and MAC over all the previous handshake messages. Upon
+receiving client finished, the server will decrypt it using the session keys
+and validate the integrity of the handshake process. If the decryption or
+verification fails, the handshake is deemed to be failed and all the allocated
+session resources are freed. If successful, the server sends a “Change Cipher
+Spec” message indicating all messages send from now on will be encrypted using
+the shared session secret keys. Finally server computes its authenticated and
+encrypted “Finished” Message and sends it to the Client. This completes the
+full Handshake process. 
+
+\end{document}
