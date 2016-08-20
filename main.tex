@@ -1,8 +1,7 @@
-% -*- program: xelatex -*-
+%-*- program: xelatex -*-
 \documentclass{article}
+
 \usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\usepackage{textcomp}
 \usepackage[english]{babel}
 \usepackage{graphicx}
 \usepackage{float}
@@ -14,35 +13,55 @@
 \usepackage[font=scriptsize]{caption}
 \usepackage[hang]{footmisc} 
 
-\newcommand{\Intel}{Intel\textsuperscript{\textregistered}}
+
+%%%%%%%%%%%%%%%%%SETTING FONT TO MINION PRO. COMMENT THESE LINES IF YOU DON'T
+%%%%%%%%%%%%%%%%%%HAVE THE FONT!!!
+\usepackage{mathspec}
+\setmainfont{Minion Pro}
+\setmathsfont(Digits,Greek,Latin)[Numbers={Proportional}]{Minion Pro}
+\setmathrm{Minion Pro}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\Intel}{Intel\textregistered}
 \newcommand{\crandom}{\texttt{ClientRandom}}
 \newcommand{\srandom}{\texttt{ServerRandom}}
 \newcommand{\premaster}{\texttt{\{PremasterSecret\}}$_K$}
+
 \bibliography{references.bib}
+
 \graphicspath{{images/}{../images/}}
 
-\title{SGX Project}
-\author{Team Awesome}
+\title{A Practical TLS Enabled Web Server Without Trusting The Operating
+System}
 
+\author{
+  A. Awad \and
+  C. Chaiphet \and
+  I. Gakos \and
+  W. Grajkowski \and
+  B. Jacob
+}
 \begin{document}
 
 \maketitle
-
+\pagenumbering{gobble}
 \newpage
 
 \begin{abstract}
-	\subfile{sections/abstract.tex}
+  \subfile{sections/abstract.tex}
 \end{abstract}
+
 
 \newpage
 
 \tableofcontents
 
 \newpage
+\pagenumbering{arabic}
 
 \section{Introduction}
 \subfile{sections/introduction.tex}
 \newpage
+
 
 \section{Background}
 \label{sec:background}
@@ -56,7 +75,12 @@
 
 \section{Implementation}
 \label{sec:implementation}
-\subfile{sections/implementation.tex}
+\subfile{sections/implementation.tex} 
+\newpage
+
+\section{Performance Evaluation}
+\label{sec:perfeval}
+\subfile{sections/perfevaluation.tex}
 \newpage
 
 \section{Project Management}

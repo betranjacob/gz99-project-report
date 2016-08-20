@@ -16,15 +16,28 @@ our performance measurements and details the results we acquired from running
 our tests.
 \subsection{Performance Model}
 To model the performance of our prototype we implemented a second version
-that has no dependencies on OpenSGX, and replaces certain SGX instructions with busy waits, simulating the overhead in executing them. In dong so, we make the same assumptions as~\cite{Baumann14} namely: 
+that has no dependencies on OpenSGX and replaces certain SGX
+instructions with busy waits, simulating the overhead in executing
+them. In dong so, we make the same assumptions as~\cite{Baumann14} namely: 
 	\begin{enumerate}
-		\item We assume that the CPU used in testing performs the same as an SGX-enabled CPU for all non-SGX instructions.
-		\item We assume that the EPC is large enough to accommodate the entirety of the trusted component and any data structures created after program start-up 
+		\item We assume that the CPU used in testing performs
+                  the same as an SGX-enabled CPU for all non-SGX instructions
+		\item We assume that the EPC is large enough to
+                  accommodate the entirety of the trusted component
+                  and any data structures created after program start-up 
 	\end{enumerate}
-Leaving the overhead of SGX instructions, memory encryption, and asynchronous exits unaccounted for. 
+Leaving the overhead of SGX instructions, memory encryption, and
+asynchronous exits unaccounted for. 
 
-SGX instructions that bootstrap the enclave and verify its integrity are only executed once at startup and, therefore, have no effect on performance. As a result, we only simulate the overhead of EENTER, ERESUME and EEXIT. Simulating 
-the slow down in memory accesses, resultant from the memory encryption engine, was carried out by reducing the memory's clock in~\cite{Baumann14}. Such a proxy works for their systems because its entirety executes on top of SGX. Clearly, such an approach would underestimate the performance of our system because only the trusted component incurs the overhead of memory encryption.
+SGX instructions that bootstrap the enclave and verify its integrity
+are only executed once at startup, and therefore have no effect on
+performance. As a result, we only simulate the overhead of EENTER,
+ERESUME and EEXIT. Simulating the slow down in memory accesses,
+resultant from the memory encryption engine, was carried out by
+reducing the memory's clock in~\cite{Baumann14}. Such a proxy works
+for their system because its entirety executes on top of SGX. Clearly,
+such an approach would underestimate the performance of our system
+because only the trusted component incurs the overhead of memory encryption.
 In solving this we....%We don't have a solution for this yet
 
 %Need to document our hypothesis, still thinking about it. I have my own notes

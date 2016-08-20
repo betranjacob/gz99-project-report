@@ -1,7 +1,7 @@
 \documentclass[../main.tex]{subfiles}
 
 \begin{document}
-	
+%TODO: Document SGX instructions EENTER, ERESUME and EEXIT
 \subsection{An overview of \Intel SGX} 
 This section will not cover all of the details of SGX but only those applicable to our project, for a complete treatment of SGX please refer to~\cite{IntelCorporation2010}. \Intel SGX is a set of x86 instructions that allow for a programming model wherein a program can be split into two components: an untrusted component that executes as normal and a trusted component that executes within a protected area of RAM, called an enclave, which can only be accessed when executing the trusted component. 
 
@@ -15,5 +15,13 @@ Interacting with the trusted component, as a result, may only occur through invo
 	\caption{Interaction of the untrusted part of the application with the trusted part can only occur through a callgate}
 	\label{fig:sgxhighlevel}
 \end{figure}
-
+%%%%%%%%%%%%%transition to OpenSGX still have to add more to the
+%%%%%%%%%%%%%SGX overview
+At the time we begun working on this project we did not posses access to SGX
+hardware, forcing us to use a simulator. There were two choices, at the time,
+OpenSGX and the \Intel~ Windows SDK's simulation mode. We selected the former
+to implement our prototype as it was compatible with Linux, a platform we were
+more familiar with, and had several examples we could refer to for guidance in
+our implementation (the Intel SDK, at the time, was under-documented). The
+following section provides a quick examination of OpenSGX's salient features.
 \end{document}
