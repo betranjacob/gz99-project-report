@@ -1,7 +1,51 @@
 \documentclass[../main.tex]{subfiles}
  
 \begin{document}
-\textbf{Hello world!}
- 
-Hello, here is some text without a meaning.  This... 
+
+\textit{Project Management. Outline of how the work was split up. How
+collaborative work was planned. Who did what. How agreement was reached. How
+essential project information was managed and communicated. How integration
+and testing was organised.}\\
+
+\noindent
+At the begining of the project we have spent about 2 weeks making sure we
+understand the problem and our approach to the solution. We researched
+software possibilities, available documentation, related work until we
+identified three main parts of the project:
+
+\begin{itemize}
+	\item Secret provinsioning to the enclave through reomte attestation
+	\item Libressl and nginx instrumentation
+	\item Performance evaluation
+\end{itemize}
+
+% add something on milestones, risks, main goals, seocndary goals (gant chart)
+\noindent
+Therefore, we divided our group into three subgroups:
+\begin{itemize}
+	\item Ahmed and John working on the SGX part
+	\item Betran and Wiktor working on Libressl and nginx
+	\item Chiraphat working on the test setup and performance evaluation
+\end{itemize}
+
+\noindent
+We have chosen messaging app Slack as our daily communication channel since we
+already used it during the course duration. We setup github repositories to
+collaborate on the code. We also decided to use LaTex for documentation of our
+work and writeup of group report to follow research best practices.\\
+
+\noindent
+Every week we met with Brad, our supeervisor, to report on our progress, make
+sure we are on track with our schedule and discuss any issues and tasks to be
+carried in the following week. Additionally, we held our own meeting to
+internally share what we have learned and (re)distribute further work.\\
+
+\noindent
+We also assessed whether some tasks need more man power, which for most of the
+time was not necessary, until towards the end of the project when we stumbled
+upon more challenging implementation issues or needed to integrate parts of
+the project to be ready for final preformance evaluation. During that time we
+held more in person meetings and held pair debugging sessions. These turned
+out to be very useful and we managed to solve the issues on time.
+
 \end{document}
