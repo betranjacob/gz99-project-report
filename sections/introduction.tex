@@ -9,7 +9,7 @@ designed assuming that its user trusts the hardware and OS of the
 machine on which the key is held.
  
 While this assumption is perfectly valid in the case where a person is
-running an SSL/TLS enabled service on their own machines, many web
+running an SSL/TLS-enabled service on their own machines, many web
 applications are now hosted by third party cloud service providers
 such as Amazon Web Services, Heroku, Digital Ocean \&c. Moreover, to
 offer SSL/TLS, the private key must also be stored with the web
@@ -23,7 +23,7 @@ difficult to maintain the privacy of critical secrets.
 Consider a case where the cloud provider is not malicious; a
 vulnerability within their platform could lead to leaking the private
 key if exploited by an adversary. Moreover, if the cloud provider is
-indeed malicious they could simply read your private key from the hard
+indeed malicious, they could simply read your private key from the hard
 disk, assuming the key is not encrypted, or mount some form of memory
 sniffing attack to read the key from the web server's memory since
 data in RAM is not encrypted. A compromised private key allows an

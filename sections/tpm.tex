@@ -16,20 +16,20 @@ private key cannot be compromised without compromising the TPM itself.
 The security benefits of a TPM, however, were outweighed by the cost
 of purchasing the additional piece of hardware, and TPMs did not gain
 any traction with cloud providers. In this project we utilized a new
-technology from \Intel called Software Guard Extensions (SGX). SGX is
+technology from \Intel~called Software Guard Extensions (SGX). SGX is
 an augmentation to \Intel's ISA which offer the ability to launch
 encrypted regions of memory, called enclaves, where only trusted
-regions of code can read/write. This allows for TPM like
+regions of code can read/write. This allows for TPM-like
 functionality, but SGX has the advantage of being deployed as part of
-new CPUs released by \Intel and as a result, when cloud providers
-upgrade their machines they will possess the ability to support SGX
+new, commodity, CPUs released by \Intel. As a result, when cloud providers
+upgrade their machines, they will possess the ability to support SGX
 programs without purchasing additional hardware.
 
 % This might not have to be placed here, but I guess its doing no harm
 % being here
 SGX has gained momentum as a research platform for security related
-work such as Haven~\cite{Baumann14} which secures a legacy application
-from an non-trusted OS and cloud-provider \textit{without} modifying
+work such as Haven~\cite{Baumann14}, which secures a legacy application
+from a non-trusted OS and cloud-provider \textit{without} modifying
 the application's source code.  Yet, there is no work, to our
 knowledge, that attempts to secure only the private key material
 through use of SGX. Narrowing the trusted region to contain only the

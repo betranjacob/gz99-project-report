@@ -18,7 +18,7 @@ To motivate the design of our system, we begin by discussing a system
 called Wedge~\cite{Bittau08} that was used to refactor Apache, by
 enforcing PoLP, securing the private key in the face of an adversary
 who is capable of exploiting the web server application. First, we
-list the attacks possible against a monolithic web server and then
+list the attacks possible against a monolithic web server, and then
 detail how the design implemented with Wedge resolved these
 vulnerabilities.
 
@@ -46,7 +46,7 @@ between the server and the client:
 \begin{enumerate}
   \item The adversary could leak the private key from the network facing
     component, which has to run as root to bind to port 80.  This could
-    be by reading the private key from disk directly or from the
+    be done by reading the private key from disk directly or from the
     process's memory space. The attack is illustrated in
     Figure~\ref{fig:attack1}.
 
@@ -117,7 +117,7 @@ machine. Such adversaries may leak the key from the privileged
 component's memory space by exploiting the OS, or, in the case of the
 malicious cloud provider, simply read the key from disk\footnote{Even
   if the key is encrypted on disk, the decryption key must be present
-  in the plain-text binary file for the privileged component or in the
+  in the plain-text binary file for the privileged component, or in the
   process's memory, at runtime, in plain-text}.  A hardware component,
 called a trusted platform module, has been utilised in an effort to
 secure the private key against the adversaries described above.

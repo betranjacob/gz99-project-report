@@ -14,9 +14,9 @@ code with an interface to \texttt{sgx-lib}, a library that contains
 wrapper- functions for user-level SGX instructions.
 
 \Intel's SGX specification does not detail how an enclave program may
-invoke system calls\footnotemark; OpenSGX specifies an interface
-called a trampoline/stub which allows an enclave program to invoke
-\texttt{libc} functions. The interface works as follows:
+invoke system calls\footnotemark; OpenSGX specifies an interface which
+allows an enclave program to invoke \texttt{libc} functions. The
+interface works as follows:
 \begin{enumerate}
   \item The enclave program writes the arguments for the system call
     into a shared area of memory called a \textit{stub}
