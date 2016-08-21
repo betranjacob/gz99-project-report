@@ -3,7 +3,7 @@
 \begin{document}
 With the recent surge in privacy concerns, employing SSL/TLS to secure
 communications in the middle of the network has become common
-place. SSL/TLS offers guarantees of confidentiality and integrity
+place. SSL/TLS offers guarantees of confidentiality and integrity,
 provided that a private key's secrecy is maintained. Yet, SSL/TLS was
 designed assuming that its user trusts the hardware and OS of the
 machine on which the key is held.
@@ -13,23 +13,23 @@ running an SSL/TLS enabled service on their own machines, many web
 applications are now hosted by third party cloud service providers
 such as Amazon Web Services, Heroku, Digital Ocean \&c. Moreover, to
 offer SSL/TLS, the private key must also be stored with the web
-application on these service providers' machines.  This implies that a
+application on these service providers' machines. This implies that a
 server administrator using the aforementioned services is trusting the
 cloud-provider, including any personnel with physical/administrative
 access to the machines, and the underlying OS to maintain the secrecy
-of the sensitive key material. Such a Wide trust surface makes it
+of the sensitive key material. Such a wide trust surface makes it
 difficult to maintain the privacy of critical secrets.
 
 Consider a case where the cloud provider is not malicious; a
 vulnerability within their platform could lead to leaking the private
-key, if exploited by an adversary. Moreover, if the cloud provider is
+key if exploited by an adversary. Moreover, if the cloud provider is
 indeed malicious they could simply read your private key from the hard
-disk, if it is not encrypted, or mount some form of memory sniffing
-attack to read the key from the web server's memory since data in RAM
-is not encrypted. A compromised private key allows an adversary to do
-the following:
+disk, assuming the key is not encrypted, or mount some form of memory
+sniffing attack to read the key from the web server's memory since
+data in RAM is not encrypted. A compromised private key allows an
+adversary to do the following:
 \begin{itemize}
-  \item Decrypt past, stored, communication between the web server and a
+  \item Decrypt past, stored communication between the web server and a
     client (assuming a cipher that does not provide perfect forward
     secrecy is in use)
   \item Decrypt any ongoing communication between the web server and a
@@ -40,69 +40,30 @@ the following:
 In all cases, a compromised key voids the confidentially and integrity
 guarantees of SSL/TLS.
 
-Our project aimed to break this assumption by refactoring legacy web
-servers to secure the long term private key in the face of: (1) An
-adversary who is capable of exploiting the server application, (2) a
-malicious cloud provider, and (3) an adversary with an exploit for the
-underlying operating system.
-
-The first of these goals has been extensively addressed in previous
-works ~\cite{Bittau08, Krohn2004} through use of the principle of
-least privilege - the notion that a process should only be allowed
-access to the smallest possible data set while still maintaining its
-functionality - to isolate the private key containing process from the
-network facing process. This approach thwarts an adversary capable of
-exploiting only the network facing process, as long as the interface
-to the private key containing process is well defined. However, it
-offers no protection against an adversary capable of exploiting the
-operating system on which the web server is running or an adversary
-who controls the physical machine on which the server is hosted.
-
-Securing the private-key against such an adversary required
-specialized hardware called a trusted platform module (TPM), a device
-that can secure the private key through encryption via a Storage Root
-Key (SRK)~\cite{tpm10}. The SRK's integrity is maintained by ensuring
-that its private component may never leave the TPM. As a result, the
-long term private key itself can never be decrypted outside the
-TPM. The TPM is also capable of executing cryptographic operations,
-including those that make use of the long term private key in
-SSL/TLS. Consequentially, by delegating all private key operations to
-the TPM one can rest assured that their private key cannot be
-compromised without compromising the TPM itself.
-
-The security benefits of a TPM were outweighed by the cost of
-purchasing the additional piece of hardware, and TPMs did not gain any
-traction with cloud providers. In this project we utilized a new
-technology from \Intel called Software Guard Extensions (SGX). SGX is
-an augmentation to \Intel's ISA which offer the ability to launch
-encrypted regions of memory, called enclaves, where only trusted
-regions of code can read/write. This allows for TPM like
-functionality, but SGX has the advantage of being deployed as part of
-new CPUs released by \Intel and as a result, when cloud providers
-upgrade their machines they will possess the ability to support SGX
-programs without purchasing additional hardware.
-
-% This might not have to be placed here, but I guess its doing no harm
-% being here
-SGX has gained momentum as a research platform for security related
-work such as Haven~\cite{Baumann14} which secures a legacy application
-from an untrusted OS and cloud-provider \textit{without} modifying the
-application's source code.  Yet, there is no work, to our knowledge,
-that attempts to secure only the private key material through use of
-SGX. Narrowing the trusted region to be the component that handles the
-private key allows us to define a much smaller trusted computing base
-that only contains the CPU and the code that handles the long term
-private key.
+Clearly, implicitly trusting a cloud-proivder and the OS with
+sensitive key material poses a considerable security risk. Yet, this
+assumption of trust is usually the case when server administrators
+deploy web applications via cloud based services. Our project aims to
+break this assumption by refactoring legacy web servers to secure the
+long term private key in the face of: (1) An adversary who is capable
+of exploiting the server application, (2) a malicious cloud provider,
+and (3) an adversary with an exploit for the underlying operating
+system. We utilise the principle of least privilege and along with a
+recently released technology from \Intel~called Software Guard
+Extensions, both of which are described in
+Section~\ref{sec:background}, in designing our system.
 
 The remainder of this report is divided as follows:
-Section~\ref{sec:background} provides a more detailed overview of
-previous work and technologies underlying our project,
-Section~\ref{sec:design} discusses the design of the system that we
-implemented to meet the above-stated goals,
+Section~\ref{sec:background} provides a detailed overview of previous
+solutions to the problem outlined here, and technologies underlying
+our project, Section~\ref{sec:design} discusses the design of the
+system that we implemented to meet the above-stated goals,
 Section~\ref{sec:implementation} highlights a few implementation
-considerations in realizing the system that we designed,
-Section~\ref{sec:projectmgmt} details the managerial aspects of this
-project, and, finally, Section~\ref{sec:conclusion} offers areas where
-this project could be improved, and concludes this report.
+considerations in realising the system that we designed,
+Section~\ref{sec:perfeval} presents the evaluation we have conducted
+of the system, Section~\ref{sec:projectmgmt} details the managerial
+aspects of this project, and, finally, Section~\ref{sec:conclusion}
+offers areas where this project could be improved, and concludes this
+report.
 	
 \end{document}

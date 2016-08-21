@@ -1,9 +1,9 @@
 \documentclass[../main.tex]{subfiles}
 
 \begin{document}
-\subsection{The Principle Of Least Privilege}
-
-As previously stated the principle of least privilege (PoLP) requires
+The first of our goals has been extensively addressed in previous
+works ~\cite{Bittau08, Krohn2004} through use of the principle of
+least privilege. The principle of least privilege (PoLP) requires
 that components of a system operate with the minimum resources
 required to complete their respective tasks. PoLP is heavily utilized
 in systems security research to design systems that maintain their
@@ -31,9 +31,9 @@ the web server and client, because the solution presented in there
 does not hold if we remove the assumption that the OS and cloud
 provider are trusted. A consequence of the web server's user-level
 processes (dynamic content generation scripts, databases \&c.)
-requiring plain- text to complete their tasks, thus, even if we secure
+requiring data in plain-text to complete their tasks, even if we secure
 the encrypt/decrypt interface using the solution in the Wedge paper,
-the data would be available in the non-privileged process's
+is that plain-text data would be available in the non-privileged process's
 memory. This is further discussed in Section~\ref{sec:design}.
 
 \subsubsection*{Possible Attacks}
@@ -58,7 +58,6 @@ between the server and the client:
           \label{fig:attack1}
 	\end{figure}
 
-	% add a foot note explaining the naive session key generation?
   \item The adversary may record traffic exchanged over the
     SSL/TLS channel and then exploit a naive session key
     generation interface to acquire the session keys used in that
@@ -85,12 +84,13 @@ between the server and the client:
 	\end{figure}
 \end{enumerate}
 
-\subsubsection*{Proposed Solution} 
-The solution proposed in the Wedge paper is through partitioning the
-session key generation code into its own logical compartment
-\footnote{This compartment is called an sthread in Wedge's
-  nomenclature} that executes at high privilege.  This partitioning
-can be seen in Figure~\ref{fig:wedge-partition}.
+\subsubsection*{Proposed Solution}
+
+The solution proposed in the Wedge paper is achieved through
+partitioning the session key generation code into its own logical
+compartment \footnote{This compartment is called an sthread in Wedge's
+  nomenclature} that executes at high privilege. This partitioning can
+be seen in Figure~\ref{fig:wedge-partition}.
 
 \begin{figure}[H]
   \centering
@@ -100,7 +100,7 @@ can be seen in Figure~\ref{fig:wedge-partition}.
   \label{fig:wedge-partition}
 \end{figure}
 
-The low privilege worker process does not have possess to the privatex
+The low privilege worker process does not have possess to the private
 key, but must rely on an interface to the session key generation
 process. The interface takes \crandom~ and \premaster~ as arguments,
 both of which are provided by the client, while the high privilege
@@ -111,14 +111,15 @@ invoking the session key generation interface.
 
 While this design secures the private key against the previously
 described adversary, it is not, by itself, sufficient to secure the
-key against an adversary capable of exploiting the operating system,
-and may, therefore, leak the key from the privileged component's
-memory space, or from a malicious cloud-provider with full access to
-the physical machine and is capable of reading the key from disk
-\footnote{Even if the key is encrypted on disk, the decryption key
-  must be present in the plain-text binary file for the privileged
-  component or in the process's memory, at runtime, in plain-text}. To
-secure the key against the aforementioned adversaries, we utilized
-SGX.
+key against an adversary capable of exploiting the OS, or from a
+malicious cloud-provider with full access to the physical
+machine. Such adversaries may leak the key from the privileged
+component's memory space by exploiting the OS, or, in the case of the
+malicious cloud provider, simply read the key from disk\footnote{Even
+  if the key is encrypted on disk, the decryption key must be present
+  in the plain-text binary file for the privileged component or in the
+  process's memory, at runtime, in plain-text}.  A hardware component,
+called a trusted platform module, has been utilised in an effort to
+secure the private key against the adversaries described above.
 
 \end{document}
