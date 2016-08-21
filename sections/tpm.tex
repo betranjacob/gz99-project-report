@@ -1,18 +1,17 @@
 \documentclass[../main.tex]{subfiles}
  
 \begin{document}
-Securing the private-key against key against an adversary capable of
-exploiting the operating system is achievable through use
-of specialised hardware called a trusted platform module (TPM), a
-device that can secure the private key through encryption via a
-Storage Root Key (SRK)~\cite{tpm10}. The SRK's integrity is maintained
-by ensuring that its private component may never leave the TPM. As a
-result, the long term private key itself can never be decrypted
-outside the TPM. The TPM is also capable of executing cryptographic
-operations, including those that make use of the long term private key
-in SSL/TLS. Consequentially, by delegating all private key operations
-to the TPM, one can rest assured that their private key cannot be
-compromised without compromising the TPM itself.
+Securing the private key against an adversary capable of exploiting
+the operating system is achievable through use of specialised hardware
+called a trusted platform module (TPM). TPMs can secure the private
+key through encryption via a Storage Root Key (SRK)~\cite{tpm10}. The
+SRK's integrity is maintained by ensuring that its private component
+may never leave the TPM. As a result, the long term private key itself
+can never be decrypted outside the TPM. The TPM is also capable of
+executing cryptographic operations, including those that make use of
+the long term private key in SSL/TLS. Consequentially, by delegating
+all private key operations to the TPM, one can rest assured that their
+private key cannot be compromised without compromising the TPM itself.
 
 The security benefits of a TPM, however, were outweighed by the cost
 of purchasing the additional piece of hardware, and TPMs did not gain
