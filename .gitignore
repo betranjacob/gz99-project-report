@@ -182,3 +182,10 @@ TSWLatexianTemp*
 
 #glue
 *.glue
+#*#
+*.tex~
+#*.tex#
+_*_.tex
+*.tex#
+*.pdf
+!main.pdf
