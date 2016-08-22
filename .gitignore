@@ -189,3 +189,4 @@ _*_.tex
 *.tex#
 *.pdf
 !main.pdf
+/todo.org

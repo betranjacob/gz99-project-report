@@ -21,7 +21,57 @@ and a design specific to ciphers that \textbf{do} support forward
 secrecy.
 
 \subsubsection*{High level design}
-%TODO: WIP 
+% TODO: WIP
+In general, regardless of the cipher used, SSL/TLS utilises the
+long-term private key to negotiate ephemeral keys for use in the
+current session; hence, to secure the long-term private key, we need
+to examine the session establishment mechanism. Roughly, SSL/TLS's
+handshake can be split into four steps:
+
+\begin{enumerate}
+  \item \textbf{Contacting the server, and establishing parameters for
+    the session}. Specifically, the exchange of hello messages that
+    include: the server's certificate(s) a list of ciphers supported by
+    each side (to determine which cipher is to be used for this session),
+    \srandom, and \crandom. The random variables are used to derive the
+    secret, used to secure communications.
+  \item \textbf{Asymmetric key exchange}: based on the cipher
+    selected, the client and server determine the asymmetric keys that are
+    to be used to exchange the symmetric keys for the session. This step
+    is necessary in two scenarios:
+    \begin{enumerate}
+      \item The client and server both possess public key
+        certificates, and both entities wish to verify each other's identity
+        during the handshake. We do not consider this case due to its
+        rarity. Generally, the client verifies the server as part of the
+        SSL/TLS handshake, and the server verifies the identity of the client
+        via some other means, such as a username \& password.
+      \item The client and server selected a cipher that offers
+        forward secrecy. These ciphers function by first exchanging an
+        ephemeral asymmetric secret. This secret is then used in negotiating
+        the symmetric secret.
+    \end{enumerate} In all other cases, the server's asymmetric keys
+    are used to negotiate the ephemeral symmetric secret.
+  \item \textbf{Ephemeral symmetric key negotiation}: The client and
+    server establish the symmetric secret that is used for the current
+    session. Calculating the symmetric secret requires the random values
+    exchanged in step 1.
+  \item \textbf{Verifying the integrity of the just-negotiated keys,
+    completing the session establishment}: Both the server and the client
+    compute a MAC across the packets exchanged in establishing the
+    session. The resultant finished message is encrypted using the
+    just-negotiated keys. If both sides successfully verify the MAC, the
+    handshake is complete and the session is established. If either side
+    fails to verify the MAC, the session is terminated.
+\end{enumerate} Figure~\ref{fig:abshandshake} illustrates this
+generalized SSL/TLS handshake.
+
+\begin{figure}[H] \centering
+  \includegraphics[scale=0.44]{images/abstract-handshake.pdf}
+  \caption{SSL/TLS handshake generalization}
+  \label{fig:abshandshake}
+\end{figure}
+
 By utilizing the aforementioned remote-attestation process, we can
 provision the trusted component of the remote server application with
 an SSL private key while making it extremely difficult for even
