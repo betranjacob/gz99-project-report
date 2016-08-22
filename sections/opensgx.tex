@@ -1,6 +1,9 @@
 \documentclass[../main.tex]{subfiles}
-OpenSGX~\cite{opensgx} is a platform that provides a software
-emulation layer enabling the execution of SGX instructions
+
+\begin{document}
+
+OpenSGX~\cite{opensgx} is a platform that provides a
+software emulation layer enabling the execution of SGX instructions
 \textit{without} the possession of SGX hardware. Specifically, OpenSGX
 implements a hardware emulation layer, implementing SGX's instructions
 and data structure as per \Intel's specification \footnotemark, and an
@@ -17,26 +20,26 @@ wrapper- functions for user-level SGX instructions.
 invoke system calls\footnotemark; OpenSGX specifies an interface which
 allows an enclave program to invoke \texttt{libc} functions. The
 interface works as follows:
+
 \begin{enumerate}
   \item The enclave program writes the arguments for the system call
     into a shared area of memory called a \textit{stub}
   \item The enclave program invokes EEXIT, exiting enclave mode, and
     executes a pre-defined handler called a \textit{trampoline} which
     invokes the system call
-  \item After the system call is complete, results are written to
-    into the \textit{stub} and ERESUME is called, resuming the execution of
-    the enclave program
-\end{enumerate}
-By creating this interface, writing code for OpenSGX is akin to
-writing C code, making the development process
+  \item After the system call is complete, results are written to into
+    the \textit{stub} and ERESUME is called, resuming the execution of the
+    enclave program
+\end{enumerate} By creating this interface, writing code for OpenSGX
+is akin to writing C code, making the development process
 familiar. Figure~\ref{fig:opensgxdes} illustrates the high level
 design of OpenSGX.
 
 \begin{figure}[H]
   \centering
   \includegraphics[scale=0.4]{images/opensgx-design.png}
-  \caption{High level design of OpenSGX. Grey boxes indicate protected
-    area of memory; striped boxes indicate shared areas}
+  \caption{High level design OpenSGX. Grey boxes indicate protected
+    areas of memory. Striped boxes indicate shared areas.}
   \label{fig:opensgxdes}
 \end{figure}
 
