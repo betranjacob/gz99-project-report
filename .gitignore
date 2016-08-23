@@ -191,3 +191,5 @@ _*_.tex
 !main.pdf
 /todo.org
 *.org~
+!images/*.pdf
+!abstract-handshake.pdf
