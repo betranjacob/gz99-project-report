@@ -193,3 +193,4 @@ _*_.tex
 *.org~
 !images/*.pdf
 
+*.db
