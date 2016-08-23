@@ -3,7 +3,21 @@
 \label{sec:ssloverview}
 Before discussing previously proposed solutions to the problem we
 identified in the Introdcution, we present here a generic overview of
-SSL/TLS. In general, regardless of the cipher used, SSL/TLS utilises
+SSL/TLS.
+
+SSL/TLS supports a wide array of ciphers, but they can be roughly
+split into two categories: ciphers that support forward secrecy, and
+ciphers that do not. Ciphers that offer forward secrecy are ones
+wherein a compromised long-term private key does not allow an
+adversary to compromise previously eavesdropped, stored
+sessions. SSL/TLS's session establishment mechanism is different based
+on the category to which the cipher belongs. Consequentially,
+depending on the type of cipher used for a given session, our system
+must adapt to two, different,control flows. In this section we present
+a generalisation of the SSL/TLS handshake that we heavily referred
+to in designing our system.
+
+In general, regardless of the cipher used, SSL/TLS utilises
 the long-term private key to negotiate ephemeral keys for use in the
 current session; hence, to secure the long-term private key, we need
 to examine the session establishment mechanism. Roughly, SSL/TLS's

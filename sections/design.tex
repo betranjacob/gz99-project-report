@@ -5,20 +5,7 @@
 \subsection{The Threat Model}
 \subfile{sections/threat-model.tex}
 
-\subsection{System Design}%TODO: this title is a wip
-SSL/TLS supports a wide array of ciphers, but they can be roughly
-split into two categories: ciphers that support forward secrecy, and
-ciphers that do not. Ciphers that offer forward secrecy are ones
-wherein a compromised long-term private key does not allow an
-adversary to compromise previously eavesdropped, stored
-sessions. SSL/TLS's session establishment mechanism is different based
-on the category to which the cipher belongs. Consequentially,
-depending on the type of cipher used for a given session, our system
-must adapt to two, different,control flows. In this section we present
-the following: a high level design that is cipher agnostic, a design
-that supports ciphers that \textbf{do not} support forward secrecy,
-and a design specific to ciphers that \textbf{do} support forward
-secrecy.
+%TODO: this title is a wip
 
 \subsubsection*{High level design}
 % TODO: WIP
