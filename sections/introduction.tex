@@ -20,6 +20,7 @@ access to the machines, and the underlying OS to maintain the secrecy
 of the sensitive key material. Such a wide trust surface makes it
 difficult to maintain the privacy of critical secrets.
 
+% why 'assuming the key is not encrypted" is valid -> server program needs access to the private key for correct o[eration, i.e. hanling the handshake
 
 Consider a case where the cloud provider is not malicious; a
 vulnerability within their platform could lead to leaking the private
@@ -53,6 +54,8 @@ system. We utilise the principle of least privilege and along with a
 recently released technology from \Intel~called Software Guard
 Extensions, both of which are described in
 Section~\ref{sec:background}, in designing our system.
+
+% In our (system) design we utilise (..) ?
 
 The remainder of this report is divided as follows:
 Section~\ref{sec:background} provides a detailed overview of previous
