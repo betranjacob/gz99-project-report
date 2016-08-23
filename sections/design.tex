@@ -7,14 +7,14 @@
 
 \subsection{System Level Design} %TODO: title is WIP
 
-% TODO: ALL TEXT IN THIS SECTION IS WIP!!!
+% TODO: ALL TEXT IN THIS SECTION IS WIP
 Given the background and threat model discussed above, we may now
 discuss the design of our system. We first describe how the system is
 partitioned in a cipher agnostic manner. Then, we expand upon the
 generic design, illustrating how the system handles: (1) Ciphers that
 do not offer forward secrecy (2) Ciphers that offer forward secrecy.
 
-\subsubsection{Abstract Abstract Design}
+\subsubsection{Abstract Design}
 By utilizing the above-detailed remote-attestation process, we can
 provision the trusted component of the remote server application with
 an SSL private key while making it extremely difficult for even
@@ -23,6 +23,7 @@ the key. This is a stark contrast to current schemes wherein the
 private key is merely shipped as part of the server application to the
 cloud provider.
 
+\subsubsection{Designing for Ciphers \textit{Lacking} Forward Secrecy}
 As previously mentioned in Section~\ref{sec:ssloverview}, the
 private key is required by a subset of the operations executed during
 the handshake step. These operations have to be executed within the
@@ -51,17 +52,14 @@ resulting interface ensures that, even if a previously eavesdropped
 \texttt{\{PremasterSecret\}$_K$} is provided, a fresh session-key is
 computed on every invocation.
 
-\subsubsection{Designing for Ciphers \textit{Lacking} Forward Secrecy}
 % Freshness of the generated session-key has been used in [WEDGE
 % CITATION] to maintain the secrecy of an SSL/TLS private key in the
 % face of a passive eavesdropper how can exploit the server
 % application's network facing process. We use it to secure the
 % private key against an adversary who can exploit the underlying
 % operating system and / or a malicious cloud provider.
-
-\subfile{sections/ecdhe-handshake.tex}
-
 \subsubsection{Designing for Ciphers \textit{Offering} Forward Secrecy}
+\subfile{sections/ecdhe-handshake.tex}
 
 \noindent
 \\We consider two scenarios that slightly change the exchange of
