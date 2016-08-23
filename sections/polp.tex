@@ -51,35 +51,33 @@ of the server. We did not consider the second threat model detailed in
 the Wedge paper, wherein an attacker is capable of actively modifying
 packets exchanged between the web server and client, because the
 solution presented in there does not hold if we remove the assumption
-that the OS and cloud provider are trusted. A consequence of the web
-server's user-level processes (dynamic content generation scripts,
-databases \&c.)  requiring data in plain-text to complete their tasks,
-even if we secure the encrypt/decrypt interface using the solution in
-the Wedge paper, is that plain-text data would be available in the
-non-privileged process's memory. This is further discussed in
-Section~\ref{sec:design}.
+that the OS and cloud provider are trusted. This is a consequence of
+the web server's user-level processes (dynamic content generation
+scripts, databases \&c.)  requiring data in plain-text to complete
+their tasks. As such, even if we secure the encrypt/decrypt interface
+using the solution in the Wedge paper, plain-text data would
+be available in a non-privileged process's memory. This is further
+discussed in Section~\ref{sec:design}.
 
 \subsubsection*{Possible Attacks}
 
 There are two main attacks that may be mounted by an adversary capable
-of exploiting \textit{only} the network facing component of the web
+of exploiting \textit{only} unprivileged components of the web
 server application and passively eavesdropping on packets exchanged
 between the server and the client:
-
+ 
 \begin{enumerate}
-  \item The adversary could leak the private key from the network facing
-    component, which has to run as root to bind to port 80.  This could
-    be done by reading the private key from disk directly or from the
-    process's memory space. The attack is illustrated in
-    Figure~\ref{fig:attack1}.
+  \item The adversary could leak the private key from the network
+    facing worker process. This could be done by reading the private key
+    from disk directly or from the process's memory space. The attack is
+    illustrated in Figure~\ref{fig:attack1}.
 
-	\begin{figure}[H]
-          \centering
-          \includegraphics[scale=0.15]{images/attack1.png}
-          \caption{Exploiting the network facing component to leak the
-            private key}
-          \label{fig:attack1}
-	\end{figure}
+    \begin{figure}[H] \centering
+      \includegraphics[scale=0.15]{images/attack1.png}
+      \caption{Exploiting the network facing component to leak the
+        private key}
+      \label{fig:attack1}
+    \end{figure}
 
   \item The adversary may record traffic exchanged over the SSL/TLS
     channel and then exploit a naive session key generation interface to
@@ -90,18 +88,17 @@ between the server and the client:
     eavesdropped session's symmetric key and is, therefore, no different
     to having read access to the private key from the adversary's
     perspective. This exploit only works if the cipher used is one that
-    does not offer forward secrecy, and it only affects the
-    single session which was eavesdropped. The attack is illustrated in
+    does not offer forward secrecy, and it only affects the single session
+    which was eavesdropped. The attack is illustrated in
     Figure~\ref{fig:attack2}.
 
-	\begin{figure}[H]
-          \centering
-          \includegraphics[scale=0.15]{images/attack2.png}
-          \caption{Exploiting the network facing component and the
-            naive session key generation interface to generate session
-            keys for eavesdropped session}
-          \label{fig:attack2}
-	\end{figure}
+    \begin{figure}[H] \centering
+      \includegraphics[scale=0.15]{images/attack2.png}
+      \caption{Exploiting the network facing component and the naive
+        session key generation interface to generate session keys for
+        eavesdropped session}
+      \label{fig:attack2}
+    \end{figure}
 \end{enumerate}
 
 \subsubsection*{Proposed Solution}
@@ -136,7 +133,7 @@ malicious cloud-provider with full access to the physical
 machine. Such adversaries may leak the key from the privileged
 component's memory space by exploiting the OS, or, in the case of the
 malicious cloud provider, simply read the key from disk\footnote{Even
-  if the key is encrypted on disk, the decryption key must be present
+b  if the key is encrypted on disk, the decryption key must be present
   in the plain-text binary file for the privileged component, or in
   the process's memory, at runtime, in plain-text}.  A hardware
 component, called a trusted platform module, has been utilised in an

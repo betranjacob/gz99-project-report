@@ -5,12 +5,17 @@
 \subsection{The Threat Model}
 \subfile{sections/threat-model.tex}
 
-%TODO: this title is a wip
+\subsection{System Level Design} %TODO: title is WIP
 
-\subsubsection*{High level design}
-% TODO: WIP
+% TODO: ALL TEXT IN THIS SECTION IS WIP!!!
+Given the background and threat model discussed above, we may now
+discuss the design of our system. We first describe how the system is
+partitioned in a cipher agnostic manner. Then, we expand upon the
+generic design, illustrating how the system handles: (1) Ciphers that
+do not offer forward secrecy (2) Ciphers that offer forward secrecy.
 
-By utilizing the aforementioned remote-attestation process, we can
+\subsubsection{Abstract Abstract Design}
+By utilizing the above-detailed remote-attestation process, we can
 provision the trusted component of the remote server application with
 an SSL private key while making it extremely difficult for even
 \textit{privileged} processes running on the cloud provider to access
@@ -18,18 +23,13 @@ the key. This is a stark contrast to current schemes wherein the
 private key is merely shipped as part of the server application to the
 cloud provider.
 
-As previously highlighted in Section~\ref{sec:ssloverview}, the
+As previously mentioned in Section~\ref{sec:ssloverview}, the
 private key is required by a subset of the operations executed during
 the handshake step. These operations have to be executed within the
 trusted component, and are invoked by the non-trusted component via an
-interface that we define in this section. Note that the interface has
+interface we define in this section. Note that the interface has
 to be carefully designed, allowing the handshake to complete correctly
-while not exposing the long term private key through an oracle.
-
-
-% TODO: introduce this better to make it clear that there are 2
-% different handshakes; I only went into some detail here, definitely
-% need more depth
+while not exposing the long term private key through an oracle. 
 
 Take for example an interface where the non-trusted component supplies
 \texttt{(ServerRandom, ClientRandom, \{PremasterSecret\}$_K$)}. Such
@@ -51,6 +51,7 @@ resulting interface ensures that, even if a previously eavesdropped
 \texttt{\{PremasterSecret\}$_K$} is provided, a fresh session-key is
 computed on every invocation.
 
+\subsubsection{Designing for Ciphers \textit{Lacking} Forward Secrecy}
 % Freshness of the generated session-key has been used in [WEDGE
 % CITATION] to maintain the secrecy of an SSL/TLS private key in the
 % face of a passive eavesdropper how can exploit the server
@@ -59,6 +60,8 @@ computed on every invocation.
 % operating system and / or a malicious cloud provider.
 
 \subfile{sections/ecdhe-handshake.tex}
+
+\subsubsection{Designing for Ciphers \textit{Offering} Forward Secrecy}
 
 \noindent
 \\We consider two scenarios that slightly change the exchange of
