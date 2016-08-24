@@ -14,6 +14,17 @@ partitioned in a cipher agnostic manner. Then, we expand upon the
 generic design, illustrating how the system handles: (1) Ciphers that
 do not offer forward secrecy (2) Ciphers that offer forward secrecy.
 
+% FIXME: I believe here we should introduce the split on the designs
+% for private and session key isolation, there is more content at the
+% end of this section on this which should be moved here as well.
+
+None of our designs modify the SSL handshake itself, though we carefully
+compartmentalize the protocol's execution in trusted and untrusted
+components. The interface for both kind of ciphers is split into two
+versions, one where only the private key of the server is protected
+and one where both the private and the session keys are protected by
+the enclave.
+
 \subsubsection{Abstract Design}
 By utilizing the above-detailed remote-attestation process, we can
 provision the trusted component of the remote server application with
@@ -51,6 +62,61 @@ a new \texttt{ServerRandom} every time the interface is invoked. The
 resulting interface ensures that, even if a previously eavesdropped
 \texttt{\{PremasterSecret\}$_K$} is provided, a fresh session-key is
 computed on every invocation.
+
+Concerning the scenario where only the server's private key is protected, the
+SSL handshake begins with the client connecting to the server by sending a
+ClientHello message. The \texttt{client\_random} value contained in this
+message is delivered to the enclave for future key derivation. Note that,
+though this value travels cleartext over the network, we have to provide the
+trusted component with it as it consists a dependency for calculating the
+\texttt{master\_secret}. Upon successfully feeding the enclave with
+\texttt{client\_random}, the untrusted component sends a command to the enclave
+requesting the generation of \texttt{server\_random} and blocks until the value
+is returned (in cleartext form as well). As earlier mentioned, this ensures the
+freshness of a new session and blocks an attacker who might completely own the
+untrusted part of the platform from influencing session key generation. Having
+received the \texttt{server\_random} value from the enclave, the server replies
+to the client with a \texttt{ServerHello} message. The server blocks until it
+receives the next packet from the client. The client responds with a
+\texttt{ClientKeyExchange\{PremasterSecret\}$_K$} message, where \texttt{K} is
+the server's public key. Leaving it intact, the server directly forwards the
+encrypted message to the enclave. The code running within the enclave uses the
+provisioned server's private key to decrypt \texttt{\{PremasterSecret\}$_K$}.
+The latter, along with the pre-negotiated \texttt{client\_random} and
+\texttt{server\_random} values are fed into a PRF in order to compute the
+\texttt{master\_secret}. Recall that this interface is defined to protect only
+the server's private key, thus it is safe to expose the \texttt{MasterSecret}
+cleartext to the untrusted component. From now on the SSL handshake continues
+without any more interactions with the enclave specific to key derivation
+\footnote{Actually, there is one more interaction with the enclave upon
+successful termination of an SSL handshake. This is mostly an implementation
+detail regarding SSL session management and Nginx's event-driven design and is
+not directly connected with the SSL/TLS protocol itself. We explain further in
+section \ref{implementation} why this extra context switch is required}.
+
+%%%%%%%%%%%%% WIP START
+Regarding the design where we want to protect both the server's private key
+and the SSL session's key block, we augment the previously defined interface
+from the point where the \texttt{\{PremasterSecret\}$_K$} is available to the
+enclave. For this scenario, we do not expose the \texttt{MasterSecret} to the
+untrusted component, as this would merely provide an oracle for session key
+derivation to an adversary. Following, the server asks the enclave to generate
+the session key block using the pre-negotiated secrets and this key block does
+never leave the trusted component. At this point, the client signals the server
+with a \texttt{ChangeCipherSpec} message about transitioning to a specific
+cipher and the server interacts with the enclave to initialize the client's
+cipher specific environment. Upon receiving the encrypted
+\texttt{ClientFinished} message, the server forwards the message intact to the
+enclave for MAC verification and integrity check. If this process successfully
+completes, the server signals the client for transitioning to a specific cipher
+and sets the appropriate cipher environment in the enclave as well. Finally, it
+asks the enclave to build the \texttt{ServerFinished} message using the same
+interface it used for decrypting the \texttt{ClientFinished} message and
+establishes the SSL connection by sending it to the client. Note that, as the
+SSL/TLS protocol defines, the interface used for encryption/decryption of the
+Finished messages is the same used for encryption/decryption of the user data
+travelling over the network.
+%%%%%%%%%%%%% WIP END
 
 % Freshness of the generated session-key has been used in [WEDGE
 % CITATION] to maintain the secrecy of an SSL/TLS private key in the
