@@ -2,27 +2,25 @@
  
 \begin{document}
 
-We developed our prototype using OpenSGX which, as detailed in
-Section~\ref{sec:background}, is an emulator for the SGX instruction
-set and relies on QEMU to execute the trusted code. Consequentially,
-we cannot measure end to end performance by simply executing our
-prototype and tabulating how many requests per second are completed,
-due to the overhead of emulation.  Instead, we resorted to modeling
-the performance of the prototype in a manner similar
-to~\cite{Baumann14}.
+We developed our prototype using OpenSGX which, as detailed in 
+Section~\ref{sec:background}, is an emulator for the SGX instruction set and
+relies on QEMU to execute the trusted code. Consequentially, we cannot measure
+end to end performance by simply executing our prototype and tabulating how
+many requests per second are completed, due to the overhead of emulation.
+Instead, we resorted to modeling the performance of the prototype in a manner
+similar to~\cite{Baumann14}.
 
 % Need to detail hardware used for testing here....
-The remainder of this section describes the model we implemented to
-carry out our performance measurements and details the results we
-acquired from running our tests.
+The remainder of this section describes the model we implemented to carry out
+our performance measurements and details the results we acquired from running
+our tests.
 
 \subsection{Performance Model}
 
-To model the performance of our prototype we implemented a second
-version of our enclave program that has no dependencies on OpenSGX and
-replaces certain SGX instructions with busy waits, simulating the overhead in
-executing them. In dong so, we make the same assumptions as~\cite{Baumann14}
-namely:
+To model the performance of our prototype we implemented a second version of
+our enclave program that has no dependencies on OpenSGX and replaces certain
+SGX instructions with busy waits, simulating the overhead in executing them.
+In dong so, we make the same assumptions as~\cite{Baumann14} namely:
 \begin{enumerate}
   \item We assume that the CPU used in testing performs the same as an
     SGX-enabled CPU for all non-SGX instructions
@@ -30,21 +28,21 @@ namely:
     entirety of the trusted component and any data structures created
     after program start-up
 \end{enumerate}
-Leaving the overhead of SGX instructions, memory encryption, and
-asynchronous exits unaccounted for.
+Leaving the overhead of SGX instructions, memory encryption, and asynchronous
+exits unaccounted for.
 
-SGX instructions that bootstrap the enclave and verify its integrity
-are only executed once at startup, and therefore have no effect on runtime
-performance. As a result, we only simulate the overhead of EENTER,
-ERESUME and EEXIT. Simulating the slow down in memory accesses due to the need
-to decrypt the RAM contents before being able to access them in processors
-cache, was carried out by reducing the memory's clock in~\cite{Baumann14}.
-Such a proxy works for their system because it executes within an enclave in
-its entirety. Clearly, such an approach would underestimate the performance of
-our system because only the trusted component incurs the overhead of memory
-encryption. We have not been able to find a solution to model this performance
-hit in our system.
+SGX instructions that bootstrap the enclave and verify its integrity are only
+executed once at startup, and therefore have no effect on runtime performance.
+As a result, we only simulate the overhead of EENTER, ERESUME and EEXIT.
+Simulating the slow down in memory accesses due to the need to decrypt the RAM
+contents before being able to access them in processors cache, was carried out
+by reducing the memory's clock in~\cite{Baumann14}. Such a proxy works for
+their system because it executes within an enclave in its entirety. Clearly,
+such an approach would underestimate the performance of our system because
+only the trusted component incurs the overhead of memory encryption. We have
+not been able to find a solution to model this performance hit in our system.
 
+\subsection{Hypothesis}
 We expect to see the most performance slowdown due to expensive context
 switches between untrusted and enclave programs. This is due to the required
 TLB flush (??) accompanying EENTER and EEXIT instructions.
@@ -53,15 +51,16 @@ For the case when master secret and session keys are available to the OS we
 don't expect significant slowdown as it only adds 4 context switches during
 the handshake that can be amortised over multiple connections.
 
-The larger burden on the enclave program for the case when 
-
-% TODO: do we use opensgx in any way - it gives us the number of sgx
-% instructions executed?
+In contrast, the second case, providing stronger security guarantees, should
+perform considerably poorer due to extra XXX context switches during the
+handshake. Moreover this scenario incurs additional slowdown due to the extra
+4 context switches for every request made to the server.
 
 \subsection{Tests setup}
 % hardware specs
 We run our tests on a XXX core, XXX GHz machine, with XXX RAM, XXX network
-card, running Debian / Ubuntu X.X. We used Apache Benchmark XXX.
+card, running Debian / Ubuntu X.X. To generate the load we used Apache
+Benchmark XXX.
 
 We have tested end to end performance for ciphersuites not offering forward
 secrecy based on RSA handshake as well as suites providing forward secrecy
@@ -70,7 +69,9 @@ based on ECDHE:
   \item (RSA-)AES256-GCM-SHA384
   \item ECDHE-RSA-AES256-GCM-SHA384
 \end{enumerate}
-We use the AES as it can benefit from hardware acceleration in most setups
+
+We use the AES as it can benefit from hardware acceleration using AESNI
+instructions present in modern devices.
 
 We tested two versions of our program, for the two threat models discussed in
 Section~\ref{sec:design}:
@@ -80,17 +81,23 @@ Section~\ref{sec:design}:
 \end{enumerate}
 
 For the session keys inside the enclave we have tested a range of static
-document sizes to capture the overhead of encrypt / decrypt oracle interface.
+document sizes to capture the cost of encrypt / decrypt oracle interface.
 
 We performed the test for the busywait instrumented enclave program with sgx
 instrumented libressl 2.4.1 statically linked to nginx 1.11.1. We ran the same
 set of tests with an unmodified version of nginx+libressl for baseline
 comparison.
 
+We also run the test inside OpenSGX to learn which and how many SGX
+instructions were executed
 
-% Need to document our hypothesis, still thinking about it. I have my
-% own notes though
 \subsection{Results}
+
+% From wedge:
+%  - maximum throughput that the SGX-partitioned version of nginx and the
+%  original version of nginx can sustain (req/s)
+%  - all sessions cached vs non cached
+%  - 
 
 \subsection{Discussion}
 
