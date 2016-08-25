@@ -1,13 +1,13 @@
 \documentclass[../../main.tex]{subfiles}
 
-\begin{document}
-As previously mentioned in Section~\ref{sec:ssloverview}, the private
-key is required by a subset of the operations executed during the
-handshake step. These operations have to be executed within the
-trusted component, and are invoked by the non-trusted component via an
-interface we define in this section. Note that the interface has to be
-carefully designed, allowing the handshake to complete correctly while
-not exposing the long term private key through an oracle.
+\begin{document} As previously mentioned in
+Section~\ref{sec:ssloverview}, the private key is required by a subset
+of the operations executed during the handshake step. These operations
+have to be executed within the trusted component, and are invoked by
+the non-trusted component via an interface we define in this
+section. Note that the interface has to be carefully designed,
+allowing the handshake to complete correctly while not exposing the
+long term private key through an oracle.
 
 Take for example an interface where the non-trusted component supplies
 \texttt{(ServerRandom, ClientRandom, \{PremasterSecret\}$_K$)}. Such
@@ -101,10 +101,11 @@ the network. Thus, every subsequent data record will be
 encrypted/decrypted by the same interface used for
 encrypting/decrypting the \texttt{Finished} messages, with the session
 keys never being exposed to the untrusted component.
+
 % Freshness of the generated session-key has been used in [WEDGE
 % CITATION] to maintain the secrecy of an SSL/TLS private key in the
 % face of a passive eavesdropper how can exploit the server
 % application's network facing process. We use it to secure the
 % private key against an adversary who can exploit the underlying
-% operating system and / or a malicious cloud provider.
+% operating system and/or a malicious cloud provider.
 \end{document}
