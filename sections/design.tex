@@ -91,32 +91,42 @@ without any more interactions with the enclave specific to key derivation
 \footnote{Actually, there is one more interaction with the enclave upon
 successful termination of an SSL handshake. This is mostly an implementation
 detail regarding SSL session management and Nginx's event-driven design and is
-not directly connected with the SSL/TLS protocol itself. We explain further in
-section \ref{implementation} why this extra context switch is required}.
+not directly connected with the SSL/TLS protocol itself. We reason further
+about this requirement in Section \ref{sec:implementation}.}.
 
-%%%%%%%%%%%%% WIP START
 Regarding the design where we want to protect both the server's private key
 and the SSL session's key block, we augment the previously defined interface
 from the point where the \texttt{\{PremasterSecret\}$_K$} is available to the
 enclave. For this scenario, we do not expose the \texttt{MasterSecret} to the
 untrusted component, as this would merely provide an oracle for session key
-derivation to an adversary. Following, the server asks the enclave to generate
-the session key block using the pre-negotiated secrets and this key block does
-never leave the trusted component. At this point, the client signals the server
-with a \texttt{ChangeCipherSpec} message about transitioning to a specific
-cipher and the server interacts with the enclave to initialize the client's
-cipher specific environment. Upon receiving the encrypted
-\texttt{ClientFinished} message, the server forwards the message intact to the
-enclave for MAC verification and integrity check. If this process successfully
-completes, the server signals the client for transitioning to a specific cipher
-and sets the appropriate cipher environment in the enclave as well. Finally, it
-asks the enclave to build the \texttt{ServerFinished} message using the same
-interface it used for decrypting the \texttt{ClientFinished} message and
-establishes the SSL connection by sending it to the client. Note that, as the
-SSL/TLS protocol defines, the interface used for encryption/decryption of the
-Finished messages is the same used for encryption/decryption of the user data
-travelling over the network.
-%%%%%%%%%%%%% WIP END
+derivation to an adversary. The server asks the enclave to generate the session
+key block using the pre-negotiated secrets and this key block does never leave
+the trusted component. At this point, the client signals the server with a
+\texttt{ChangeCipherSpec} message about transitioning to a specific CipherSpec
+and the server interacts with the enclave to initialize the client's cipher
+specific environment. The server now prepares for receiving the
+\texttt{ClientFinished} message by calculating the digest of the handshake
+messages it received so far \footnote{As defined by TLS 1.2, the digest
+enclosed in the \texttt{Finished} messages does not include the
+\texttt{Finished} messages themselves.}. This step entails a dependency of the
+established session key, thus a context switch to the trusted environment is
+required for calculating the digest of the handshake buffer. Upon receiving
+the encrypted \texttt{ClientFinished} message, the server forwards the message
+intact to the enclave for decryption through the decrypt interface and
+calculates the MAC of the decrypted message to verify its authenticity and
+integrity. If this process successfully completes, the server signals the
+client for transitioning to a specific cipher and sets up the appropriate
+cipher environment in the enclave as well. Finally, it asks the enclave to
+calculate the digest of the handshake messages it received so far and encrypts
+this digest within the encalve using the established session keys. If the
+client successfully verifies all security properties of the
+\texttt{ServerFinished} message, the SSL connection is considered established.
+Note that, as the protocol defines, the interface used for encryption/
+decryption of the \texttt{Finished} messages is the same used for encryption/
+decryption of the user data travelling over the network. Thus, every subsequent
+data record will be encrypted/decrypted by the same interface used for
+encrypting/decrypting the \texttt{Finished} messages, with the session keys
+never being exposed to the untrusted component.
 
 % Freshness of the generated session-key has been used in [WEDGE
 % CITATION] to maintain the secrecy of an SSL/TLS private key in the

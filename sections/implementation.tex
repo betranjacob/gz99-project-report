@@ -1,3 +1,26 @@
-% TODO: Add details about SSL session key management and book keeping in the
-% enclave
-% TODO: Mention returning of IV/nonce to the untrusted part
+%NGINX achieves state of the art performance in commodity hardware due to its
+%event-driven design which renders the web server capable of scaling to
+%hundends of thousands of concurrent connections. This architecture introduced
+%an implication in our design regarding handling concurrent SSL handshakes.
+%Although an implementation detail, we explain further a simple scheme we used
+%for supporting NGINX's behaviour, as it was a crucial part of our final
+%performance evaluation results\footnote{Not dealing with concurrent
+%connections, would mean that the enclave would be only be able to handle a
+%single connection at a time which would end up in severe performance penalties
+%in our results.}. According to an event-driven architecture, instead of
+%blocking until an I/O operation completes, the web server could switch between
+%ongoing connections maximizing this way the system's resource utilization.
+%Designing the enclave to store SSL state specific values in a flat memory space
+%would result in loosing the state of an ongoing SSL handshake when the web
+%server switches to another connection. Our scheme uses a native implementation
+%of a dynamic hash table that provides type checking and storing of arbitrary
+%data structures. We used this data structure in order to map the state of
+%ongoing SSL handshakes or established connections against an identifier and
+%pay nearly constant time cost when an enclave tries to retrieve the state of
+%an ongoing connection. Because the SSL session ID is considered established
+%only when the handshake successfully completes, we assign an SGX specific
+%identifier to an in-progress SSL handshake and switch the mapping key within
+%the enclave to the SSL session ID when the handshake completes. Note that,
+%this mechanism not only enables the enclave to deal with concurrent
+%connections, but also lets us support SSL session resumption. In the interest
+%of time, we left support of SessionTickets as future work.
