@@ -1,0 +1,62 @@
+\documentclass[../../main.tex]{subfiles}
+
+\begin{document}
+
+\paragraph{Session keys available to the OS}
+
+If our sole goal is to protect the long term, private key then we may
+decide it is safe to keep the active sessions' keys outside of the
+TCB. This allows the compromised OS to use the keys as it pleases. It
+can just read them out from memory and send to a man in the middle (on
+a different to compromised machine). MITM could then decrypt
+previously captured traffic. This method it is possible to leak
+current (and cached) sessions keys. Old, captured sessions for which
+session keys have been deleted can no longer be recovered. However, if
+the OS persists to be malicious it can always monitor future (current)
+connections.\\
+
+\noindent One could prefer this option for performance reasons - such
+design puts less burden on the enclave program. In particular the role
+of the enclave can finish after the master secret is computed from
+server and client randoms and pre-master secret. This is because a
+pseudo-random function (PRF) lies between master secret and the input
+values so no information can be learned about the private key. The
+derivation of session keys and encryption / decryption of messages can
+be left unaltered in the untrusted program and therefore less
+\'context\' switches to the enclave would be required.
+
+\paragraph{Session keys hidden within the enclave}
+
+One may want to further protect the key material by requiring that the
+session keys themselves do not leave the enclave. Instead an encrypt /
+decrypt oracle interface is presented to the untrusted component. The
+enclave performs the cryptographic operations using stored state
+accessed by the session\_id. This prevents the compromised OS from
+leaking the session keys to a different machine, but requires a more
+complicated and expensive design. One can imagine that if the attacker
+is leaking ton of data out of the server, it may be more easily
+noticeable than if the session keys are exported outside of the server
+once.\\
+
+\noindent If we decide to keep our session keys in the enclave apart
+from providing a mechanism to transfer the cipher context we have to
+additionally present an interface that would allow to sign the
+handshake finish messages.\\
+
+\noindent To allow the trusted component to encrypt / decrypt messages
+we also need to transfer the symmetric cipher context which can be
+done during computation of master secret. Additionally, every time we
+need to pass the initialization values such as initialization vector
+or nonce need to be transferred to the enclave.\\
+
+\noindent The performance cost is increased since now at least 4
+context switches between untrusted and trusted processes are required
+for each packet processing, i.e. 2 switches to decrypt an incoming
+packet and pass plain-text back to the application and 2 to encrypt
+the outgoing result after application processing (plain-text in,
+cipher-text out of an enclave).\\
+
+\noindent Also every handshake now needs 6 (TODO: ???) more context
+switches during digest update.
+
+\end{document}
