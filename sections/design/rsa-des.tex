@@ -62,15 +62,17 @@ successfully feeding the enclave with \crandom, the untrusted
 component sends a command to the \textit{enclave program}, requesting
 the generation of \srandom. Upon receiving ~\srandom~from the
 \textit{enclave program}, the server replies to the client with a
-\texttt{ServerHello} message. The client responds with a
+\texttt{ServerHello} message, followed by a \texttt{ServerDone}
+message. \texttt{ServerDone} informs the client that the server is
+ready to proceed to the key negotiation phase. The client responds with a
 \texttt{ClientKeyExchange} message, containing \premaster, where
 \texttt{K} is the server's public key. The server forwards
 \premaster~to the \textit{enclave program}. The code running within
 the enclave uses the provisioned long-term private key to decrypt
 \premaster. The now-decrypted \texttt{PremasterSecret}, along with the
-pre-negotiated \crandom~and \srandom~values are fed into provided to
-the aforementioned PRF, outputting \texttt{MasterSecret}. The remainder
-of the handshake continues without any more interactions with the
+pre-negotiated \crandom~and \srandom~values are input to the
+aforementioned PRF, outputting \texttt{MasterSecret}. The remainder of
+the handshake continues without any more interactions with the
 \textit{enclave program} \footnote{Actually, there is one more
   interaction with the enclave upon successful termination of an SSL
   handshake. This is mostly an implementation detail regarding SSL
