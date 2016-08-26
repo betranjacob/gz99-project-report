@@ -67,7 +67,7 @@ Public key certificate and a list of server preferred ciphers.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[scale=0.4]{EC-DHE-Handshake.png}
+  \includegraphics[scale=0.4]{EC-DHE-Handshake.pdf}
   \caption{EC-DHE Handshake}
   \label{fig:ecdhe_handshake}
 \end{figure}
@@ -122,4 +122,15 @@ encrypted using the shared session secret keys. Finally server
 computes its authenticated and encrypted “Finished” Message and sends
 it to the Client. This completes the full Handshake process.
 
+Observe, however, that \texttt{MasterSecret} is used to compute the
+session key block in the untrusted component; hence, an adversary,
+after exploiting the untrusted component, may leak the session key
+block (or leak \texttt{MasterSecret} and derive the session key block
+themselves). 
+
 \end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../main"
+%%% End:
