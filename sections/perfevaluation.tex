@@ -10,7 +10,6 @@ many requests per second are completed, due to the overhead of emulation.
 Instead, we resorted to modeling the performance of the prototype in a manner
 similar to~\cite{Baumann14}.
 
-% Need to detail hardware used for testing here....
 The remainder of this section describes the model we implemented to carry out
 our performance measurements and details the results we acquired from running
 our tests.
@@ -39,8 +38,12 @@ contents before being able to access them in processors cache, was carried out
 by reducing the memory's clock in~\cite{Baumann14}. Such a proxy works for
 their system because it executes within an enclave in its entirety. Clearly,
 such an approach would underestimate the performance of our system because
-only the trusted component incurs the overhead of memory encryption. We have
-not been able to find a solution to model this performance hit in our system.
+only the trusted component incurs the overhead of memory encryption. Instead
+we captured the number of Last Layer Cache (LLC) misses as a relevant measure.
+
+Finally, the performance of `malloc` is slower for our test program than what
+it would be within real SGX because we have to context switch to the OS to
+allocate memory.
 
 \subsection{Hypothesis}
 We expect to see the most performance slowdown due to expensive context
@@ -59,6 +62,28 @@ handshake. Moreover this scenario incurs additional slowdown due to the extra
 vary the response size for the keys outside too - to verify our hypothesis
 that its not going to be performance drop
 
+\subsection{Microbenchmarks}
+In order to gain better insight about our implementation we measured its
+following aspects.
+
+OpenSGX can report the performance measurement of an enclave program which
+includes the number of kernel switches and number and type of enclave
+instructions executed. We report the relevant number of instructions per
+request.
+
+To be able to reason about performance hit due to memory decryption we
+captured the number of LLC misses using Intel VTune Amplifier. We tried to
+verify its reported values using perf tool, but chose the former because it
+had all CPU specific counters predefined in the program and was available
+under student license. perf also lacked thourough documentation and would
+require consulting Intel Reference Manual for the counter values for our CPU.
+ 
+To measure the size of the TCB of the enclave program we generated its static
+call graph (using Egypt) to determine all the libressl entry point functions
+and how they follow internally. We then manually copied the source of all
+functions used and counted the resulting SLOC (with cloc). We also report the
+number of changes we have made to the libressl and nginx source code.
+
 \subsection{Tests setup}
 We run our tests on a Amazon EC2 XXX instances, with the server and
 client located on different virtual machines within the same data center.
@@ -66,8 +91,8 @@ client located on different virtual machines within the same data center.
 have 1 virtual CPU, with 3.75 GiB RAM, 4 GB SSD storage, and XXX network. The
 underlying hardware is Intel Xeon E5-2670 v2 (or Sandy Bridge) 2.5 GHz
 (2.6 GHz for Sandy Bridge) \cite{aws_instances}. We use Ubuntu 14.04 with 
-4.4.0-34 generic kernel for our OS and a custom script using \it{httperf} to
-generate the load and measure the performance.
+4.4.0-34 generic kernel for our OS and a custom script using \textit{httperf}
+to generate the load and measure the performance.
 
 We have measured the end to end performance for ciphersuites not offering
 forward secrecy based on RSA handshake as well as suites providing forward
@@ -101,16 +126,20 @@ instructions were executed and to be able to verify our performance results.
 
 We also varied the ratio betewen new and reused (cached) sessions.
 
-eval:
-  - how many lines of code  (semicolons)
-    - start with high level, entry point functions -> scrape down (sloccount)
-
-\subsection{Microbenchmarks}
- - number and type of enclave instructions executed per request
- - number of l3 misses which affects performance due to need for RAM decryption
- (intel vtune)
-
 \subsection{Results}
+
+Table XXX presents the number of modifications to the source code.
+The enclave program TCB is XXX of sloc.
+
+We used the formula from [page 30 in \url{https://software.intel.com/sites/landingpage/legacy/pdfs/Using_Intel_VTune_Amplifier_XE_on_2nd_Gen_Intel_Core_Family.pdf}]
+to convert the number of LLC misses to the percentage of cycles the enclave
+program spent on waiting for cache misses. We multiply this by the memory
+overhead reported in [CITATION NEEDED] (5-14 \%)
+
+Additionally we report that this not a performance bottleneck as it is under
+0.2\% which Intel considers `normal case`.
+
+
 
 % From wedge:
 %  - maximum throughput that the SGX-partitioned version of nginx and the
