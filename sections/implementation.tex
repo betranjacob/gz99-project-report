@@ -39,19 +39,19 @@ Figure 2 illustrates the system components and their corresponding partitions.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[scale=0.4]{images/implementation.png}
+  \includegraphics[scale=0.25]{images/implementation.png}
   \caption{Secure Webserver block diagram }
   \label{fig:implementation-overview}
 \end{figure}
 
 In the following section,  we briefly discuss about the different aspects of each of the system components, the difficulties faced during the implementation phase and the rationale leading to any particular approach that we have taken. 
 
-\item \textbf{NGINX Server }.
+\textbf{NGINX Server }.
 NGINX is an open source web server that uses an asynchronous event-driven approach for handling requests from the clients. The rationale behind choosing Nginx over Apache is the performance improvement it offers with the event driven architecture. In Nginx, each worker process handles thousands of connections simultaneously as opposed to Apache’s process/thread per connection approach. Furthermore Nginx is lightweight, scalable and also gaining lot of market share compared to Apache.
 
 The Nginx server process can manage multiple clients simultaneously and the request events are handled individually as they arrive. The server is capable to offload  the tasks to multiple worker processes in case of heavy incoming traffic. However we have configured it to run as a single worker process. This arrangement is to make it compatible with the shortcoming of openSGX i.e. it can execute only one enclave at any instance. In short, it supports only a  single execution thread at a time. Hence regardless of how many worker processes are requesting, only one can be served by openSGX.  We have modified nginx’s default configuration file to facilitate this.  (  /etc/nginx/nginx.conf ).  
 
-\item \textbf{SSL Engine }.
+\textbf{SSL Engine }.
 We have used LibreSSL library to implement the SSL/TLS protocols in the system. LibreSSL is a fork of OpenSSL aiming to provide more secure implementation. LibreSSL has undergone lot of code pruning and majority of the changes went into the library were related to the security vulnerabilities found in OpenSSL. 
 
 The library is linked to both Nginx and Enclave processes. The Libressl variant attached to the Nginx process has been modified, such that  the implementation of all crypto operations are replaced with IPC read/write stubs to SGX-Bridge (refer next section).  This means,  all the secure operations of the handshake such as signing, verification, key generation etc will invoke an IPC request to the SGX counterpart. The SGX part of LibreSSL will  execute the operations and respond accordingly. We limited the SGX  code only with cryptographic operations to reduce the size of the Trusted Computing Base. Most of the code base for connection establishment/termination, state machine handling etc are still maintained outside the enclave. 
@@ -64,25 +64,25 @@ During the first phase of development, we isolated all the private key related o
 
 We used SSL AEAD (Authenticated Encryption with Associated Data ) interfaces for encrypting/decrypting the application data. The AEAD operation is designed to provide both data authenticity (integrity) and confidentiality in a single step. The  underlying mode of operation for the AEAD symmetric key crypto is GCM (Galois Counter Mode). GCM is highly efficient and yields better performance. Furthermore GCM achieves the higher throughput rates with reasonable hardware resources by processing instructions parallely in contrast to CBC mode which incurs significant pipeline stalls.
 
-\item \textbf{SGX Bridge }.
+\textbf{SGX Bridge }.
 
 SGX Bridge is a Named Pipe IPC interface developed for data exchange between Nginx and SGX enclave process. It constitutes all the functions and data structures to read to and write from the enclave. 
 
 There are two main APIs which are used to write one of the predefined command ( with its  associated data ) to the enclave, and read the result back to the server. 
-> sgxbridge_pipe_write_cmd(SSL *s, int cmd, int len, unsigned char* data)
-> sgxbridge_pipe_read(int len, unsigned char* data);
+> sgxbridge\_pipe\_write\_cmd(SSL *s, int cmd, int len, unsigned char* data)
+> sgxbridge\_pipe\_read(int len, unsigned char* data);
 
 In the real SGX hardware, the enclave will exist within the same process virtual memory and can be accessed directly without aiding an IPC. We have decided to use these interfaces for our project as it was the IPC facility readily available within the open SGX library. 
 
-\item \textbf{Compiler, Tools and Build system }.
+\textbf{Compiler, Tools and Build system }.
 All the implementation parts were written in ‘C’ programming language. 
 At various phases of the developments, we had to use tools such as Valgrind for profiling, Callgrind for call stack analysis and gdb for debugging etc. We have developed and maintained a single bash script that automates the building and installation of  all the software packages used within the system. 
 
-A conditional compilation flag “OPENSSL_WITH_SGX” has been introduced in the LibreSSL engine to aid switching between native mode and sgx mode during the build process. It is also a reference point to identify sgx call gates introduced in Libressl as part of the project.
+A conditional compilation flag “OPENSSL\_WITH\_SGX” has been introduced in the LibreSSL engine to aid switching between native mode and sgx mode during the build process. It is also a reference point to identify sgx call gates introduced in Libressl as part of the project.
 
-\item \textbf{ Busy Wait - ( Is it worth mentioning here or in test set up/perf eval ??? ) }.
+\textbf{ Busy Wait - ( Is it worth mentioning here or in test set up/perf eval ??? ) }.
 
-\item \textbf{ OpenSGX - (Anything interesting that not mentioned in the previous sections ??? ) }.
+\textbf{ OpenSGX - (Anything interesting that not mentioned in the previous sections ??? ) }.
 
 \end{document}
 
