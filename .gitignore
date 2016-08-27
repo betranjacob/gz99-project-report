@@ -188,9 +188,9 @@ TSWLatexianTemp*
 _*_.tex
 *.tex#
 *.pdf
-!main.pdf
 /todo.org
 *.org~
 !images/*.pdf
 
 *.db
+
