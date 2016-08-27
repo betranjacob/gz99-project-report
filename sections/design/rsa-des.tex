@@ -27,10 +27,10 @@ meaning that the output cannot be mapped back to the input; hence, we
 may choose to offer an interface that accepts \crandom, \srandom, and
 \premaster, and returns \texttt{MasterSecret}. However, such an
 interface allows an adversary to \textit{influence} the generation of
-\texttt{MasterSecret}. To be precise, it allows to generate the
-\texttt{MasterSecret} for any eavesdropped session (\srandom~and
-\crandom~are both sent in the clear, and the interface takes
-\premaster, all of these are easily captured by a passive
+\texttt{MasterSecret}. To be precise, it allows an adversary to
+generate the \texttt{MasterSecret} for any eavesdropped session
+(\srandom~and \crandom~are both sent in the clear, and the interface
+takes \premaster, all of these are easily captured by a passive
 eavesdropper).
 
 Instead, we offer the same interface proposed in the Wedge paper, and
