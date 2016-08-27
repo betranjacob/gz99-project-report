@@ -106,18 +106,6 @@ resulting interface is depicted in Figure~\ref{fig:ecdhe-handshake}.
   \label{fig:ecdhe-handshake}
 \end{figure}
 
-In both designs described above, the \texttt{MasterSecret} is returned
-to the untrusted component. As previously mentioned, the
-\texttt{MasterSecret} is used to compute the session key block; hence,
-an adversary, after exploiting the untrusted component, may leak the
-session key block, or leak \texttt{MasterSecret} and derive the
-session key block themselves. Consequentially, an attacker may choose
-to store session key blocks and eavesdropped sessions, and decrypt the
-stored sessions at his leisure. Yet, requests received from the client
-have to be decrypted for processing by unprivileged user programs. The
-following section describes an augmentation to the designs presented
-above, and explains the resulting security properties.
-
 \end{document}
 
 %%% Local Variables:
