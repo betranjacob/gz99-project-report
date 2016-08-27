@@ -38,7 +38,7 @@ computationally difficult to seperate the ``paint mixtures''.
   \caption{DH Key Exchange paint analogy}
   \label{fig:paint}
 \end{figure}
-Moreover, by creating new ``secret paints'' for each session, and
+Moreover, by creating new ``secret paints'' for each session and
 purging all the ``paints'' from memory after a session is complete,
 one obtains Ephemeral DH Key Exchange (DHE). DHE offers forward
 secrecy because no long-term private secret is used to negotiate the
@@ -46,46 +46,59 @@ shared secret; hence, compromising a single session's ``secret
 paints'' does not affect any other session (new ``secret paints'' are
 used for new sessions).
 
-For our projects, we concentrated on Elliptical Curves DHE (ECDHE).
+For our project, we concentrated on Elliptical Curves DHE (ECDHE).
 This is a variant of DHE that utilises Elliptical Curves to ``mix''
 the ``paints''. The mathematics behind ECDHE is beyond the scope of
 this report, but the interested reader may refer to [CITATION] for
-further details.
+further details. The steps in the SSL/TLS handshake when using an
+ECDHE cipher (``ECDHE handshake'') are presented in
+Figure~\ref{fig:ecdhe-pristine}.
 
-Forward secrecy is a feature in the key arrangement protocol, which
-guarantees that the symmetric encryption keys can not be compromised
-even if the long term key ( server private key ) is compromised. To
-achieve forward secrecy we employed elliptic curve
-diffie-hellman(EC-DHE) key exchange mechanism. Most of the web servers
-prefer elliptic curves variant over standard DHE as it yields better
-performance with lesser number of key bits[1]. DHE handshake uses
-private key only to authenticate the server and generates fresh set of
-symmetric keys for every new session. The keys are computed from
-random EC parameters, which is never reused and also deleted once the
-session has ended. Hence in ECDHE Private keys will not affect the
-confidentiality of the past conversations, albeit part of the initial
-handshake. The private key will never aid the attacker as it was only
-used to authenticate the server identity If in case the attacker
-managed to attain the shared secret, he can only decrypt messages from
-that particular session. No previous or future
-sessionswould be compromised.\\
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.4]{images/EC-DHE-Handshake-pristine.pdf}
+  \caption[``ECDHE handshake'']{SSL/TLS handshake when using an ECDHE
+    cipher}
+  \label{fig:ecdhe-pristine}
+\end{figure}
 
-\noindent
+Similair to the ``RSA handshake'', the ``ECDHE handshake'' begins by
+establishing the values for \crandom~and \srandom. In performing this
+exchange, the involved parties also agree on the Elliptic Curve
+(``well-known paint'') to be used in negotiating the shared secret.
+Following that, the server computes its private parameter (``secret
+paint'') and the corresponding public parameter (``paint mixture''). A
+hash function is applied across the public parameter, \srandom, and
+\crandom. This resulting message digest is signed using the long-term
+private key and is sent to the client, attached to the public
+parameter. The client verifies the signature received, computes their
+own private and public parameters, and sends the public parameter to
+the server. The client and server may now derive the
+\texttt{PremasterSecret}, \texttt{MasterSecret}, and the session key
+block. The handshake now proceeds in the same way as the ``RSA
+handshake''.
+
+Clearly, from the discussion above, the long-term private key is used
+only for verification purposes in the ``ECDHE handshake''. 
+
+
+
+
+%-------------------------------------------------------------------
+
 We have partitioned the standard EC-DHE handshake implementation in
 Libressl and separated it into two components. One network facing
 component is deemed untrusted and is running as a part of nginx web
 server process. The other part resides inside the trusted SGX enclave
 and runs as an independent process. Both the components of the server
 communicate via a list of fine grained API’s
-wrapped over a named pipe IPC interface.\\
+wrapped over a named pipe IPC interface.
 
-\noindent
 The handshake process is carried out in two different phases, one to
 authenticate the server identity and other to establish the pre master
 secret. Figure~\ref{fig:ecdhe_handshake}) illustrates the messages
-exchanges between client and server’s trusted and untrusted compartments.\\
+exchanges between client and server’s trusted and untrusted compartments.
 
-\noindent
 A Https client can initiate the handshake by sending a “client hello”
 enclosed with a random number and a list of Elliptic curves it
 supports. Upon receiving this request, the nginx server initialises a
@@ -108,7 +121,6 @@ Public key certificate and a list of server preferred ciphers.
   \label{fig:ecdhe_handshake}
 \end{figure}
 
-\noindent
 In the second phase of DH key exchange, the server will pick one of
 the client supported elliptic curves and send the curve id to the
 enclave. In the enclave we will generate both the public and private
@@ -117,9 +129,8 @@ public part of the DH param is exposed to the nginx server process and
 the private part is kept secret within the enclave. This ensures
 additional security to the system by making the enclave completely
 abstain from accepting any server side seeds pertaining the shared
-secret generation.\\
+secret generation.
 
-\noindent
 In order to prove, that the server has control of the private key and
 DH params, the Server has to produce a digital signature. In our
 design this is computed within the enclave. This will include Client
@@ -129,9 +140,9 @@ Signature to the client as part of the “Server Key Exchange” message.
 Client verifies this message using the server public key. If the
 verification is successful , the client generates its part of EC
 params and sends it to the server as part of “Client Key Exchange”
-message.\\
+message.
 
-\noindent
+
 After receiving the “Client Key Exchange” message, the server will
 attain all the required seeds to launch the shared key generation
 process. The keys are calculated in a three level process. First a
@@ -141,9 +152,8 @@ one of the seed along with Client Random and Server Random for the
 shared Master secret generation. Server will finally generate the
 symmetric session keys with the associated MACs and Initialisation
 vectors from the master secret. All the three steps of key
-generation processes is securely performed within the enclave.\\
+generation processes is securely performed within the enclave.
 
-\noindent
 The client will then send a “Change Cipher Spec” message to indicate
 it will use the newly generated keys to hash and encrypt further
 messages. The handshake is complete from the client end after sending
