@@ -2,20 +2,56 @@
 
 \begin{document}
 
-\paragraph{Forward Secrecy and ECDHE Handshake}
-In RSA key exchange process, all the messages exchanged between server
-and client can be compromised if the server’s private key is ever
-disclosed. In specific, an active attacker who has recorded all the
-data communication between the server and client for a certain period
-of time and stores it until such a time he has access to the private
-key. The adversary can now decrypt all the historic data using the
-compromised private key. This is possible because the attacker will
-have access to all the seeds ( Client Random, Server random and
-Pre-Master secret ) required to generate the symmetric session keys
-This capability to decode historic data at any point of time in the
-future pose a serious threat to the secure communication over the cyberspace.\\
+At the time the Wedge paper was published, ciphers that offer forward
+secrecy were not common place; hence, the authors of Wedge deemed it
+unnecessary to provide support for this category of ciphers. However,
+forward secrecy has gained popularity since, with
+[STATISTIC][CITATION]. We have, therefore, designed our system to
+accomodate ciphers within this category. As of TLSv1.2 ciphers that
+offer forward secrecy employ some variant of Diffie-Hellman (DH) Key
+Exchange to establish the \texttt{PremasterSecret}. Before discussing
+the SSL/TLS handsake for these ciphers, we provide a brief
+explaination of DH Key Exchange.
 
-\noindent
+
+DH Key Exchange is an asymmetric cryptographic algorithm used to
+arrive at a shared secret between two parties. DH Key Exchange can be
+best illustrated using the famous ``paint mixing'' analogy. The
+analogy is presented in Figure~\ref{fig:paint}.
+\begin{enumerate}
+  \item The partiticpants agree to using a publicly known ``paint
+    color''
+  \item Each participant generates a secret ``paint color''
+  \item Each participant ``mixes'' their ``secret color'' with the
+    ``public color'' they previously agreed to use
+  \item The participants \textit{exchange} the ``paint mixtures'' from
+    the previous step
+  \item The participants combine the ``paint mixture'' they received
+    with their own ``secret paint''. Both parties now possess the same
+    ``shared secret paint''.
+\end{enumerate}
+The security of DH Key Exchange relies on the assumption that it is
+computationally difficult to seperate the ``paint mixtures''.
+\begin{figure}[H]
+  \centering
+  
+  \caption{DH Key Exchange paint analogy}
+  \label{fig:paint}
+\end{figure}
+Moreover, by creating new ``secret paints'' for each session, and
+purging all the ``paints'' from memory after a session is complete,
+one obtains Ephemeral DH Key Exchange (DHE). DHE offers forward
+secrecy because no long-term private secret is used to negotiate the
+shared secret; hence, compromising a single session's ``secret
+paints'' does not affect any other session (new ``secret paints'' are
+used for new sessions).
+
+For our projects, we concentrated on Elliptical Curves DHE (ECDHE).
+This is a variant of DHE that utilises Elliptical Curves to ``mix''
+the ``paints''. The mathematics behind ECDHE is beyond the scope of
+this report, but the interested reader may refer to [CITATION] for
+further details.
+
 Forward secrecy is a feature in the key arrangement protocol, which
 guarantees that the symmetric encryption keys can not be compromised
 even if the long term key ( server private key ) is compromised. To
@@ -26,7 +62,7 @@ performance with lesser number of key bits[1]. DHE handshake uses
 private key only to authenticate the server and generates fresh set of
 symmetric keys for every new session. The keys are computed from
 random EC parameters, which is never reused and also deleted once the
-session has ended.  Hence in ECDHE Private keys will not affect the
+session has ended. Hence in ECDHE Private keys will not affect the
 confidentiality of the past conversations, albeit part of the initial
 handshake. The private key will never aid the attacker as it was only
 used to authenticate the server identity If in case the attacker
@@ -39,14 +75,14 @@ We have partitioned the standard EC-DHE handshake implementation in
 Libressl and separated it into two components. One network facing
 component is deemed untrusted and is running as a part of nginx web
 server process. The other part resides inside the trusted SGX enclave
-and runs as an independent process.  Both the components of the server
+and runs as an independent process. Both the components of the server
 communicate via a list of fine grained API’s
 wrapped over a named pipe IPC interface.\\
 
 \noindent
 The handshake process is carried out in two different phases, one to
 authenticate the server identity and other to establish the pre master
-secret.  Figure~\ref{fig:ecdhe_handshake}) illustrates the messages
+secret. Figure~\ref{fig:ecdhe_handshake}) illustrates the messages
 exchanges between client and server’s trusted and untrusted compartments.\\
 
 \noindent
@@ -89,9 +125,9 @@ DH params, the Server has to produce a digital signature. In our
 design this is computed within the enclave. This will include Client
 Random, Server Random and Public DH Params signed using server private
 key. Server sends the ECDHE parameter (in clear) together with
-Signature to the client as part of the “Server Key Exchange”
-message. Client verifies this message using the server public key. If
-the verification is successful , the client generates its part of EC
+Signature to the client as part of the “Server Key Exchange” message.
+Client verifies this message using the server public key. If the
+verification is successful , the client generates its part of EC
 params and sends it to the server as part of “Client Key Exchange”
 message.\\
 
@@ -100,7 +136,7 @@ After receiving the “Client Key Exchange” message, the server will
 attain all the required seeds to launch the shared key generation
 process. The keys are calculated in a three level process. First a
 Pre-Master key is computed from Client Public ECDHE param and Server
-ECDHE params(both Private and Public).  The pre-master is then used as
+ECDHE params(both Private and Public). The pre-master is then used as
 one of the seed along with Client Random and Server Random for the
 shared Master secret generation. Server will finally generate the
 symmetric session keys with the associated MACs and Initialisation
@@ -126,7 +162,7 @@ Observe, however, that \texttt{MasterSecret} is used to compute the
 session key block in the untrusted component; hence, an adversary,
 after exploiting the untrusted component, may leak the session key
 block (or leak \texttt{MasterSecret} and derive the session key block
-themselves). 
+themselves).
 
 \end{document}
 
