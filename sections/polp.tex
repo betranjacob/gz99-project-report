@@ -23,12 +23,12 @@ offer forward secrecy, and the scenario where only the client verifies
 the server's identity as part of the SSL/TLS handshake.
 Figure~\ref{fig:pristrsashake} illustrates the resulting SSL/TLS
 handshake. We refer to this handshake as the ``RSA'' handshake for
-brevity\footnote{The cipher normally usually used in this handshake is
-  RSA; hence the name}. The asymmetric key exchange step is not
-necessary here, as mentioned in the previous section. The symmetric
-key negotiation step comprises of the client generating a random value
-for \texttt{PremasterSecret}, encrypting it in the server's public
-key, and sending the resulting packet to the server. Observe that the
+brevity\footnote{The cipher usually used in this handshake is RSA;
+  hence the name}. The asymmetric key exchange step is not necessary
+here, as mentioned in the previous section. The symmetric key
+negotiation step comprises of the client generating a random value for
+\texttt{PremasterSecret}, encrypting it in the server's public key,
+and sending the resulting packet to the server. Observe that the
 long-term private key, as a result, is only used in decrypting
 \premaster.
 
@@ -83,14 +83,13 @@ between the server and the client:
     channel and then exploit a naive session key generation interface to
     acquire the session keys used in that exchange. A naive interface is
     one that accepts \crandom, \srandom, and \premaster~ where $K$ is the
-    web server's public key.  Such an interface allows an adversary, after
+    web server's public key. Such an interface allows an adversary, after
     exploiting the unprivileged component, to generate any previously
     eavesdropped session's symmetric key and is, therefore, no different
     to having read access to the private key from the adversary's
-    perspective. This exploit only works if the cipher used is one that
-    does not offer forward secrecy, and it only affects the single session
-    which was eavesdropped. The attack is illustrated in
-    Figure~\ref{fig:attack2}.
+    perspective. This exploit only works if the cipher used does not offer
+    forward secrecy, and it only affects the single session which was
+    eavesdropped. The attack is illustrated in Figure~\ref{fig:attack2}.
 
     \begin{figure}[H] \centering
       \includegraphics[scale=0.15]{images/attack2.png}
@@ -129,16 +128,16 @@ the session key generation interface.
 While this design secures the private key against the previously
 described adversary, it is not, by itself, sufficient to secure the
 key against an adversary capable of exploiting the OS, or from a
-malicious cloud-provider with full access to the physical
-machine. Such adversaries may leak the key from the privileged
-component's memory space by exploiting the OS, or, in the case of the
-malicious cloud provider, simply read the key from disk\footnote{Even
-b  if the key is encrypted on disk, the decryption key must be present
-  in the plain-text binary file for the privileged component, or in
-  the process's memory, at runtime, in plain-text}.  A hardware
-component, called a trusted platform module, has been utilised in an
-effort to secure the private key against the adversaries described
-above.
+malicious cloud-provider with full access to the physical machine.
+Such adversaries may leak the key from the privileged component's
+memory space by exploiting the OS, or, in the case of the malicious
+cloud provider, simply read the key from disk\footnote{Even if the
+  long-term private key is encrypted on disk, the key for decrypting
+  it must be present in the binary file of the privileged component
+  (which is unencrypted), or in the process's memory at runtime in
+  plain-text}. A hardware component, called a trusted platform module,
+has been utilised in an effort to secure the private key against the
+adversaries described above.
 
 \end{document}
 

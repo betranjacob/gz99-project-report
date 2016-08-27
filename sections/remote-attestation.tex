@@ -71,7 +71,7 @@ The steps involved in the attestation process are as follows
   \item The challenger invokes the remote attestation mechanism to
     verify the identity and integrity of the remote enclave
   \item The non-trusted part of the web server receives the challenge,
-    passes it along to the trusted portion of the web server along with
+    passes it to the trusted portion of the web server along with
     the identity of the quoting enclave. The quoting enclave is a special
     enclave provided by Intel as part of the SGX platform to enable remote
     attestation by verifying the integrity of the underlying
@@ -89,18 +89,19 @@ The steps involved in the attestation process are as follows
     is verified by calculating the MAC across its contents.
   \item Assuming the REPORT is verified successfully, the quoting
     enclave generates a QUOTE structure that includes the REPORT structure
-    and a signature across the quote generated using a key known as the
-    EPID key. %add expansion of EPID The EPID key is a private key, unique
+    and a signature across the QUOTE, generated using a key known as the
+    EPID key. %add expansion of EPID
+    The EPID key is a private key, unique
     to the CPU that is part of the platform, and verifies the firmware of
     the processor and its SGX capabilities.
   \item The QUOTE is sent along with the ephemeral key to the
     challenger
   \item The challenger verifies the QUOTE structure by using an EPID
-    public certificate. If this is successful then the challenger is sure
+    public certificate. If this is successful, the challenger is sure
     that this QUOTE came from a valid SGX CPU and can trust its
     authenticity. The challenger can then check the contents of the REPORT
     contained within the QUOTE to verify the identity of the remote
-    enclave, and the integrity of the ephemeral key received along with
+    enclave and the integrity of the ephemeral key received along with
     the QUOTE. The ephemeral key, if proven to be valid, can now be used
     to communicate with the remote enclave in a secure
     manner.\footnote{Verifying the certificate itself is conducted through
