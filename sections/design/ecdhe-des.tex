@@ -71,102 +71,40 @@ paint'') and the corresponding public parameter (``paint mixture''). A
 hash function is applied across the public parameter, \srandom, and
 \crandom. This resulting message digest is signed using the long-term
 private key and is sent to the client, attached to the public
-parameter. The client verifies the signature received, computes their
-own private and public parameters, and sends the public parameter to
-the server. The client and server may now derive the
-\texttt{PremasterSecret}, \texttt{MasterSecret}, and the session key
-block. The handshake now proceeds in the same way as the ``RSA
-handshake''.
+parameter. The digital signature is computed to:
+%This can be phrased better, leaving it for now.
+\begin{itemize}
+  \item Prove the identity of the server to the client
+  \item Prove that the ECDHE public parameter received was indeed
+    computed by the server, preventing man in the middle attacks. 
+\end{itemize}
+The client verifies the signature received, computes their own private
+and public parameters, and sends the public parameter to the server.
+The client and server may now derive the \texttt{PremasterSecret},
+\texttt{MasterSecret}, and the session key block. The handshake then
+proceeds in the same way as the ``RSA handshake''.
 
 Clearly, from the discussion above, the long-term private key is used
-only for verification purposes in the ``ECDHE handshake''. 
-
-
-
-
-%-------------------------------------------------------------------
-
-We have partitioned the standard EC-DHE handshake implementation in
-Libressl and separated it into two components. One network facing
-component is deemed untrusted and is running as a part of nginx web
-server process. The other part resides inside the trusted SGX enclave
-and runs as an independent process. Both the components of the server
-communicate via a list of fine grained API’s
-wrapped over a named pipe IPC interface.
-
-The handshake process is carried out in two different phases, one to
-authenticate the server identity and other to establish the pre master
-secret. Figure~\ref{fig:ecdhe_handshake}) illustrates the messages
-exchanges between client and server’s trusted and untrusted compartments.
-
-A Https client can initiate the handshake by sending a “client hello”
-enclosed with a random number and a list of Elliptic curves it
-supports. Upon receiving this request, the nginx server initialises a
-new session in the enclave (TODO: Add info related to session
-cache/resumption.?) and configures the random number received from the
-client. The server random seed is generated inside the enclave. This
-will accord to additional security to the system by preventing an
-adversary from exploiting the untrusted component of the server and by
-influencing a session key generation based on random seeds of his
-choice. Enclave code maintains separate state for each session and
-will not accept server random as an input argument in any API
-interfaces. After obtaining the server random, it is sent to the
-client as part of the “Server Hello” message together with Server
-Public key certificate and a list of server preferred ciphers.
+only for verification purposes in the ``ECDHE handshake''. To secure
+the long-term secret, one may elect to provide an interface that
+receives \crandom, \srandom, and ECDHE public parameter, computes the
+message digest, and derives the signature. However, such an interface
+allows an adversary to \textit{influence} key generation, if they
+explot the untrusted component. Instead, we created an interface that
+accepts \crandom~ and returns the signature. The values of~\srandom~,
+the private parameter, and the public parameter are computed in the
+enclave. This provides the same freshness property described earlier
+in the context of the ``RSA handshake'', preventing the attacker from
+acquiring any useful information by exploiting the interface. The
+resulting interface is depicted in\ref{fig:ecdhe-handshake}
 
 \begin{figure}[H]
   \centering
   \includegraphics[scale=0.4]{EC-DHE-Handshake.pdf}
-  \caption{EC-DHE Handshake}
-  \label{fig:ecdhe_handshake}
+  \caption{``ECDHE Handshake'' with long-term private key in an SGX
+    enclave}
+  \label{fig:ecdhe-handshake}
 \end{figure}
-
-In the second phase of DH key exchange, the server will pick one of
-the client supported elliptic curves and send the curve id to the
-enclave. In the enclave we will generate both the public and private
-part of the EC-DH parameters based on the chosen curve id. Only the
-public part of the DH param is exposed to the nginx server process and
-the private part is kept secret within the enclave. This ensures
-additional security to the system by making the enclave completely
-abstain from accepting any server side seeds pertaining the shared
-secret generation.
-
-In order to prove, that the server has control of the private key and
-DH params, the Server has to produce a digital signature. In our
-design this is computed within the enclave. This will include Client
-Random, Server Random and Public DH Params signed using server private
-key. Server sends the ECDHE parameter (in clear) together with
-Signature to the client as part of the “Server Key Exchange” message.
-Client verifies this message using the server public key. If the
-verification is successful , the client generates its part of EC
-params and sends it to the server as part of “Client Key Exchange”
-message.
-
-
-After receiving the “Client Key Exchange” message, the server will
-attain all the required seeds to launch the shared key generation
-process. The keys are calculated in a three level process. First a
-Pre-Master key is computed from Client Public ECDHE param and Server
-ECDHE params(both Private and Public). The pre-master is then used as
-one of the seed along with Client Random and Server Random for the
-shared Master secret generation. Server will finally generate the
-symmetric session keys with the associated MACs and Initialisation
-vectors from the master secret. All the three steps of key
-generation processes is securely performed within the enclave.
-
-The client will then send a “Change Cipher Spec” message to indicate
-it will use the newly generated keys to hash and encrypt further
-messages. The handshake is complete from the client end after sending
-a “Finished” message containing a hash and MAC over all the previous
-handshake messages. Upon receiving client finished, the server will
-decrypt it using the session keys and validate the integrity of the
-handshake process. If the decryption or verification fails, the
-handshake is deemed to be failed and all the allocated session
-resources are freed. If successful, the server sends a “Change Cipher
-Spec” message indicating all messages send from now on will be
-encrypted using the shared session secret keys. Finally server
-computes its authenticated and encrypted “Finished” Message and sends
-it to the Client. This completes the full Handshake process.
 
 Observe, however, that \texttt{MasterSecret} is used to compute the
 session key block in the untrusted component; hence, an adversary,
