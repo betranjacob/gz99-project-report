@@ -96,7 +96,7 @@ the private parameter, and the public parameter are computed in the
 enclave. This provides the same freshness property described earlier
 in the context of the ``RSA handshake'', preventing the attacker from
 acquiring any useful information by exploiting the interface. The
-resulting interface is depicted in\ref{fig:ecdhe-handshake}
+resulting interface is depicted in Figure~\ref{fig:ecdhe-handshake}.
 
 \begin{figure}[H]
   \centering
@@ -106,11 +106,17 @@ resulting interface is depicted in\ref{fig:ecdhe-handshake}
   \label{fig:ecdhe-handshake}
 \end{figure}
 
-Observe, however, that \texttt{MasterSecret} is used to compute the
-session key block in the untrusted component; hence, an adversary,
-after exploiting the untrusted component, may leak the session key
-block (or leak \texttt{MasterSecret} and derive the session key block
-themselves).
+In both designs described above, the \texttt{MasterSecret} is returned
+to the untrusted component. As previously mentioned, the
+\texttt{MasterSecret} is used to compute the session key block; hence,
+an adversary, after exploiting the untrusted component, may leak the
+session key block, or leak \texttt{MasterSecret} and derive the
+session key block themselves. Consequentially, an attacker may choose
+to store session key blocks and eavesdropped sessions, and decrypt the
+stored sessions at his leisure. Yet, requests received from the client
+have to be decrypted for processing by unprivileged user programs. The
+following section describes an augmentation to the designs presented
+above, and explains the resulting security properties.
 
 \end{document}
 
