@@ -56,22 +56,22 @@ Forward secrecy is a feature in the key arrangement protocol, which
 guarantees that the symmetric encryption keys can not be compromised
 even if the long term key ( server private key ) is compromised. To
 achieve forward secrecy we employed elliptic curve
-diffie-hellman(EC-DHE) key exchange mechanism. Most of the web servers
-prefer elliptic curves variant over standard DHE as it yields better
-performance with lesser number of key bits[1]. DHE handshake uses
-private key only to authenticate the server and generates fresh set of
-symmetric keys for every new session. The keys are computed from
-random EC parameters, which is never reused and also deleted once the
-session has ended. Hence in ECDHE Private keys will not affect the
-confidentiality of the past conversations, albeit part of the initial
-handshake. The private key will never aid the attacker as it was only
-used to authenticate the server identity If in case the attacker
-managed to attain the shared secret, he can only decrypt messages from
-that particular session. No previous or future
-sessionswould be compromised.\\
+diffie-hellman (ECDHE) key exchange mechanism. Most of the web
+servers prefer elliptic curves variant over standard DHE as it yields
+better performance with lesser number of key bits[1]. DHE handshake
+uses private key only to authenticate the server and generates fresh
+set of symmetric keys for every new session. The keys are computed
+from random EC parameters, which are never reused and also deleted
+once the session has ended. Hence in ECDHE Private keys will not
+affect the confidentiality of the past conversations, albeit part of
+the initial handshake. The private key will never aid the attacker as
+it was only used to authenticate the server identity. If the attacker
+managed to attain the shared secret, she can only decrypt messages
+from that particular session. No previous or future sessions would be
+compromised.\\
 
 \noindent
-We have partitioned the standard EC-DHE handshake implementation in
+We have partitioned the standard ECDHE handshake implementation in
 Libressl and separated it into two components. One network facing
 component is deemed untrusted and is running as a part of nginx web
 server process. The other part resides inside the trusted SGX enclave
@@ -104,7 +104,7 @@ Public key certificate and a list of server preferred ciphers.
 \begin{figure}[H]
   \centering
   \includegraphics[scale=0.4]{EC-DHE-Handshake.pdf}
-  \caption{EC-DHE Handshake}
+  \caption{ECDHE Handshake}
   \label{fig:ecdhe_handshake}
 \end{figure}
 
