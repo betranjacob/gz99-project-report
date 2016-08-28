@@ -1,6 +1,5 @@
 % TODO: Add details about SSL session key management and book keeping in the
 % enclave
-% TODO: Mention returning of IV/nonce to the untrusted part
 %NGINX achieves state of the art performance in commodity hardware due to its
 %event-driven design which renders the web server capable of scaling to
 %hundends of thousands of concurrent connections. This architecture introduced
@@ -31,14 +30,6 @@
 
 \documentclass[../main.tex]{subfiles}
 
-%the implementation section needs to cover things like:
-%- We used openSGX, and therefore could not do XYZ and therefore had to do PQR
-%- We implemented that enclave as a second process, isolated from
-%NGINX/LibreSSL. What are the reasons behind that.
-%- We used named pipes as opposed to sockets/other IPC constructs, why did we do
-%that
-%- Details on the specific ciphers we support, and why we did not support other
-%ciphers
 \begin{document}
 
 In this section, we highlight the system's components along with their
@@ -47,9 +38,10 @@ the implementation considerations we made in realizing the final design. We
 built a prototype of our design which consists of the following parts: NGINX
 which is an event-driven web server achieving state-of-the-art performance,
 LibreSSL as an implementation of the SSL/TLS protocol, OpenSGX as an emulation
-environment of \Intel's SGX hardware and a narrow interface that utilizes UNIX
-named pipes to achieve IPC between the trusted and untrusted components. Figure
-\ref{fig:implementation-overview} depicts an overview of our prototype system.
+environment of \Intel's SGX hardware and SGXBridge, a narrow interface that
+utilizes UNIX named pipes to achieve IPC between the trusted and untrusted
+components. Figure \ref{fig:implementation-overview} depicts an overview of our
+prototype system.
 
 \begin{figure}[H]
   \centering
@@ -99,34 +91,87 @@ session's state within the enclave, though this ID is only available when the
 SSL handshake successfully completes. We modified NGINX to assign a randomly
 generated SGX specific ID to a new incoming connection which would be used by
 the enclave until an SSL handshake completes and the mapping key changes to the
-now established SSL session ID. We explain further in Section \ref{sec:opensgx}
-how this scheme enables our system to handle SSL session resumption.
+now established SSL session ID. We explain further in Section
+\ref{subsec:opensgx} how this scheme enables our system to handle SSL session
+resumption.
 
-\subsection{LibreSSL}.
-We have used LibreSSL library to implement the SSL/TLS protocols in the system. LibreSSL is a fork of OpenSSL aiming to provide more secure implementation. LibreSSL has undergone lot of code pruning and majority of the changes went into the library were related to the security vulnerabilities found in OpenSSL. 
+\subsection{LibreSSL}
+\label{subsec:libressl}
+We used the LibreSSL library as an implementation of the SSL/TLS protocol for
+our system. LibreSSL is a fork of OpenSSL aiming to provide a more secure
+implementation and it has undergone major code pruning. The majority of the
+changes compared to legacy OpenSSL are related to the security vulnerabilities
+found in the latter. In our prototype system, both NGINX and SGX runtime are
+linked to this library.
 
-The library is linked to both NGINX and Enclave processes. The LibreSSL variant attached to the NGINX process has been modified, such that  the implementation of all crypto operations are replaced with IPC read/write stubs to SGX-Bridge (refer next section).  This means,  all the secure operations of the handshake such as signing, verification, key generation etc will invoke an IPC request to the SGX counterpart. The SGX part of LibreSSL will  execute the operations and respond accordingly. We limited the SGX  code only with cryptographic operations to reduce the size of the Trusted Computing Base. Most of the code base for connection establishment/termination, state machine handling etc are still maintained outside the enclave. 
+The LibreSSL variant attached to the NGINX process has been modified, such that
+ the implementation of all crypto operations are replaced with IPC
+read()/write() stubs to SGXBridge (Section \ref{subsec:sgxbridge}). That is,
+all the secure operations of an SSL handshake such as signing, verification,
+key generation, encryption or decryption, will invoke an IPC request to the SGX
+counterpart. We made careful cuts in LibreSSL's code in order to minimize the
+code executed within the trusted component, thus effectively reducing the size
+of the TCB. Most of the code executing within the enclave includes
+cryptographic operations, except for a small volume of code responsible for
+SSL state bookkeeping reasons\footnote{As mentioned in Section
+\ref{sec:design}, upon exchange of the \texttt{ChangeCipherSpec} messages the
+enclave prepares the environment for handling crypto operations.}. The rest of
+LibreSSL's code that handles tasks such as establishment/termination
+and state manipulation, executes outside of the enclave and is assumed to
+contain vulnerabilities and be potentially owned.
 
-It is interesting to note that in the SGX part, we maintain a session cache based on a dynamic hash table ( SSL - LHASH routines ) and this distinguishes multiple ongoing sessions with their corresponding session ids. This empowers us not only to handle concurrent SSL handshakes but also deal with the SSL session resumption within the enclave. 
- (More details on cache implementation.. John? )
-
-
-During the first phase of development, we isolated all the private key related operations into the SGX component and returned only master key to the untrusted part of the server. To further enhance the security, we moved the symmetric session key generation as well to the SGX enclave.  This brings all the cryptographic operations within the secure compartment. It’s interesting to note that, after the key block generation we had to return IV/nonce and key-block length back to the untrusted part of the server. These parameters are necessary for changing cipher states in the untrusted LibreSSL part.  (more to expand by john ??)
-
-We used SSL AEAD (Authenticated Encryption with Associated Data ) interfaces for encrypting/decrypting the application data. The AEAD operation is designed to provide both data authenticity (integrity) and confidentiality in a single step. The  underlying mode of operation for the AEAD symmetric key crypto is GCM (Galois Counter Mode). GCM is highly efficient and yields better performance. Furthermore GCM achieves the higher throughput rates with reasonable hardware resources by processing instructions parallely in contrast to CBC mode which incurs significant pipeline stalls.
+Our system supports legacy RSA ciphers without forward secrecy support such as
+AES256-SHA and ECDHE with perfect forward secrecy support such as
+ECDHE-RSA-AES256-GCM-SHA384. We also support the AEAD (Authenticated Encryption
+with Associated Data) mode of operation for encrypting/decrypting the
+application data. The AEAD operation is designed to provide authenticity,
+integrity and confidentiality in a single step. The underlying mode of
+operation for the AEAD symmetric key crypto is GCM (Galois
+Counter Mode). GCM is highly efficient and yields state-of-the-art performance
+in commodity hardware by extensively utilizing an instruction or hardware
+pipeline, in contrast to CBC mode which incurs significant pipeline stalls.
 
 \subsection{OpenSGX}
-\label{sec:opensgx}
+\label{subsec:opensgx}
+As described in Section \ref{sec:opensgx}, OpenSGX is an emulation environment
+of \Intel SGX. We used its runtime to isolate the execution of the trusted
+component.
+%- We used openSGX, and therefore could not do XYZ and therefore had to do PQR
+%- We implemented that enclave as a second process, isolated from
+%NGINX/LibreSSL. What are the reasons behind that.
+%- Mention issues with the provisioning mechanishm
+%- Mention returning of IV/nonce to the untrusted part
 
-\textbf{SGX Bridge }.
+%It is interesting to note that in the SGX part, we maintain a session cache based on a dynamic hash table ( SSL - LHASH routines ) and this distinguishes multiple ongoing sessions with their corresponding session ids. This empowers us not only to handle concurrent SSL handshakes but also deal with the SSL session resumption within the enclave.
+% (More details on cache implementation.. John? )
 
-SGX Bridge is a Named Pipe IPC interface developed for data exchange between NGINX and SGX enclave process. It constitutes all the functions and data structures to read to and write from the enclave. 
+%During the first phase of development, we isolated all the private key related operations into the SGX component and returned only master key to the untrusted part of the server. To further enhance the security, we moved the symmetric session key generation as well to the SGX enclave.  This brings all the cryptographic operations within the secure compartment. It’s interesting to note that, after the key block generation we had to return IV/nonce and key-block length back to the untrusted part of the server. These parameters are necessary for changing cipher states in the untrusted LibreSSL part.  (more to expand by john ??)
+%
 
-There are two main APIs which are used to write one of the predefined command ( with its  associated data ) to the enclave, and read the result back to the server. 
-> sgxbridge\_pipe\_write\_cmd(SSL *s, int cmd, int len, unsigned char* data)
-> sgxbridge\_pipe\_read(int len, unsigned char* data);
 
-In the real SGX hardware, the enclave will exist within the same process virtual memory and can be accessed directly without aiding an IPC. We have decided to use these interfaces for our project as it was the IPC facility readily available within the open SGX library. 
+\subsection{SGXBridge}
+\label{subsec:sgxbridge}
+
+SGXBridge is a Named Pipe IPC interface developed for exchanging data between
+the trusted and untrusted process. It declares all the functions and data
+structures required by the two components data serialization. Each operation
+that goes through SGXBridge requires two memcpy() and two I/O operations on the
+named pipe\footnote{Note that, all I/O operations on a named pipe occur on
+kernel buffers whose size may vary from 4K to 64K depending on the kernel
+distribution and do not incur any actual disk I/O.}. It is worth mentioning
+that in the current version of OpenSGX (v1.0), the interface will read/write
+data to/from the stub (shared memory) in buffers of 512 bytes. This immediately
+cancels a pipe buffer larger than this size, thus we designed SGXBridge to
+follow this assumption. We mention though, this does not affect our performance
+results, as our evaluation environment executes outside of the OpenSGX's
+runtime. For simplicity, we designed SGXBridge read()/write() operations to
+follow a similar API to UNIX's I/O interface. For brevity reasons, we omit the
+implementation details and we refer the reader to the documented code.
+
+In real SGX hardware, the enclave will exist within a single process's virtual
+memory and can be accessed directly without the requirement of an IPC
+mechanism. We decided to use these interfaces for our project as it was an IPC
+facility already available within the OpenSGX library.
 
 \textbf{Compiler, Tools and Build system }.
 All the implementation parts were written in ‘C’ programming language. 
