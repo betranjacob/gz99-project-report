@@ -136,18 +136,26 @@ pipeline, in contrast to CBC mode which incurs significant pipeline stalls.
 As described in Section \ref{sec:opensgx}, OpenSGX is an emulation environment
 of \Intel SGX. We used its runtime to isolate the execution of the trusted
 component.
-%- We used openSGX, and therefore could not do XYZ and therefore had to do PQR
-%- We implemented that enclave as a second process, isolated from
-%NGINX/LibreSSL. What are the reasons behind that.
-%- Mention issues with the provisioning mechanishm
-%- Mention returning of IV/nonce to the untrusted part
+% TODO: We used openSGX, and therefore could not do XYZ and therefore had to do
+%   PQR >>>  "technically, we couldn't use it to do enclave + untrusted in one
+%   process, but that's more of us not using their trampoline/stub than
+%   anything", also
+%   "opensgx also made the perf eval more difficult because the simulation
+%   doesn't take into account things like number of cycles in an SGX
+%   instruction etc. and I guess that would refer to the perf eval section
+%
+% TODO: We implemented that enclave as a second process, isolated from
+%       NGINX/LibreSSL. What are the reasons behind that.
+% TODO: Mention issues with the provisioning mechanishm
+% TODO: Mention returning of IV/nonce to the untrusted part
+% TODO: OpenSGX, anything interesting that not mentioned in the previous
+% sections ???
 
 %It is interesting to note that in the SGX part, we maintain a session cache based on a dynamic hash table ( SSL - LHASH routines ) and this distinguishes multiple ongoing sessions with their corresponding session ids. This empowers us not only to handle concurrent SSL handshakes but also deal with the SSL session resumption within the enclave.
 % (More details on cache implementation.. John? )
 
 %During the first phase of development, we isolated all the private key related operations into the SGX component and returned only master key to the untrusted part of the server. To further enhance the security, we moved the symmetric session key generation as well to the SGX enclave.  This brings all the cryptographic operations within the secure compartment. It’s interesting to note that, after the key block generation we had to return IV/nonce and key-block length back to the untrusted part of the server. These parameters are necessary for changing cipher states in the untrusted LibreSSL part.  (more to expand by john ??)
 %
-
 
 \subsection{SGXBridge}
 \label{subsec:sgxbridge}
@@ -173,15 +181,19 @@ memory and can be accessed directly without the requirement of an IPC
 mechanism. We decided to use these interfaces for our project as it was an IPC
 facility already available within the OpenSGX library.
 
-\textbf{Compiler, Tools and Build system }.
-All the implementation parts were written in ‘C’ programming language. 
-At various phases of the developments, we had to use tools such as Valgrind for profiling, Callgrind for call stack analysis and gdb for debugging etc. We have developed and maintained a single bash script that automates the building and installation of  all the software packages used within the system. 
+\subsection{Compiler, Tools and Build system}.
+All the implementation parts were written in ‘C’ programming language. At
+various phases of the developments, we had to use tools such as Valgrind for
+profiling, Callgrind for call stack analysis and GDB for debugging. We
+developed and maintained a single bash script that automates the building and
+installation of all the software packages used within the system.
 
-A conditional compilation flag “OPENSSL\_WITH\_SGX” has been introduced in the LibreSSL engine to aid switching between native mode and sgx mode during the build process. It is also a reference point to identify sgx call gates introduced in LibreSSL as part of the project.
+For convenience, we add two compilation flags in LibreSSL: --enable-sgx and
+--enable-sgx-keyblock. The former enables the scenario where only the server's
+private key is protected, while the latter enables the scenario where both the
+server's private key and the SSL session keyblock are secured by the enclave.
 
-\textbf{ Busy Wait - ( Is it worth mentioning here or in test set up/perf eval ??? ) }.
-
-\textbf{ OpenSGX - (Anything interesting that not mentioned in the previous sections ??? ) }.
+% TODO: Busy Wait, is it worth mentioning here or in test set up/perf eval ???
 
 \end{document}
 
