@@ -133,28 +133,58 @@ pipeline, in contrast to CBC mode which incurs significant pipeline stalls.
 
 \subsection{OpenSGX}
 \label{subsec:opensgx}
-As described in Section \ref{sec:opensgx}, OpenSGX is an emulation environment
-of \Intel SGX. We used its runtime to isolate the execution of the trusted
-component.
-% TODO: We used openSGX, and therefore could not do XYZ and therefore had to do
-%   PQR >>>  "technically, we couldn't use it to do enclave + untrusted in one
-%   process, but that's more of us not using their trampoline/stub than
-%   anything", also
-%   "opensgx also made the perf eval more difficult because the simulation
-%   doesn't take into account things like number of cycles in an SGX
-%   instruction etc. and I guess that would refer to the perf eval section
-%
-% TODO: We implemented that enclave as a second process, isolated from
-%       NGINX/LibreSSL. What are the reasons behind that.
-% TODO: Mention issues with the provisioning mechanishm
-% TODO: Mention returning of IV/nonce to the untrusted part
-% TODO: OpenSGX, anything interesting that not mentioned in the previous
-% sections ???
+As described in Section \ref{sec:opensgx}, OpenSGX is an emulation
+environment of \Intel~SGX. We used its runtime to build a prototype of
+the designs description in Section~\ref{sec:design}. OpenSGX, however,
+does not provide a complete implementation of SGX. Consequentially,
+there were a few implementation decisions that were directly affected
+by this limitation.
 
-%It is interesting to note that in the SGX part, we maintain a session cache based on a dynamic hash table ( SSL - LHASH routines ) and this distinguishes multiple ongoing sessions with their corresponding session ids. This empowers us not only to handle concurrent SSL handshakes but also deal with the SSL session resumption within the enclave.
-% (More details on cache implementation.. John? )
+Specifically, OpenSGX does not support multiple threads within an
+enclave. This means that, to support multiple server worker processes,
+each worker would have to talk to a different enclave, otherwise, a
+worker process would be blocked waiting for another worker's request
+to complete (something that is not the case if a non-modified server
+is in-use). We discuss this issue further in
+Section~\ref{sec:futurework}.
 
-%During the first phase of development, we isolated all the private key related operations into the SGX component and returned only master key to the untrusted part of the server. To further enhance the security, we moved the symmetric session key generation as well to the SGX enclave.  This brings all the cryptographic operations within the secure compartment. It’s interesting to note that, after the key block generation we had to return IV/nonce and key-block length back to the untrusted part of the server. These parameters are necessary for changing cipher states in the untrusted LibreSSL part.  (more to expand by john ??)
+Moreover, OpenSGX does not provide a way to programmatically invoke an
+enclave from an untrusted component. To circumvent this limitation, we
+implemented our design as two processes, one for the untrusted
+component, and one for the \textit{enclave program}. The two processes
+communicate using a named pipe. We used blocking
+\texttt{read()}/\texttt{write()} operations to emulate the untrusted
+component switching contexts to execute the \textit{enclave program}.
+
+Finally, OpenSGX does not provide a way of accurately benchmarking
+CPU cycle counts because it does not account for the number of cycles
+each SGX instruction requires. This led to us estimating cycle counts
+for an SGX instruction for the performance evaluation(see
+Section~\ref{sec:perfeval}).
+
+
+% TODO: Mention issues with the provisioning mechanishm TODO: Mention
+% returning of IV/nonce to the untrusted part TODO: OpenSGX, anything
+% interesting that not mentioned in the previous sections ???
+
+% It is interesting to note that in the SGX part, we maintain a
+% session cache based on a dynamic hash table ( SSL - LHASH routines )
+% and this distinguishes multiple ongoing sessions with their
+% corresponding session ids. This empowers us not only to handle
+% concurrent SSL handshakes but also deal with the SSL session
+% resumption within the enclave. (More details on cache
+% implementation.. John? )
+
+% During the first phase of development, we isolated all the private
+% key related operations into the SGX component and returned only
+% master key to the untrusted part of the server. To further enhance
+% the security, we moved the symmetric session key generation as well
+% to the SGX enclave. This brings all the cryptographic operations
+% within the secure compartment. It’s interesting to note that, after
+% the key block generation we had to return IV/nonce and key-block
+% length back to the untrusted part of the server. These parameters
+% are necessary for changing cipher states in the untrusted LibreSSL
+% part. (more to expand by john ??)
 %
 
 \subsection{SGXBridge}
