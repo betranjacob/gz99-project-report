@@ -17,9 +17,23 @@ enclave), the underlying operating system, the hypervisor, all
 firmware and the BIOS are potentially compromised. Side-channel
 attacks that originate from other sources such as CPU cache timing
 information (L1, L2, L3), power consumption or other entropy source
-are considered as out of scope of this work. Finally, we assume an
+are considered as out of scope of this work. We also assume an
 attacker may act as man-in-the-middle to eavesdrop active sessions
-and, as further analysed in the Limitations section, launch a
-denial-of-service attack, though without compromising any secret
+and, as further analysed in the Section \ref{sec:limitations}, launch
+a denial-of-service attack, though without compromising any secret
 isolation guarantees of our design.
+
+As further described in Section \ref{sec:implementation}, our design
+uses a single enclave where state for all active SSL connections is
+stored in memory. If an adversary compromises the code running within
+the trusted component, security parameters such as session keys could
+be owned as well. Note that, this would not be of great interest as
+in this case the private key itself is exposed as well. Thus, it
+would be trivial for the attacker to generate all past and current
+connections' session keys for ciphers with no forward secrecy support
+and all current connection's session keys for ciphers with forward
+secrecy support. Nevertheless, we consider adapting any software
+fault isolation scheme within the trusted component as out of scope
+of this work and we assume all code running within the enclave is
+trusted.
 \end{document}
