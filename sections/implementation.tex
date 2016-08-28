@@ -31,11 +31,25 @@
 
 \documentclass[../main.tex]{subfiles}
 
+%the implementation section needs to cover things like:
+%- We used openSGX, and therefore could not do XYZ and therefore had to do PQR
+%- We implemented that enclave as a second process, isolated from
+%NGINX/LibreSSL. What are the reasons behind that.
+%- We used named pipes as opposed to sockets/other IPC constructs, why did we do
+%that
+%- Details on the specific ciphers we support, and why we did not support other
+%ciphers
 \begin{document}
-In this section,  we discuss the various parts of the system components that we have modified during the different phases of the project. The main implementation parts comprise modification to Nginx-Webserver’s SSL event handling layer , partitioning the LibreSSL engine, openSGX hardening , generate automated build setup and develop an IPC interface.  This  section also covers the improvements that we have made to  each component to achieve our final goal. The discussion on the work carried out  for testing the system, performance monitoring etc are  saved for a later chapters.
 
-The primary focus of the work was to separate all the sensitive data ( particularly  private keys ) from the network facing component of the Web server to a secure region. To achieve this, we had to separate out the key management part of the SSL layer from the Nginx server. 
-Figure 2 illustrates the system components and their corresponding partitions. 
+In this section, we highlight the system's components along with their
+necessary modifications, the rationale and challenges behind them and discuss
+the implementation considerations we made in realizing the final design. We
+built a prototype of our design which consists of the following parts: NGINX
+which is an event-driven web server achieving state-of-the-art performance,
+LibreSSL as an implementation of the SSL/TLS protocol, OpenSGX as an emulation
+environment of \Intel's SGX hardware and a narrow interface that utilizes UNIX
+named pipes to achieve IPC between the trusted and untrusted components. Figure
+\ref{fig:implementation-overview} depicts an overview of our prototype system.
 
 \begin{figure}[H]
   \centering
@@ -44,29 +58,69 @@ Figure 2 illustrates the system components and their corresponding partitions.
   \label{fig:implementation-overview}
 \end{figure}
 
-In the following section,  we briefly discuss about the different aspects of each of the system components, the difficulties faced during the implementation phase and the rationale leading to any particular approach that we have taken. 
+\subsection{NGINX}
 
-\textbf{NGINX Server }.
-NGINX is an open source web server that uses an asynchronous event-driven approach for handling requests from the clients. The rationale behind choosing Nginx over Apache is the performance improvement it offers with the event driven architecture. In Nginx, each worker process handles thousands of connections simultaneously as opposed to Apache’s process/thread per connection approach. Furthermore Nginx is lightweight, scalable and also gaining lot of market share compared to Apache.
+NGINX is an open source web server that uses an asynchronous event-driven
+approach for handling requests from the clients. The rationale behind choosing
+NGINX over Apache is the performance improvement it offers with the event
+driven architecture. In NGINX, each worker process handles thousands of
+connections simultaneously as opposed to Apache's thread per connection
+approach. Furthermore NGINX is lightweight, scalable and also gaining lot of
+market share compared to Apache.
 
-The Nginx server process can manage multiple clients simultaneously and the request events are handled individually as they arrive. The server is capable to offload  the tasks to multiple worker processes in case of heavy incoming traffic. However we have configured it to run as a single worker process. This arrangement is to make it compatible with the shortcoming of openSGX i.e. it can execute only one enclave at any instance. In short, it supports only a  single execution thread at a time. Hence regardless of how many worker processes are requesting, only one can be served by openSGX.  We have modified nginx’s default configuration file to facilitate this.  (  /etc/nginx/nginx.conf ).  
+The NGINX server process can manage multiple clients simultaneously and the
+request events are handled individually as they arrive. The server is capable
+to offload the tasks to multiple worker processes in case of heavy incoming
+traffic. This architecture introduced two implications in our design regarding
+handling concurrent SSL handshakes and therefore concurrent connections.
 
-\textbf{SSL Engine }.
+First, OpenSGX comes without multi-threading support, fact that immediately
+renders the enclave incapable of handling concurrent requests. We initially
+considered an alternative design to provide multi-core support, in which an
+enclave is launched for each worker and each enclave communicates with a shared
+enclave to store/retrieve state specific to an active SSL handshake/session.
+Though such a design would enable our system to support multiple NGINX workers,
+it does not present a realistic approach for a production system with real SGX
+hardware where multi-threading is natively supported. Thus we limit our current
+model to a single core, and in the lack of possesion of real SGX hardware we
+leave multi-core support as future work.
+
+Second, although not directly connected to NGINX's event-driven architecture
+but an implementation detail we would have to deal with regardless of our
+choice of web server, we discuss a simple scheme we used for enabling the
+enclave to handle multiple connections at a time \footnote{In order to maximize
+performance, a web server will try to switch between ongoing connections while
+it waits for network I/O, which immediately poses the requirement for an
+enclave to be aware of multiple SSL sessions. Regarding our design, not dealing
+with concurrent connections, would mean that the enclave would only be able to
+handle a single connection at a time which would have severe perfomance impact
+to our design.}. Ultimately, the SSL session ID is used to map against a
+session's state within the enclave, though this ID is only available when the
+SSL handshake successfully completes. We modified NGINX to assign a randomly
+generated SGX specific ID to a new incoming connection which would be used by
+the enclave until an SSL handshake completes and the mapping key changes to the
+now established SSL session ID. We explain further in Section \ref{sec:opensgx}
+how this scheme enables our system to handle SSL session resumption.
+
+\subsection{LibreSSL}.
 We have used LibreSSL library to implement the SSL/TLS protocols in the system. LibreSSL is a fork of OpenSSL aiming to provide more secure implementation. LibreSSL has undergone lot of code pruning and majority of the changes went into the library were related to the security vulnerabilities found in OpenSSL. 
 
-The library is linked to both Nginx and Enclave processes. The Libressl variant attached to the Nginx process has been modified, such that  the implementation of all crypto operations are replaced with IPC read/write stubs to SGX-Bridge (refer next section).  This means,  all the secure operations of the handshake such as signing, verification, key generation etc will invoke an IPC request to the SGX counterpart. The SGX part of LibreSSL will  execute the operations and respond accordingly. We limited the SGX  code only with cryptographic operations to reduce the size of the Trusted Computing Base. Most of the code base for connection establishment/termination, state machine handling etc are still maintained outside the enclave. 
+The library is linked to both NGINX and Enclave processes. The LibreSSL variant attached to the NGINX process has been modified, such that  the implementation of all crypto operations are replaced with IPC read/write stubs to SGX-Bridge (refer next section).  This means,  all the secure operations of the handshake such as signing, verification, key generation etc will invoke an IPC request to the SGX counterpart. The SGX part of LibreSSL will  execute the operations and respond accordingly. We limited the SGX  code only with cryptographic operations to reduce the size of the Trusted Computing Base. Most of the code base for connection establishment/termination, state machine handling etc are still maintained outside the enclave. 
 
 It is interesting to note that in the SGX part, we maintain a session cache based on a dynamic hash table ( SSL - LHASH routines ) and this distinguishes multiple ongoing sessions with their corresponding session ids. This empowers us not only to handle concurrent SSL handshakes but also deal with the SSL session resumption within the enclave. 
  (More details on cache implementation.. John? )
 
 
-During the first phase of development, we isolated all the private key related operations into the SGX component and returned only master key to the untrusted part of the server. To further enhance the security, we moved the symmetric session key generation as well to the SGX enclave.  This brings all the cryptographic operations within the secure compartment. It’s interesting to note that, after the key block generation we had to return IV/nonce and key-block length back to the untrusted part of the server. These parameters are necessary for changing cipher states in the untrusted Libressl part.  (more to expand by john ??)
+During the first phase of development, we isolated all the private key related operations into the SGX component and returned only master key to the untrusted part of the server. To further enhance the security, we moved the symmetric session key generation as well to the SGX enclave.  This brings all the cryptographic operations within the secure compartment. It’s interesting to note that, after the key block generation we had to return IV/nonce and key-block length back to the untrusted part of the server. These parameters are necessary for changing cipher states in the untrusted LibreSSL part.  (more to expand by john ??)
 
 We used SSL AEAD (Authenticated Encryption with Associated Data ) interfaces for encrypting/decrypting the application data. The AEAD operation is designed to provide both data authenticity (integrity) and confidentiality in a single step. The  underlying mode of operation for the AEAD symmetric key crypto is GCM (Galois Counter Mode). GCM is highly efficient and yields better performance. Furthermore GCM achieves the higher throughput rates with reasonable hardware resources by processing instructions parallely in contrast to CBC mode which incurs significant pipeline stalls.
 
+\subsection{OpenSGX}
+\label{sec:opensgx}
+
 \textbf{SGX Bridge }.
 
-SGX Bridge is a Named Pipe IPC interface developed for data exchange between Nginx and SGX enclave process. It constitutes all the functions and data structures to read to and write from the enclave. 
+SGX Bridge is a Named Pipe IPC interface developed for data exchange between NGINX and SGX enclave process. It constitutes all the functions and data structures to read to and write from the enclave. 
 
 There are two main APIs which are used to write one of the predefined command ( with its  associated data ) to the enclave, and read the result back to the server. 
 > sgxbridge\_pipe\_write\_cmd(SSL *s, int cmd, int len, unsigned char* data)
@@ -78,7 +132,7 @@ In the real SGX hardware, the enclave will exist within the same process virtual
 All the implementation parts were written in ‘C’ programming language. 
 At various phases of the developments, we had to use tools such as Valgrind for profiling, Callgrind for call stack analysis and gdb for debugging etc. We have developed and maintained a single bash script that automates the building and installation of  all the software packages used within the system. 
 
-A conditional compilation flag “OPENSSL\_WITH\_SGX” has been introduced in the LibreSSL engine to aid switching between native mode and sgx mode during the build process. It is also a reference point to identify sgx call gates introduced in Libressl as part of the project.
+A conditional compilation flag “OPENSSL\_WITH\_SGX” has been introduced in the LibreSSL engine to aid switching between native mode and sgx mode during the build process. It is also a reference point to identify sgx call gates introduced in LibreSSL as part of the project.
 
 \textbf{ Busy Wait - ( Is it worth mentioning here or in test set up/perf eval ??? ) }.
 
