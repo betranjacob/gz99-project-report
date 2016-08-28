@@ -8,11 +8,11 @@ an adversary, after exploiting the untrusted component, may leak the
 session key block, or leak \texttt{MasterSecret} and derive the
 session key block themselves. Consequentially, an attacker may choose
 to store session key blocks and eavesdropped sessions, and decrypt the
-stored sessions at his leisure. Yet, requests received from the
-client have to be in plain-text for processing by unprivileged user
-programs. This section describes an augmentation to the designs
-presented above, which attempts to resolve the highlighted issue, and
-explains the resulting security properties.
+stored sessions at his leisure. Yet, requests received from the client
+have to be in plain-text for processing by unprivileged user programs.
+This section describes an augmentation to the designs presented above,
+which attempts to resolve the highlighted issue, and explains the
+resulting security properties.
 
 A possible solution to the outlined problem would be to implement the
 user programs that require plain-text as part of the \textit{enclave
@@ -107,6 +107,31 @@ keys never being exposed to the untrusted component
   function. We included this invocation in the Figure for
   completeness, however, it is an implementation detail.}.
 
+While this design exposes a decrypt/encrypt interface, providing an
+\textit{oracle} for the session keys, it remains more secure than a
+design where the session keys remain in the untrusted componenet. Even
+though an adversary may exploit the untrusted componenet and
+encrypt/decrypt packets of their choosing, there are a few
+limitations:
+\begin{itemize}
+  \item Packets that are encrypted or decrypted can only pertain to
+    a currently ongoing session. This is because, after a session
+    terminates, the session keys are removed from the enclave, and, thus,
+    invoking the interface with packets from previously eavesdropped
+    sessions does not return any useful results (this relies on the
+    freshness property, discussed earlier, ensuring that new session keys
+    are generated for each session in a manner that cannot be influenced
+    by the adversary).
+  \item Under this scheme, an adversary cannot leak the session keys
+    by exploiting the untrusted component. Consequintially, to acquire
+    any useful data through encrypting/decrypting packets, the adversary
+    must remain connected to the server machine, actively exploiting it.
+    This is much more difficult to concealthan the attack described
+    at the beginning of this subsection where the attacker leaks the session
+    keys and decrypts/encrypts packets on another machine.
+\end{itemize}
+These security benefits, nevertheless, come at a performance overhead that we discuss
+in Section~\ref{sec:perfeval}.
 
 \end{document}
 
