@@ -36,14 +36,11 @@ Figure~\ref{fig:keys-inside} illustrates this design.
 
 \begin{figure}[H]
   \centering
-  
+  \includegraphics[scale=0.4]{images/RSA-SGX-Handshake-SessionKeys.pdf}
   \caption{SSL/TLS handshake with session keys in the enclave}
   \label{fig:keys-inside}
 \end{figure}
 
-% TODO: EXPLAIN DESIGN
-
-% TODO: EXPLAIN DESIGN'S PROPERTIES
 As before, the untrusted component obtains \srandom~from the
 \textit{enclave program}. The untrusted component then forwards
 packets received to allow for the generation of
@@ -130,8 +127,9 @@ limitations:
     at the beginning of this subsection where the attacker leaks the session
     keys and decrypts/encrypts packets on another machine.
 \end{itemize}
-These security benefits, nevertheless, come at a performance overhead that we discuss
-in Section~\ref{sec:perfeval}.
+These security benefits, nevertheless, come at a performance overhead
+that we discuss in Section~\ref{sec:perfeval}.
+
 
 \end{document}
 
