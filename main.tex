@@ -12,7 +12,8 @@
 \usepackage{csquotes}
 \usepackage[font=scriptsize]{caption}
 \usepackage[hang]{footmisc} 
-
+\usepackage{authblk}
+\usepackage{hyperref}
 
 %%%%%%%%%%%%%%%%%SETTING FONT TO MINION PRO. COMMENT THESE LINES IF YOU DON'T
 %%%%%%%%%%%%%%%%%%HAVE THE FONT!!!
@@ -33,18 +34,28 @@
 \title{A Practical TLS Enabled Web Server Without Trusting The Operating
 System}
 
-\author{
-  A. Awad \and
-  C. Chaiphet \and
-  I. Gakos \and
-  W. Grajkowski \and
-  B. Jacob
-}
+\author{A. Awad}
+\author{C. Chaiphet}
+\author{I. Gakos}
+\author{W. Grajkowski}
+\author{B. Jacob \\\small Supervisor: Dr. Brad Karp}
+\date{September 5, 2016}
+\affil{MSc in Networked Computer Systems \\University College London}
+
 \begin{document}
 
-\maketitle
 \pagenumbering{gobble}
-\newpage
+
+\begin{titlepage}
+  \maketitle
+  \vfill \tiny
+  \noindent
+  This report is submitted as part of the requirement for the MSc
+  Degree in Networked Computer Systems at University College
+  London. It is substantially the result of our own work except where
+  explicitly indicated in the text.
+\end{titlepage}
+
 
 \begin{abstract}
   \subfile{sections/abstract.tex}
