@@ -5,13 +5,13 @@
 At the time the Wedge paper was published, ciphers that offer forward
 secrecy were not common place; hence, the authors of Wedge deemed it
 unnecessary to provide support for this category of ciphers. However,
-forward secrecy has gained popularity since, with
-[STATISTIC][CITATION]. We have, therefore, designed our system to
-accomodate ciphers within this category. As of TLSv1.2 ciphers that
-offer forward secrecy employ some variant of Diffie-Hellman (DH) Key
-Exchange to establish the \texttt{PremasterSecret}. Before discussing
-the SSL/TLS handsake for these ciphers, we provide a brief
-explaination of DH Key Exchange.
+forward secrecy has gained popularity since with around 86.5\% of
+servers supporting some forward secrecy ciphers~\cite{fs_stats}. We have, therefore,
+designed our system to accomodate ciphers within this category. As of
+TLSv1.2, ciphers that offer forward secrecy employ some variant of
+Diffie-Hellman (DH) Key Exchange to establish the
+\texttt{PremasterSecret}. Before discussing the SSL/TLS handsake for
+these ciphers, we provide a brief explaination of DH Key Exchange.
 
 
 DH Key Exchange is an asymmetric cryptographic algorithm used to
@@ -35,7 +35,7 @@ computationally difficult to seperate the ``paint mixtures''.
 \begin{figure}[H]
   \centering
   \includegraphics[scale=0.4]{images/paint_color.pdf}
-  \caption{DH Key Exchange paint analogy}
+  \caption{DH Key Exchange paint analogy \cite{paints}}
   \label{fig:paint}
 \end{figure}
 Moreover, by creating new ``secret paints'' for each session and

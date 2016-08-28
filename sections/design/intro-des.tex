@@ -26,10 +26,6 @@ long-term private key. The remainder of this section details the
 interface design for: (1) Ciphers that do not offer forward secrecy
 (2) Ciphers that offer forward secrecy.
 
-% FIXME: I believe here we should introduce the split on the designs
-% for private and session key isolation, there is more content at the
-% end of this section on this which should be moved here as well.
-
 %None of our designs modify the SSL handshake itself, though we carefully
 %compartmentalize the protocol's execution in trusted and untrusted
 %components. The interface for both kind of ciphers is split into two
