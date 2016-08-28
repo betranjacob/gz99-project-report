@@ -96,8 +96,8 @@ We run our tests on a Amazon EC2 m4.large instances, with the server and
 client located on different virtual machines within the same data center.
 These machines have 2 virtual CPUs with 8 GiB RAM and ``moderate'' network
 performance, which according to [REFERENCE - http://stackoverflow.com/a/35806587  or  http://stackoverflow.com/questions/5257553/coloring-white-space-in-git-diffs-output] corresponds to 450 (2011) or 790 (2015) Mbit/s. Our
-own tests using iperf between the client and server machines reported XXX. The
-underlying hardware is Intel Xeon E5-2676 v3 clocked @2.4 GHz
+own tests using iperf between the client and server machines reported
+465 Mbit/s. The underlying hardware is Intel Xeon E5-2676 v3 clocked @2.4 GHz
 \cite{aws_instances}. We use Ubuntu 14.04 with 4.4.0-34-generic kernel for our
 OS and a custom script using \textit{httperf} to generate the load and measure
 the performance.
