@@ -2,24 +2,25 @@
  
 \begin{document}
 
-We developed our prototype using OpenSGX which, as detailed in 
-Section~\ref{sec:background}, is an emulator for the SGX instruction set and
-relies on QEMU to execute the trusted code. Consequentially, we cannot measure
-end to end performance by simply executing our prototype and tabulating how
-many requests per second are completed, due to the overhead of emulation.
-Instead, we resorted to modeling the performance of the prototype in a manner
-similar to~\cite{Baumann14}.
+We developed our prototype using OpenSGX which, as detailed in
+Section~\ref{sec:background}, is an emulator for the SGX instruction
+set and relies on QEMU to execute the trusted code. Consequentially,
+we cannot measure end to end performance by simply executing our
+prototype and tabulating how many requests per second are completed,
+due to the overhead of emulation. Instead, we resorted to modeling the
+performance of the prototype in a manner similar to~\cite{Baumann14}.
 
-The remainder of this section describes the model we implemented to carry out
-our performance measurements and details the results we acquired from running
-our tests.
+The remainder of this section describes the model we implemented to
+carry out our performance measurements and details the results we
+acquired from running our tests.
 
 \subsection{Performance Model}
 
-To model the performance of our prototype we implemented a second version of
-our enclave program that has no dependencies on OpenSGX and replaces certain
-SGX instructions with busy waits, simulating the overhead in executing them.
-In dong so, we make the same assumptions as~\cite{Baumann14} namely:
+To model the performance of our prototype we implemented a second
+version of our enclave program that has no dependencies on OpenSGX and
+replaces certain SGX instructions with busy waits, simulating the
+overhead in executing them. In dong so, we make the same assumptions
+as~\cite{Baumann14} namely:
 \begin{enumerate}
   \item We assume that the CPU used in testing performs the same as an
     SGX-enabled CPU for all non-SGX instructions
@@ -27,137 +28,161 @@ In dong so, we make the same assumptions as~\cite{Baumann14} namely:
     entirety of the trusted component and any data structures created
     after program start-up
 \end{enumerate}
-Leaving the overhead of SGX instructions, memory encryption, and asynchronous
-exits unaccounted for.
+Leaving the overhead of SGX instructions, memory encryption, and
+asynchronous exits unaccounted for.
 
-SGX instructions that bootstrap the enclave and verify its integrity are only
-executed once at startup, and therefore have no effect on runtime performance.
-As a result, we only simulate the overhead of EENTER, ERESUME and EEXIT.
-Simulating the slow down in memory accesses due to the need for decrypting RAM
-contents before being able to access them in processors cache, was carried out
-by reducing the memory's clock in~\cite{Baumann14}. Such a proxy works for
-their system because it executes within an enclave in its entirety. Clearly,
-such an approach would underestimate the performance of our system because
-only the trusted component incurs the overhead of memory encryption. Instead
-we captured the number of Last Layer Cache (LLC) misses as a relevant measure.
+SGX instructions that bootstrap the enclave and verify its integrity
+are only executed once at startup, and therefore have no effect on
+runtime performance. As a result, we only simulate the overhead of
+EENTER, ERESUME and EEXIT. Simulating the slow down in memory accesses
+due to the need for decrypting RAM contents before being able to
+access them in processors cache, was carried out by reducing the
+memory's clock in~\cite{Baumann14}. Such a proxy works for their
+system because it executes within an enclave in its entirety. Clearly,
+such an approach would underestimate the performance of our system
+because only the trusted component incurs the overhead of memory
+encryption. Instead we captured the number of Last Layer Cache (LLC)
+misses as a relevant measure.
 
-Finally, the performance of `malloc` is slower for our test program than what
-it would be within real SGX because we have to context switch to the OS to
-allocate memory.
+Finally, the performance of `malloc` is slower for our test program
+than what it would be within real SGX because we have to context
+switch to the OS to allocate memory.
 
 \subsection{Hypothesis}
-We expect to see the most performance slowdown due to expensive context
-switches between untrusted and enclave programs. This is due to the required
-TLB flush (??) accompanying EENTER and EEXIT instructions.
+We expect to see the most performance slowdown due to expensive
+context switches between untrusted and enclave programs. This is due
+to the required TLB flush (??) accompanying EENTER and EEXIT
+instructions.
 
-For the case when master secret and session keys are available to the OS we
-don't expect significant slowdown as it only adds 4 context switches during
-the handshake that can be amortised over multiple connections.
+For the case when master secret and session keys are available to the
+OS we don't expect significant slowdown as it only adds 4 context
+switches during the handshake that can be amortised over multiple
+connections.
 
-In contrast, the second case, providing stronger security guarantees, should
-perform considerably poorer due to extra XXX context switches during the
-handshake. Moreover this scenario incurs additional slowdown due to the extra
-4 context switches for every request made to the server.
+In contrast, the second case, providing stronger security guarantees,
+should perform considerably poorer due to extra XXX context switches
+during the handshake. Moreover this scenario incurs additional
+slowdown due to the extra 4 context switches for every request made to
+the server.
 
-We expect size of the static content served not to influence performance of
-the session keys outside version and degrade linearily (???) in case of
-session keys inside the enclave.
+We expect size of the static content served not to influence
+performance of the session keys outside version and degrade linearily
+(???) in case of session keys inside the enclave.
 
-The performance of ECDHE handshake should be worse than that of RSA handshake
-due to the need for deriving fresh asymetric key for each new session,
-however, the drop in performance of our system compared to vanilla nginx
-should be roughly constant regardless of the type of the key exchange
-mechanism.
+The performance of ECDHE handshake should be worse than that of RSA
+handshake due to the need for deriving fresh asymetric key for each
+new session, however, the drop in performance of our system compared
+to vanilla nginx should be roughly constant regardless of the type of
+the key exchange mechanism.
 
 \subsection{Microbenchmarks}
-In order to gain better insight about our implementation we measured its
-following aspects.
+In order to gain better insight about our implementation we measured
+its following aspects.
 
-OpenSGX can report the performance measurement of an enclave program which
-includes the number of kernel switches and number and type of enclave
-instructions executed. We report the relevant number of instructions per
-request.
+OpenSGX can report the performance measurement of an enclave program
+which includes the number of kernel switches and number and type of
+enclave instructions executed. We report the relevant number of
+instructions per request.
 
 To be able to reason about performance hit due to memory decryption we
-captured the number of LLC misses using Intel VTune Amplifier. We tried to
-verify its reported values using perf tool, but chose the former because it
-had all CPU specific counters predefined in the program and was available
-under student license. perf also lacked thourough documentation and would
-require consulting Intel Reference Manual for the counter values for our CPU.
+captured the number of LLC misses using Intel VTune Amplifier. We
+tried to verify its reported values using perf tool, but chose the
+former because it had all CPU specific counters predefined in the
+program and was available under student license. perf also lacked
+thourough documentation and would require consulting Intel Reference
+Manual for the counter values for our CPU.
  
-To measure the size of the TCB of the enclave program we generated its static
-call graph (using Egypt) to determine all the libressl entry point functions
-and how they follow internally. We then manually copied the source of all
-functions used and counted the resulting SLOC (with cloc). We also report the
-number of changes we have made to the libressl and nginx source code.
+To measure the size of the TCB of the enclave program we generated its
+static call graph (using Egypt) to determine all the libressl entry
+point functions and how they follow internally. We then manually
+copied the source of all functions used and counted the resulting SLOC
+(with cloc). We also report the number of changes we have made to the
+libressl and nginx source code.
 
 \subsection{Tests setup}
-We run our tests on a Amazon EC2 m4.large instances, with the server and
-client located on different virtual machines within the same data center.
-These machines have 2 virtual CPUs with 8 GiB RAM and ``moderate'' network
-performance, which according to [REFERENCE - http://stackoverflow.com/a/35806587  or  http://stackoverflow.com/questions/5257553/coloring-white-space-in-git-diffs-output] corresponds to 450 (2011) or 790 (2015) Mbit/s. Our
-own tests using iperf between the client and server machines reported
-465 Mbit/s. The underlying hardware is Intel Xeon E5-2676 v3 clocked @2.4 GHz
-\cite{aws_instances}. We use Ubuntu 14.04 with 4.4.0-34-generic kernel for our
-OS and a custom script using \textit{httperf} to generate the load and measure
-the performance.
+We run our tests on a Amazon EC2 m4.large instances, with the server
+and client located on different virtual machines within the same data
+center. These machines have 2 virtual CPUs with 8 GiB RAM and
+``moderate'' network performance, which according to [REFERENCE -
+http://stackoverflow.com/a/35806587 or
+http://stackoverflow.com/questions/5257553/coloring-white-space-in-git-diffs-output]
+corresponds to 450 (2011) or 790 (2015) Mbit/s. Our own tests using
+iperf between the client and server machines reported 465 Mbit/s. The
+underlying hardware is Intel Xeon E5-2676 v3 clocked @2.4 GHz
+\cite{aws_instances}. We use Ubuntu 14.04 with 4.4.0-34-generic kernel
+for our OS and a custom script using \textit{httperf} to generate the
+load and measure the performance.
 
-We have measured the end to end performance for ciphersuites not offering
-forward secrecy based on RSA handshake as well as suites providing forward
-secrecy based on ECDHE:
+We have measured the end to end performance for ciphersuites not
+offering forward secrecy based on RSA handshake as well as suites
+providing forward secrecy based on ECDHE:
 \begin{enumerate}
   \item (RSA-)AES256-GCM-SHA384
   \item ECDHE-RSA-AES256-GCM-SHA384
 \end{enumerate}
 
-We use the AES as it can benefit from hardware acceleration using AESNI
-instructions present in modern devices.
+We use the AES as it can benefit from hardware acceleration using
+AESNI instructions present in modern devices.
 
-We tested two versions of our program corresponding to the two threat models
-discussed in Section~\ref{sec:design}:
+We tested two versions of our program corresponding to the two threat
+models discussed in Section~\ref{sec:design}:
 \begin{enumerate}
   \item session keys available to the OS
   \item session keys hidden from the OS
 \end{enumerate}
 
-We have tested each of the above setups with a range of static document sizes
-(1 KB - 10 MB) and a range of values for the busywait instruction delays (10,
-30, 50 K) - a subset of values used by~\cite{Baumann14})
+We have tested each of the above setups with a range of static
+document sizes (1 KB - 10 MB) and a range of values for the busywait
+instruction delays (10, 30, 50 K) - a subset of values used
+by~\cite{Baumann14})
 
 We performed the tests on the busywait instrumented enclave program
-communicating with with sgx instrumented libressl 2.4.1 statically linked to
-nginx 1.11.1. We ran the same set of tests with an unmodified version of
-nginx+libressl for baseline comparison.
+communicating with with sgx instrumented libressl 2.4.1 statically
+linked to nginx 1.11.1. We ran the same set of tests with an
+unmodified version of nginx+libressl for baseline comparison.
 
 We also run the tests inside OpenSGX to learn which and how many SGX
-instructions were executed and to be able to verify our performance results.
+instructions were executed and to be able to verify our performance
+results.
 
-As we were unable to obtain data from real life scenarios, we also varied the
-ratio betewen new and reused (cached) sessions between 0-30 \% as well as
-measuring the performance without session caching (100 \% new connections) to
-capture the worst case scenario.
+As we were unable to obtain data from real life scenarios, we also
+varied the ratio betewen new and reused (cached) sessions between 0-30
+\% as well as measuring the performance without session caching (100
+\% new connections) to capture the worst case scenario.
 
 \subsection{Results}
 
-Table XXX presents the number of modifications to the source code.
-The enclave program TCB is XXX of sloc.
+Table XXX presents the number of modifications to the source code. The
+enclave program TCB is XXX of sloc.
 
-We used the formula from [page 30 in \url{https://software.intel.com/sites/landingpage/legacy/pdfs/Using_Intel_VTune_Amplifier_XE_on_2nd_Gen_Intel_Core_Family.pdf}]
-to convert the number of LLC misses to the percentage of cycles the enclave
-program spent on waiting for cache misses. We multiply this by the memory
-overhead reported in [CITATION NEEDED] (5-14 \%)
+We used the formula from [page 30 in
+\url{https://software.intel.com/sites/landingpage/legacy/pdfs/Using_Intel_VTune_Amplifier_XE_on_2nd_Gen_Intel_Core_Family.pdf}]
+to convert the number of LLC misses to the percentage of cycles the
+enclave program spent on waiting for cache misses. We multiply this by
+the memory overhead reported in [CITATION NEEDED] (5-14 \%)
 
-Additionally we report that this not a performance bottleneck as it is under
-0.2\% which Intel considers `normal case`.
+Additionally we report that this not a performance bottleneck as it is
+under 0.2\% which Intel considers `normal case`.
 
+\begin{table}[H]
+  \resizebox{\linewidth}{!}{
+    \pgfplotstabletypeset[assign column
+    name/.style={/pgfplots/table/column name={\textbf{#1}}},col
+    sep=comma, header=has colnames,columns/test/.style={postproc cell
+      content/.append style={ /pgfplots/table/@cell
+        content/.add={$\bf}{$},
+      }}]{results/sgx_detail_instruction_count.csv} }
+\end{table}
 
-
-% From wedge:
-%  - maximum throughput that the SGX-partitioned version of nginx and the
-%  original version of nginx can sustain (req/s)
-%  - all sessions cached vs non cached
-%  - 
+% From wedge: - maximum throughput that the SGX-partitioned version of
+% nginx and the original version of nginx can sustain (req/s) - all
+% sessions cached vs non cached -
 
 \subsection{Discussion}
 
 \end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main"
+%%% End:

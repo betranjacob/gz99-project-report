@@ -1,13 +1,13 @@
- %-*- program: xelatex -*-
 \documentclass{article}
 
+\usepackage{pgfplotstable}
+\usepackage{booktabs}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{subfiles}
 \usepackage{blindtext}
-\usepackage{lsc}
 \usepackage[sorting=none, backend=biber, urldate=long]{biblatex}
 \usepackage{csquotes}
 \usepackage[font=scriptsize]{caption}
@@ -41,6 +41,14 @@ System}
 \author{B. Jacob \\\small Supervisor: Dr. Brad Karp}
 \date{September 5, 2016}
 \affil{MSc in Networked Computer Systems \\University College London}
+
+\pgfplotstableset{
+  col sep = comma,
+  every head row/.style={before row=\toprule,after row=\midrule},
+  every last row/.style={after row=\bottomrule},
+  fixed,precision=2,
+  string type,
+}
 
 \begin{document}
 
