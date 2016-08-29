@@ -121,9 +121,6 @@ providing forward secrecy based on ECDHE:
   \item ECDHE-RSA-AES256-GCM-SHA384
 \end{enumerate}
 
-We use the AES as it can benefit from hardware acceleration using
-AESNI instructions present in modern devices.
-
 We tested two versions of our program corresponding to the two threat
 models discussed in Section~\ref{sec:design}:
 \begin{enumerate}
@@ -165,13 +162,6 @@ ran the tests for file sizes varying from 1 to 32 MB (1000 requests
 each) using Apache-bench client on a personal laptop with the
 following configuration - CPU: Intel Core i5-2520M @ 2.50GHz, RAM:
 DDR3 1600MHz 16GB
-
-Results (in table?)
-
-
-Keys outside SGX - Cache Misses : 1800126 CPU Cycles : 263912395868
-
-Keys inside SGX - Cache Misses : 7500525 CPU Cycles : 1141101711650
 
 \begin{table}[H]
   \resizebox{\linewidth}{!}{ \pgfplotstabletypeset[assign column
