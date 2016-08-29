@@ -1,5 +1,6 @@
 \documentclass{article}
 
+\usepackage{pgfplots}
 \usepackage{pgfplotstable}
 \usepackage{booktabs}
 \usepackage[T1]{fontenc}
@@ -27,6 +28,8 @@
 \newcommand{\srandom}{\texttt{ServerRandom}}
 \newcommand{\premaster}{\texttt{\{PremasterSecret\}}$_K$}
 
+
+
 \bibliography{references.bib}
 
 \graphicspath{{images/}{../images/}}
@@ -49,6 +52,31 @@ System}
   fixed,precision=2,
   string type,
 }
+
+\pgfplotstableread{results/cycles_vs_rqs_sec.csv}\cyclereqs
+
+\pgfplotsset{
+    pretty/.style = {
+        minor x tick num=1,
+        xtick pos=left,
+        ytick pos=left,
+        every x tick/.style={color=black, thin},
+        every y tick/.style={color=black, thin},
+        tick align=outside,
+        xlabel near ticks,
+        ylabel near ticks,
+        axis on top,        
+    }
+}
+
+%
+% Dirty hack from Koji
+% see http://tex.stackexchange.com/a/91645/3061
+%
+\makeatletter
+\def\pgfplots@drawticklines@INSTALLCLIP@onorientedsurf#1{}%
+%\def\pgfplots@drawgridlines@INSTALLCLIP@onorientedsurf#1{}%
+\makeatother
 
 \begin{document}
 

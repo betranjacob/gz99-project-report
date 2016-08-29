@@ -165,8 +165,7 @@ Additionally we report that this not a performance bottleneck as it is
 under 0.2\% which Intel considers `normal case`.
 
 \begin{table}[H]
-  \resizebox{\linewidth}{!}{
-    \pgfplotstabletypeset[assign column
+  \resizebox{\linewidth}{!}{ \pgfplotstabletypeset[assign column
     name/.style={/pgfplots/table/column name={\textbf{#1}}},col
     sep=comma, header=has colnames,columns/test/.style={postproc cell
       content/.append style={ /pgfplots/table/@cell
@@ -174,6 +173,23 @@ under 0.2\% which Intel considers `normal case`.
       }}]{results/sgx_detail_instruction_count.csv} }
 \end{table}
 
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[pretty,ylabel = Responses/Second, ymin = 0,
+      xlabel = Number Of Busywait Cycles (Cycles * $10^4$), legend pos=outer
+      north east,  xtick scale label code/.code = {}]
+      \addplot table[y=Key Outside RSA, mark = *] from \cyclereqs;
+      \addlegendentry{Session Keys Outside \textit{RSA}}; \addplot
+      table[y=Key Outside ECDHE, mark = *] from \cyclereqs;
+      \addlegendentry{Session Keys Outside \textit{ECDHE}}; \addplot
+      table[y=Key Inside RSA, mark = *] from \cyclereqs;
+      \addlegendentry{Session Keys Inside\textit{RSA}}; \addplot
+      table[y=Key Inside ECDHE, mark = *] from \cyclereqs;
+      \addlegendentry{Session Keys Inside \textit{ECDHE}};
+    \end{axis}
+  \end{tikzpicture}
+\end{figure}
 % From wedge: - maximum throughput that the SGX-partitioned version of
 % nginx and the original version of nginx can sustain (req/s) - all
 % sessions cached vs non cached -
