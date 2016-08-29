@@ -5,19 +5,18 @@
 At the time the Wedge paper was published, ciphers that offer forward
 secrecy were not common place; hence, the authors of Wedge deemed it
 unnecessary to provide support for this category of ciphers. However,
-forward secrecy has gained popularity since with around 86.5\% of
-servers supporting some forward secrecy ciphers~\cite{fs_stats}. We have, therefore,
-designed our system to accomodate ciphers within this category. As of
-TLSv1.2, ciphers that offer forward secrecy employ some variant of
-Diffie-Hellman (DH) Key Exchange to establish the
+forward secrecy has gained popularity since, with around 86.5\% of
+servers supporting some forward secrecy ciphers~\cite{fs_stats}. We
+have, therefore, designed our system to accomodate ciphers within this
+category. As of TLSv1.2, ciphers that offer forward secrecy employ
+some variant of Diffie-Hellman (DH) Key Exchange to establish the
 \texttt{PremasterSecret}. Before discussing the SSL/TLS handshake for
 these ciphers, we provide a brief explanation of DH Key Exchange.
 
-
 DH Key Exchange is an asymmetric cryptographic algorithm used to
 arrive at a shared secret between two parties. DH Key Exchange can be
-best illustrated using the famous ``paint mixing'' analogy. The
-analogy is presented in Figure~\ref{fig:paint}.
+best illustrated using the famous ``paint mixing'' analogy described
+below, and presented in Figure~\ref{fig:paint}.
 \begin{enumerate}
   \item The participants agree to using a publicly known ``paint
     color''.
@@ -46,8 +45,8 @@ shared secret; hence, compromising a single session's ``secret
 paints'' does not affect any other session (new ``secret paints'' are
 used for new sessions).
 
-For our project, we concentrated on Elliptical Curves DHE (ECDHE).
-This is a variant of DHE that utilises Elliptical Curves to ``mix''
+For our project, we concentrated on Elliptic Curves DHE (ECDHE).
+This is a variant of DHE that utilises Elliptic Curves to ``mix''
 the ``paints''. The mathematics behind ECDHE is beyond the scope of
 this report, but the interested reader may refer to [CITATION] for
 further details. The steps in the SSL/TLS handshake when using an
@@ -80,9 +79,10 @@ parameter. The digital signature is computed to:
 \end{itemize}
 The client verifies the signature received, computes their own private
 and public parameters, and sends the public parameter to the server.
-The client and server may now derive the \texttt{PremasterSecret},
-\texttt{MasterSecret}, and the session key block. The handshake then
-proceeds in the same way as the ``RSA handshake''.
+The client and server may now derive the \texttt{PremasterSecret}
+(``shared secret paint''), \texttt{MasterSecret}, and the session key
+block. The handshake then proceeds in the same way as the ``RSA
+handshake''.
 
 Clearly, from the discussion above, the long-term private key is used
 only for verification purposes in the ``ECDHE handshake''. To secure
@@ -91,7 +91,7 @@ receives \crandom, \srandom, and ECDHE public parameter, computes the
 message digest, and derives the signature. However, such an interface
 allows an adversary to \textit{influence} key generation, if they
 exploit the untrusted component. Instead, we created an interface that
-accepts \crandom~ and returns the signature. The values of~\srandom~,
+accepts \crandom~ and returns the signature. The values of~\srandom,
 the private parameter, and the public parameter are computed in the
 enclave. This provides the same freshness property described earlier
 in the context of the ``RSA handshake'', preventing the attacker from

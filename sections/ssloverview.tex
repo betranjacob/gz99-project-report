@@ -10,10 +10,10 @@ split into two categories: ciphers that support forward secrecy, and
 ciphers that do not. Ciphers that offer forward secrecy are ones
 wherein a compromised long-term private key does not allow an
 adversary to compromise previously eavesdropped, stored
-sessions. SSL/TLS's session establishment mechanism is different based
-on the category to which the cipher belongs. Consequentially,
+sessions. SSL/TLS's session establishment mechanism differs based
+on the category to which the cipher belongs. Consequently,
 depending on the type of cipher used for a given session, our system
-must adapt to two, different, control flows. In this section we present
+must adapt to two, dissimilar, control flows. In this section we present
 an abstraction of the SSL/TLS handshake that we heavily referred
 to in designing our system.
 
@@ -26,10 +26,10 @@ handshake can be split into four steps:
 \begin{enumerate}
   \item \textbf{Contacting the server and establishing parameters for
     the session}. Specifically, the exchange of hello messages that
-    include: the server's certificate(s) a list of ciphers supported by
+    include: the server's certificate(s), a list of ciphers supported by
     each side (to determine which cipher is to be used for this session),
-    \srandom, and \crandom. The random variables are used to derive the
-    secret, used to secure communications.
+    \srandom, and \crandom. The random variables are required to derive the
+    symmetric secret used for securing communications.
   \item \textbf{Asymmetric key exchange}: based on the cipher
     selected, the client and server determine the asymmetric keys that are
     to be used to exchange the symmetric keys for the session. This step
@@ -64,19 +64,19 @@ handshake can be split into four steps:
       \item The \texttt{MasterSecret} is then used to generate a key
         block. A session key block consists of:
         \begin{itemize}
-          \item \texttt{server\_write\_key}: this key is used by the
+          \item \texttt{server\_write\_key}: is used by the
             server to encrypt outgoing packets, and by the client to decrypt
             incoming packets.
-          \item \texttt{client\_write\_key}: this key is used by the
+          \item \texttt{client\_write\_key}: is used by the
             client to encrypt outgoing packets, and by the server to decrypt
             incoming packets.
-          \item \texttt{server\_mac\_secret}: this key is used by the
+          \item \texttt{server\_mac\_secret}: is used by the
             server to compute a MAC over outgoing packets, and by the client to
             verify the MAC over incoming packets.
-          \item \texttt{client\_mac\_secret}: this key is used by the
+          \item \texttt{client\_mac\_secret}: is used by the
             client to compute a MAC over outgoing packets, and by the server to
             verify the MAC over incoming packets.
-          \item \texttt{client\_initialisation\_vector(iv)}: this is not
+          \item \texttt{client\_initialisation\_vector(iv)}: is not
             a key, but a value used to initialise the symmetric cipher at the
             client, before invoking the encryption routine on outgoing packets, and
             at the server, before invoking the decryption routine on incoming packets.
