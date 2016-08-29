@@ -27,7 +27,7 @@ reason about its security.
 Alternatively, we expanded upon the designs explained earlier as
 follows: instead of returning the \texttt{MasterSecret} to the
 untrusted component, we compute the session key block, and store it
-within the enclave. We then provide a interface that allows the
+within the enclave. We then provide an interface that allows the
 untrusted component to decrypt data received from a client and an
 interface to encrypt data outgoing to a client. These interfaces also
 calculate the MAC using the \texttt{mac\_secret} from the session key
@@ -44,31 +44,31 @@ Figure~\ref{fig:keys-inside} illustrates this design.
 As before, the untrusted component obtains \srandom~from the
 \textit{enclave program}. The untrusted component then forwards
 packets received to allow for the generation of
-\texttt{PremasterSecret}. Its at this step that new design elements
+\texttt{MasterSecret}. It is at this step that new design elements
 appear. First, \texttt{MasterSecret} is no longer returned to the
 untrusted component. Second, the \texttt{Change\-CipherSpec} message
-is passed to the client. This is because \texttt{ChangeCipherSpec}
-indicates to the recepient the transition to using the just-negotiated
-keys; therefore, the message is forwarded to the \texttt{enclave
-  program} to signal the need for generating the session key block,
-and initializing a cipher specific
+is passed to the \textit{encalve program}. This is because
+\texttt{ChangeCipherSpec} indicates to the recepient the transition to
+using the just-negotiated keys. As a result, the message is forwarded
+to the \texttt{enclave program}, signalling the need for generating
+the session key block, and initializing a cipher specific
 context\footnote{\texttt{ChangeCipherSpec} signals the transition to
   the symmetric cipher, indicating that all packets exchanged beyond
   this point are encrypted in the just-negotiated keys. The most
   commonly used symmetric cipher in SSL/TLS is AES.}. Next, the server
 prepares for receiving the \texttt{ClientFinished} message by
 beginning the calculation of a cryptographic digest\footnote{This is
-  more of an implementation consideration, than a design issue. The
-  RFC for TLS 1.2 does not specify the instance of time at which the
+  more of an implementation consideration than a design issue. The RFC
+  for TLS 1.2 does not specify the instance of time at which the
   calculation of the \texttt{FinalFinish MAC} completes, only its
   components. However, this multi-step approach is common across
   popular SSL/TLS libraries, and we, therefore, elected to support
   it.} of the handshake messages received so far (handshake digest)
-\footnote{As defined by the RFC for TLS 1.2, the digest enclosed in a
-  participant's \texttt{Finished} message does not include the other
-  side's \texttt{Finished} message.} required for the
+\footnote{As defined by the RFC for TLS 1.2, the digest enclosed in
+  one participant's \texttt{Finished} message does not include the
+  other side's \texttt{Finished} message.} required for the
 \texttt{ServerFinished} message. This message contains the
-\texttt{FinalFinish MAC}, a PRF that takes an input of
+\texttt{FinalFinish MAC}, the output of a PRF that takes an input of
 \texttt{MasterSecret} and the handshake digest. Since
 \texttt{MasterSecret} is no longer returned to the untrusted
 component, this PRF must be calculated in the \textit{enclave

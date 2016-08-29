@@ -4,8 +4,8 @@
 
 OpenSGX~\cite{opensgx} is a platform that provides a
 software emulation layer enabling the execution of SGX instructions
-\textit{without} the possession of SGX hardware. Specifically, OpenSGX
-implements a hardware emulation layer, implementing SGX's instructions
+\textit{without} requiring SGX hardware. Specifically, OpenSGX
+offers a hardware emulation layer, implementing SGX's instructions
 and data structure as per \Intel's specification \footnotemark, and an
 OS emulation layer, providing access to wrapper functions for
 privileged SGX instructions (instructions, such as EADD and EINIT,
@@ -18,8 +18,8 @@ wrapper functions for user-level SGX instructions.
 
 \Intel's SGX specification does not detail how an enclave program may
 invoke system calls\footnotemark; OpenSGX specifies an interface which
-allows an enclave program to invoke \texttt{libc} functions. The
-interface works as follows:
+allows an enclave program to invoke \texttt{libc} functions, and it
+works as follows:
 
 \begin{enumerate}
   \item The enclave program writes the arguments for the system call
@@ -39,7 +39,8 @@ design of OpenSGX.
   \centering
   \includegraphics[scale=0.4]{images/opensgx-design.png}
   \caption{High level design of OpenSGX. Grey boxes indicate protected
-    areas of memory. Striped boxes indicate shared areas.}
+    areas of memory. Striped boxes indicate shared
+    areas~\cite{opensgx}.}
   \label{fig:opensgxdes}
 \end{figure}
 
