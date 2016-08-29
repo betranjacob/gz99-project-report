@@ -150,16 +150,35 @@ varied the ratio betewen new and reused (cached) sessions between 0-30
 \% as well as measuring the performance without session caching (100
 \% new connections) to capture the worst case scenario.
 
+\subsection{Memory Overhead Analysis}
+The purpose of this test case is to evaluate the impact of the memory load operations on slowing down the program. To analysis the overhead introduced, we used a tool provided by Intel, viz VTune Amplifier XE 2016. The tool generate metrics about the number of CPU cache-misses for a given number of cycles. 
+On the server side, we ran Nginx and for SGX simulation, the busy wait implementation. There were two scenarios evaluated for RSA and ECDHE cryptos, one with session-keys outside SGX and the other with session-keys inside. The hypothesis was  there will be additional memory overhead (cache-misses) in the session-keys inside case due to the encryption and decryption of data in DRAM. 
+We ran the tests for file sizes varying from 1 to 32 MB (1000 requests each) using Apache-bench client on a personal laptop with the following configuration -
+CPU: Intel Core i5-2520M @ 2.50GHz, RAM: DDR3 1600MHz 16GB
+
+Results (in table?)
+
+Keys outside SGX - 
+Cache Misses : 1800126
+CPU Cycles :  263912395868
+
+Keys inside SGX - 
+Cache Misses : 7500525
+CPU Cycles :  1141101711650
+
+We have used the equation from \url{https://software.intel.com/sites/landingpage/legacy/pdfs/Using_Intel_VTune_Amplifier_XE_on_2nd_Gen_Intel_Core_Family.pdf}] to convert the number of LLC misses to the percentage of cycles the enclave program spent on waiting for cache misses. . Each memory load from DRAM takes approximately 180 cycles.
+
+Percentage of cycles spent on memory access = (MEM_LOAD_UOPS_MISC_RETIRED.LLC_MISS_PS * 180) / CPU_CLK_UNHALTED.THREAD
+
+Percentage of cycles spent (Keys outside SGX)  =  0.123%
+Percentage of cycles spent (Keys inside SGX)     =   0.118%
+
+From the results it's evident that, there is an overhead introduced with Keys inside the SGX 
+
 \subsection{Results}
 
 Table XXX presents the number of modifications to the source code. The
 enclave program TCB is XXX of sloc.
-
-We used the formula from [page 30 in
-\url{https://software.intel.com/sites/landingpage/legacy/pdfs/Using_Intel_VTune_Amplifier_XE_on_2nd_Gen_Intel_Core_Family.pdf}]
-to convert the number of LLC misses to the percentage of cycles the
-enclave program spent on waiting for cache misses. We multiply this by
-the memory overhead reported in [CITATION NEEDED] (5-14 \%)
 
 Additionally we report that this not a performance bottleneck as it is
 under 0.2\% which Intel considers `normal case`.
