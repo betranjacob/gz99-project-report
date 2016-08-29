@@ -1,6 +1,7 @@
 \documentclass[../main.tex]{subfiles}
  
 \begin{document}
+\subfile{sections/perfeval/tests/micro-mem.tex}
 
 We developed our prototype using OpenSGX which, as detailed in
 Section~\ref{sec:background}, is an emulator for the SGX instruction
@@ -19,7 +20,7 @@ acquired from running our tests.
 To model the performance of our prototype we implemented a second
 version of our enclave program that has no dependencies on OpenSGX and
 replaces certain SGX instructions with busy waits, simulating the
-overhead in executing them. In dong so, we make the same assumptions
+overhead in executing them. In doing so, we make the same assumptions
 as~\cite{Baumann14} namely:
 \begin{enumerate}
   \item We assume that the CPU used in testing performs the same as an
@@ -197,6 +198,7 @@ under 0.2\% which Intel considers `normal case`.
       content/.append style={ /pgfplots/table/@cell
         content/.add={$\bf}{$},
       }}]{results/sgx_detail_instruction_count.csv} }
+  \caption{Number of SGX instructions executed}
 \end{table}
 
 \begin{figure}[H]
@@ -215,6 +217,7 @@ under 0.2\% which Intel considers `normal case`.
       \addlegendentry{Session Keys Inside \textit{ECDHE}};
     \end{axis}
   \end{tikzpicture}
+  \caption{Graph of busywait cycles vs. requests per second}
 \end{figure}
 
 \begin{figure}[H]
@@ -236,9 +239,9 @@ under 0.2\% which Intel considers `normal case`.
   \caption{Graph of response size vs. requests per second}
   \label{fig:sizreqs}
 \end{figure}
-% From wedge: - maximum throughput that the SGX-partitioned version of
-% nginx and the original version of nginx can sustain (req/s) - all
-% sessions cached vs non cached -
+From wedge: - maximum throughput that the SGX-partitioned version of
+nginx and the original version of nginx can sustain (req/s) - all
+sessions cached vs non cached -
 
 \subsection{Discussion}
 

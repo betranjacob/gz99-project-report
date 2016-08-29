@@ -1,0 +1,58 @@
+\documentclass[../../../main.tex]{subfiles}
+
+\begin{document}
+SGX incorporates a hardware memory encryption engine (MEE) that
+encrypts any data that resides in an enclave's reserved area in RAM.
+The MEE also decrypts data that is required by the CPU during the
+course of executing an \textit{enclave program}. Nevertheless, the MEE
+is not used on data in the CPU's cache. As a result, an
+\textit{enclave program} incurs additional overhead whenever the CPU
+cannot find the data required for an instruction in the cache. This is because
+a cache miss results in two things:
+\begin{enumerate}
+  \item Allocate space in the CPU cache for the needed data. This may entail
+    the removal of data from the CPU cache. Data removed, if it belongs
+    to an enclave and has been modified, may require encryption by the MEE.
+  \item Decryption of the requested data, incoming from main memory, by the MEE.
+\end{enumerate}
+
+\subsubsection*{Test Setup}
+To estimate the impact of the MEE, we implemented a second version of
+our \textit{enclave program} (enclave model) that has no dependencies on OpenSGX (this
+modelling approach was discussed in Section~\ref{sec:perfmodel}). We
+utilised an application from \Intel~called
+\VTune~Amplifier XE 2016. VTune
+amplifier captures the number of CPU cycles required to execute a
+program and the number of CPU cycles wasted waiting on memory due to
+last level cache (LLC) misses \footnote{We are only concerned with LLC misses
+  because only those misses lead to accessing main memory.}. Given those
+two numbers, we can calculate the percentage of CPU cycles wasted in accessing
+main memory. This result can then be used as a proxy for estimating the overhead
+of the MEE's execution.
+
+We ran the enclave model within \VTune~Amplifier and used \Apache
+Benchmark, a utility program that emulates web server workloads by
+generating a configurable number of HTT,
+
+\subsubsection*{Results}
+
+We have used the equation from \Intel~to convert the number of LLC misses to
+the percentage of cycles the enclave program spent on waiting for
+cache misses. Each memory load from DRAM takes approximately 180
+cycles.
+
+\begin{align*}
+  &\text{Percentage of cycles spent on memory access} =
+  \frac{\text{CPU Cycles Wasted On LLC Misses} * 180}{\text{Total CPU
+  Cycles}} \\
+  &\text{Percentage of Cycles Wasted - Sessions Keys Outside Enclave} = 0.123\% \\
+  &\text{Percentage of Cycles Wasted - Sessions Keys Inside Enclave} = 0.118\%        
+\end{align*}
+
+\subsubsection*{Analysis of Results}
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../../main"
+%%% End:
