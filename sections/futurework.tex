@@ -1,19 +1,21 @@
 \documentclass[../main.tex]{subfiles}
  
+What would have been done if there were more time. What others might do if they were to continue the work.
 \begin{document}
 \section{Future Work}
 During the early phase of project planning there were no sufficient SGX
 development platforms available, hence we had to succumb to an SGX emulator. We
-plan to port the entire framework on a platform with real SGX hardware support
-running on a machine in the cloud. This will help us validate a real world
-scenario with optimal system performance. In particular with a (multi-core) SGX
-enabled platform, enclaves can distribute the workload generated from different
-NGINX worker processes to separate threads. Consequently a large number of
-client requests can be honoured concurrently.
+leave as future work porting the entire framework on a platform with real SGX
+hardware running on a machine in the cloud. This will help us evaluate our
+design in a real production environment with optimal system performance. In
+particular, with an SGX enabled platform (with multi-core support), enclaves
+can distribute the workload generated from different NGINX worker processes to
+separate threads. Consequently a large number of client requests can be
+honoured concurrently.
 
 In the interest of time, we also deferred the support for SSL SessionTickets in
 the current implementation. We consider incorporating this feature in the
-future, so the server doesn't have to cache any SSL session information except
+future, so the server does not have to cache any SSL session information except
 from the ticket's keys. This will significantly reduce the memory overhead
 generated to support larger number of clients within an enclave.
 \end{document}
