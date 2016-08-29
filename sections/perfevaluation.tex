@@ -76,8 +76,8 @@ to vanilla nginx should be roughly constant regardless of the type of
 the key exchange mechanism.
 
 \subsection{Microbenchmarks}
-In order to gain better insight about our implementation we measured
-its following aspects.
+To gain better insight about our implementation we measured its
+following aspects.
 
 OpenSGX can report the performance measurement of an enclave program
 which includes the number of kernel switches and number and type of
@@ -168,28 +168,29 @@ DDR3 1600MHz 16GB
 
 Results (in table?)
 
-Keys outside SGX - 
-Cache Misses : 1800126
-CPU Cycles :  263912395868
 
-Keys inside SGX - 
-Cache Misses : 7500525
-CPU Cycles :  1141101711650
+Keys outside SGX - Cache Misses : 1800126 CPU Cycles : 263912395868
 
-We have used the equation from
-\url{https://software.intel.com/sites/landingpage/legacy/pdfs/Using_Intel_VTune_Amplifier_XE_on_2nd_Gen_Intel_Core_Family.pdf}]
-to convert the number of LLC misses to the percentage of cycles the
-enclave program spent on waiting for cache misses. . Each memory load
-from DRAM takes approximately 180 cycles.
+Keys inside SGX - Cache Misses : 7500525 CPU Cycles : 1141101711650
 
-Percentage of cycles spent on memory access =
-(MEM_LOAD_UOPS_MISC_RETIRED.LLC_MISS_PS * 180) /
-CPU_CLK_UNHALTED.THREAD
+\begin{table}[H]
+  \resizebox{\linewidth}{!}{ \pgfplotstabletypeset[assign column
+    name/.style={/pgfplots/table/column name={\textbf{#1}}},col
+    sep=comma, header=has colnames ]{results/mem_analysis.csv} }
+\end{table}
 
-Percentage of cycles spent (Keys outside SGX)  =  0.123%
-Percentage of cycles spent (Keys inside SGX)     =   0.118%
+We have used the equation from \Intel~to convert the number of LLC misses to
+the percentage of cycles the enclave program spent on waiting for
+cache misses. Each memory load from DRAM takes approximately 180
+cycles.
 
-From the results it's evident that, there is an overhead introduced with Keys inside the SGX 
+\begin{align*}
+  &\text{Percentage of cycles spent on memory access} =
+  \frac{\text{CPU Cycles Wasted On LLC Misses} * 180}{\text{Total CPU
+  Cycles}} \\
+  &\text{Percentage of Cycles Wasted - Sessions Keys Outside Enclave} = 0.123\% \\
+  &\text{Percentage of Cycles Wasted - Sessions Keys Inside Enclave} = 0.118\%        
+\end{align*}
 
 \subsection{Results}
 
@@ -211,17 +212,17 @@ under 0.2\% which Intel considers `normal case`.
 \begin{figure}[H]
   \centering
   \begin{tikzpicture}
-    \begin{axis}[pretty,ylabel = Responses/Second, ymin = 0,
-      xlabel = Number Of Busywait Cycles (Cycles * $10^4$), legend pos=outer
-      north east,  xtick scale label code/.code = {}]
+    \begin{axis}[pretty,ylabel = Responses/Second, ymin = 0, xlabel =
+      Number Of Busywait Cycles (Cycles * $10^4$), legend pos=outer
+      north east, xtick scale label code/.code = {}]
       \addplot table[y=Key Outside RSA, mark = *] from \cyclereqs;
-        \addlegendentry{Session Keys Outside \textit{RSA}};
-      \addplot table[y=Key Outside ECDHE, mark = *] from \cyclereqs;
-        \addlegendentry{Session Keys Outside \textit{ECDHE}};
-      \addplot table[y=Key Inside RSA, mark = *] from \cyclereqs;
-        \addlegendentry{Session Keys Inside\textit{RSA}};
-      \addplot table[y=Key Inside ECDHE, mark = *] from \cyclereqs;
-        \addlegendentry{Session Keys Inside \textit{ECDHE}};
+      \addlegendentry{Session Keys Outside \textit{RSA}}; \addplot
+      table[y=Key Outside ECDHE, mark = *] from \cyclereqs;
+      \addlegendentry{Session Keys Outside \textit{ECDHE}}; \addplot
+      table[y=Key Inside RSA, mark = *] from \cyclereqs;
+      \addlegendentry{Session Keys Inside\textit{RSA}}; \addplot
+      table[y=Key Inside ECDHE, mark = *] from \cyclereqs;
+      \addlegendentry{Session Keys Inside \textit{ECDHE}};
     \end{axis}
   \end{tikzpicture}
 \end{figure}
@@ -229,17 +230,17 @@ under 0.2\% which Intel considers `normal case`.
 \begin{figure}[H]
   \centering
   \begin{tikzpicture}
-    \begin{axis}[pretty,ylabel = Responses/Second, ymin = 0,
-      xmode = log,xlabel = Response Size (KB), legend pos=outer
-      north east,  xtick scale label code/.code = {}]
+    \begin{axis}[pretty,ylabel = Responses/Second, ymin = 0, xmode =
+      log,xlabel = Response Size (KB), legend pos=outer north east,
+      xtick scale label code/.code = {}]
       \addplot table[y=Stock RSA, mark = *] from \sizereqs;
-        \addlegendentry{Stock \textit{RSA}};
-      \addplot table[y=Stock ECDHE, mark = *] from \sizereqs;
-        \addlegendentry{Stock \textit{ECDHE}};
-      \addplot table[y=Key Outside RSA, mark = *] from \sizereqs;
-        \addlegendentry{Session Keys Outside \textit{RSA}};
-      \addplot table[y=Key Outside ECDHE, mark = *] from \sizereqs;
-        \addlegendentry{Session Keys Outside \textit{ECDHE}};
+      \addlegendentry{Stock \textit{RSA}}; \addplot table[y=Stock
+      ECDHE, mark = *] from \sizereqs; \addlegendentry{Stock
+        \textit{ECDHE}}; \addplot table[y=Key Outside RSA, mark = *]
+      from \sizereqs; \addlegendentry{Session Keys Outside
+        \textit{RSA}}; \addplot table[y=Key Outside ECDHE, mark = *]
+      from \sizereqs; \addlegendentry{Session Keys Outside
+        \textit{ECDHE}};
     \end{axis}
   \end{tikzpicture}
   \caption{Graph of response size vs. requests per second}
