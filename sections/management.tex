@@ -1,88 +1,101 @@
 \documentclass[../main.tex]{subfiles}
 \begin{document}
 
-We have spent the initial two weeks of the project researching what the exact
-problem we try to tackle is and what would be the best approach to solve it.
-We looked at available opensource software that we could use as a starting
-point, focusing on documentation available and taking into account its current
-and prijected market share. During that time we have also explored other
-research in the area and its approach to performance evaluation.
+% - Outline of how the work was split up.
+% - How collaborative work was planned.
+% - Who did what.
+% - How agreement was reached.
+% - How essential project information was managed and communicated.
+% - How integration and testing was organised.
 
-During that time we were all trying to get a better insight into the scope of
-the project and the software landscape and therefore we did not split the work
-between individuals.
+We spent the initial two weeks of the project in researching about the problem
+definition and what would be the best approach to solve it. We looked at
+available open source software that we could use as a starting point, focusing
+on documentation available and taking into account its current and projected
+market share. During that time, we also explored relevant research in the area
+and studied approaches we could use for performance evaluation. These tasks
+mostly involved collaborative work, trying to get a better insight into the
+scope of the project and the software landscape and therefore we did not split
+the work between individuals.
 
 We came to the conclusion that support for hardware SGX, including BIOS and
-Operating System, as well as SDK from intel is very limited or lacking
-documentation and, hence, decided to use a software emulator OpenSGX instead,
-which required us to be more careful in reasoning about our future prototype
-performance in real life scenario.
+Operating System, as well as the \intel SDK is very limited or lacking
+documentation; hence, we decided to use the aforementioned emulator OpenSGX
+instead, which required us to be more careful in reasoning about our future
+prototype performance in a real production environment.
 
-We also decided to use LibreSSL as oposed to the more mainsream OpenSSL as the
-former seemed to be more concerned about limiting the size of its TCB. We also
-decided to use NGINX instead of Apache as the former has more modern design,
-better resource management and steadily gains popularity.
+As discussed in Section \ref{sec:Implementation}, we decided to use NGINX and
+LibreSSL for our implementing the prototype of our design. Having these in
+mind, we initially divided our group into three subgroups:
 
-Having these in mind, we initially divided our group into three subgroups:
 \begin{itemize}
-	\item Ahmed and John working on the SGX part
-	\item Betran and Wiktor working on LibreSSL and NGINX
-	\item Chiraphat working on the tests setup and performance evaluation
+	\item Ahmed and John working on the SGX part.
+	\item Betran and Wiktor working on LibreSSL and NGINX.
+	\item Chiraphat working on the tests setup and performance evaluation.
+          He has also identified the major and minor goals, tasks and
+          milestones we need to reach for the project to succeed. %These are
+          %presented in the gant chart in Figure~\ref{fig:gantchart} below.
 \end{itemize}
 
-He have identified the major and minor goals and tasks as well as milestones
-we need to reach for the project to succeed. These are presented in the gant
-chart in Figure~\ref{fig:gantchart} below.
 % TODO: some more details here?
 
-\begin{figure}[H]
-  \centering
-%  \includegraphics[scale=0.25]{images/gant.png}
-  \caption{Project timeline}
-  \label{fig:gantchart}
-\end{figure}
+%\begin{figure}[H]
+%  \centering
+%%  \includegraphics[scale=0.25]{images/gant.png}
+%  \caption{Project timeline}
+%  \label{fig:gantchart}
+%\end{figure}
 
-As we only had ten weeks left to complete the project we had to employ
-a management technique that would allow to rapidly adapt to any delays and
-minimize the risks. For that reason we heavily relied on constant
-communication with the group members as well as on weekly meetings to share
-progress with our supervisor Brad, assess whether we need to shift manpower to
-any blocking tasks. Additionally, we held our own meeting to internally
-discuss the insights and hints from Brad and our own, make sure we agree in the
-understanding of the current state of the project, and plan and distribute
-work for the next week.\\
+Taking into account the available time span of ten weeks, we had to employ a
+management technique that would allow us to rapidly adapt to any delays and
+minimize the risks. We heavily relied on constant communication with the group
+members as well as on meetings with our supervisor, Professor B. Karp, which
+played a critical role in ensuring our progress. We held these meetings in a
+weekly basis where we would share our progress, discuss design or technical
+issues and present our plans for the following weeks. These meetings, also gave
+us the chance to asses whether to shift manpower to any blocking tasks.
+Additionally, we held our own meetings to internally discuss the insights and
+hints from our meetings with our supervisor, make sure we agree in the
+understanding of the current state of the project and plan and distribute work
+for the upcoming week.
 
-We have used Slack as our daily communication channel since we had it already
-set up for other NCS group works. We have setup github repositories for code
-and report as we decided to use LaTex for ease of collaboration and to follow
-research best practices.\\
+We used Slack as our daily and synchronous communication channel since it
+provides several facilities such as file sharing, integration with popular
+version control services such as GitHub, notification system \etc. We used
+Git as a version control system (both for code and report writing) and GitHub
+as a service to store our repositories upstream. We decided to use \LaTeX for
+ease of collaboration and to follow research best practices.
 
 Over the course of the project some tasks turned out to take less time than we
-planned but we also encountered a few bottlenecks and implementation
-difficulties that required assignment of more team members. In particular we
-managed to acomplish most of our initial goal of isolating the private key for
-RSA handshake and performing the necessary remote attestation fairly quickly.
-We could then shift the effort to support ciphers offering forward security
-and compartmentalization of session keys. The work was roughly split as
-follows.
+planned. Though, we also encountered a few bottlenecks and implementation
+difficulties that required assignment of more team members. In particular, we
+managed to accomplish our initial goal in isolating the private key for the RSA
+handshake and performing the necessary remote attestation sooner than we had
+initially planned. We could then shift the effort to support ciphers offering
+forward security and compartmentalization of session keys. The work was roughly
+split as follows:
 
 Ahmed fixed OpenSGX remote attestation and provinsioning mechanism, he
 developed SGX expertise that was helping us with correct design decisions and
 identification of SGX performance hits. He was also the mastermind behind
 report structure and editorial work.
 
-John helped with initial OpenSGX setup and testing, he then moved to help with
-the libressl compartmentization, i.e. computation of key block inside the
-enclave and encrypt / decrypt oracle interface. He also helpe with AWS setup
-and build scripts.
+Ioannis initially helped in setting up OpenSGX and then focused on LibreSSL
+compartmentization. He isolated the computation of session keyblock inside the
+enclave, implemented the encrypt/decrypt oracle interface and added support
+for concurrent connections and SSL session resumption within the enclave. He
+also worked on the build scripts and setting up AWS.
 
 Betran was responsible for initial NGINX and LibreSSL exploration. He then
-added support for forward secrecy ciphers and carried initial work on
-encrypt / decrypt interface.
+added support for forward secrecy ciphers and carried initial work on the
+encrypt/decrypt interface.
 
 Wiktor prepared the initial build environment and callgate interface between
-untrusted and trusted code. He also helped with the setup of the test environment and integration between different versions of our programs.
+untrusted and trusted code. He also helped with the setup of the test
+environment and integration between different versions of our programs.
 
-Chiraphet developed the performance evaluation model and tested our implementation on various machines. He was responsible for the choice of performance profiling tools and finally, executing the tests and gathering results.
-
+Chiraphat developed the performance evaluation model and tested our
+implementation on various machines. He was responsible for the choice of
+performance profiling tools and finally, executing the tests and gathering
+results.
 \end{document}
