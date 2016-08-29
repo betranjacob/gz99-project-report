@@ -10,8 +10,8 @@ servers supporting some forward secrecy ciphers~\cite{fs_stats}. We have, theref
 designed our system to accomodate ciphers within this category. As of
 TLSv1.2, ciphers that offer forward secrecy employ some variant of
 Diffie-Hellman (DH) Key Exchange to establish the
-\texttt{PremasterSecret}. Before discussing the SSL/TLS handsake for
-these ciphers, we provide a brief explaination of DH Key Exchange.
+\texttt{PremasterSecret}. Before discussing the SSL/TLS handshake for
+these ciphers, we provide a brief explanation of DH Key Exchange.
 
 
 DH Key Exchange is an asymmetric cryptographic algorithm used to
@@ -19,14 +19,14 @@ arrive at a shared secret between two parties. DH Key Exchange can be
 best illustrated using the famous ``paint mixing'' analogy. The
 analogy is presented in Figure~\ref{fig:paint}.
 \begin{enumerate}
-  \item The partiticpants agree to using a publicly known ``paint
-    color''
-  \item Each participant generates a secret ``paint color''
+  \item The participants agree to using a publicly known ``paint
+    color''.
+  \item Each participant generates a secret ``paint color''.
   \item Each participant ``mixes'' their ``secret color'' with the
-    ``public color'' they previously agreed to use
+    ``public color'' they previously agreed to use.
   \item The participants \textit{exchange} the ``paint mixtures'' from
-    the previous step
-  \item The participants combine the ``paint mixture'' they received
+    the previous step.
+  \item The participants combine the ``paint mixture'' they received.
     with their own ``secret paint''. Both parties now possess the same
     ``shared secret paint''.
 \end{enumerate}
@@ -74,7 +74,7 @@ private key and is sent to the client, attached to the public
 parameter. The digital signature is computed to:
 %This can be phrased better, leaving it for now.
 \begin{itemize}
-  \item Prove the identity of the server to the client
+  \item Prove the identity of the server to the client.
   \item Prove that the ECDHE public parameter received was indeed
     computed by the server, preventing man in the middle attacks. 
 \end{itemize}
@@ -90,7 +90,7 @@ the long-term secret, one may elect to provide an interface that
 receives \crandom, \srandom, and ECDHE public parameter, computes the
 message digest, and derives the signature. However, such an interface
 allows an adversary to \textit{influence} key generation, if they
-explot the untrusted component. Instead, we created an interface that
+exploit the untrusted component. Instead, we created an interface that
 accepts \crandom~ and returns the signature. The values of~\srandom~,
 the private parameter, and the public parameter are computed in the
 enclave. This provides the same freshness property described earlier

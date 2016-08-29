@@ -1,11 +1,20 @@
 \documentclass[../main.tex]{subfiles}
  
 \begin{document}
-\textbf{Future Work}
-\subsection{Future Work}
+\section{Future Work}
+\label{sec:futurework}
+During the early phase of project planning there were no sufficient SGX
+development platforms available, hence we had to succumb to an SGX emulator. We
+plan to port the entire framework on a platform with real SGX hardware support
+running on a machine in the cloud. This will help us validate a real world
+scenario with optimal system performance. In particular with a (multi-core) SGX
+enabled platform, enclaves can distribute the workload generated from different
+NGINX worker processes to separate threads. Consequently a large number of
+client requests can be honoured concurrently.
 
-During the early phase of project planning there were no sufficient SGX development platforms available, hence we had to succumb to a SGX emulator. In the future, we are planning  to port the entire framework on a real SGX supported platform running on a cloud machine. This will help us validate a real world scenario with optimal system performance. In particular with a SGX enabled ( with multicore ) platform, enclaves can distribute the workload generated from different NGINX worker processes to separate threads. Consequently a large number of client requests can be honoured concurrently. 
-
-In the interest of time, we also deferred the support for SSL session tickets in the current implementation. We will  incorporate this feature in the future, so the server doesn’t have to cache any SSL session information. This will significantly reduce the memory overhead generated to support larger number of clients. 
- 
+In the interest of time, we also deferred the support for SSL SessionTickets in
+the current implementation. We consider incorporating this feature in the
+future, so the server doesn't have to cache any SSL session information except
+from the ticket's keys. This will significantly reduce the memory overhead
+generated to support larger number of clients within an enclave.
 \end{document}
