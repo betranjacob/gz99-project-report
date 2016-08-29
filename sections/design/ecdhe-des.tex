@@ -91,7 +91,7 @@ receives \crandom, \srandom, and ECDHE public parameter, computes the
 message digest, and derives the signature. However, such an interface
 allows an adversary to \textit{influence} key generation, if they
 exploit the untrusted component. Instead, we created an interface that
-accepts \crandom~ and returns the signature. The values of~\srandom,
+accepts \crandom~ and returns the signature. The values of~\srandomx,
 the private parameter, and the public parameter are computed in the
 enclave. This provides the same freshness property described earlier
 in the context of the ``RSA handshake'', preventing the attacker from
