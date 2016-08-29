@@ -1,7 +1,6 @@
-cipher,Cache miss,Cache cycle,Total run tine cycle,
-Keyoutside-RSA,0,0,89806134709,0.00%
-Keyoutside-ECDHE,900063,162011340,176660264990,0.09%
-Keyoutside-Combine,1800126,324022680,263912395868,0.12%
-Keyinside-RSA,3300231,594041580,527528791292,0.11%
-Keyinside-ECDHE,2100147,378026460,614386921579,0.06%
-Keyinside-Combine,7500525,1350094500,1141101711650,0.12%
+Cipher-Design, Number of Cycles Waiting on LLC misses ,Total CPU Cycles,CPU Cycles Wasted
+RSA-Session Keys Outside-RSA,0,89806134709,0.00
+ECDHE-Session Keys Outside,900063,176660264990,0.09
+RSA-Session Keys Inside,3300231,527528791292,0.11
+ECDHE-Session Keys Inside,2100147,614386921579,0.06
+

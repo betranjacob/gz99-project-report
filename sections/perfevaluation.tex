@@ -47,10 +47,6 @@
 % encryption. Instead we captured the number of Last Layer Cache (LLC)
 % misses as a relevant measure.
 
-% Finally, the performance of `malloc` is slower for our test program
-% than what it would be within real SGX because we have to context
-% switch to the OS to allocate memory.
-
 % \subsection{Hypothesis}
 % We expect to see the most performance slowdown due to expensive
 % context switches between untrusted and enclave programs. This is due

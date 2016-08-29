@@ -1,6 +1,7 @@
 \documentclass[../../../main.tex]{subfiles}
 
 \begin{document}
+\label{sec:mem-analysis}
 SGX incorporates a hardware memory encryption engine (MEE) that
 encrypts any data that resides in an enclave's reserved area in RAM.
 The MEE also decrypts data that is required by the CPU during the
@@ -57,24 +58,31 @@ of 1000 HTTPS requests/s, to NGINX. We ran the test four times:
 
 \subsubsection*{Results}
 The values reported from \VTune~ Amplifier for the above-mentioned
-tests are in Table~\ref{tab:mem}. We used
-equation~\ref{eqn:mem}~\cite{intel-eqn} to calculate the percentage of
-cycles the enclave program wasted on waiting for cache misses the
-number of LLC misses to the percentage of cycles the enclave program
-spent on waiting for cache misses. Each memory load from DRAM takes
-approximately 180 cycles.
+tests are in Table~\ref{tab:mem}. We used the equation
+below~\cite{intel-eqn} to calculate the percentage of cycles the
+enclave program wasted on waiting for cache misses\footnote{According
+  to \Intel, each memory load from DRAM, on an i5-2520M processor,
+  consumes approximately 180 cycles}.
 
-\begin{table}[H]
-  \label{tab:mem}
-\end{table}
-\begin{align}
- \label{eqn:mem}
- \text{Percentage of cycles spent on memory access} =
+\begin{align*}
+ \text{\% of cycles spent on memory access} = 
     \frac{\text{CPU Cycles Wasted On LLC Misses} * 180}{\text{Total CPU
     Cycles}}
-\end{align}
+\end{align*}
+
+\begin{table}[H]
+  \resizebox{\linewidth}{!}{ \pgfplotstabletypeset[assign column
+    name/.style={/pgfplots/table/column name={\textbf{#1}}},col
+    sep=comma, header=has colnames, columns/{CPU Cycles Wasted}/.style
+    = {column name = {CPU Cycles Wasted(\%)}}]{results/cache_analysis.csv}}
+  \caption{Memory Analysis}
+  \label{tab:mem}
+\end{table}
 
 \subsubsection*{Analysis of Results}
+% Before running this microbenchmark, we expected to see
+% little to no cache 
+
 \end{document}
 
 %%% Local Variables:
