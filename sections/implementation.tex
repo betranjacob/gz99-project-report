@@ -89,7 +89,7 @@ handle a single connection at a time which would have severe perfomance impact
 to our design.}. Ultimately, the SSL session ID is used to map against a
 session's state within the enclave, though this ID is only available when the
 SSL handshake successfully completes. We modified NGINX to assign a randomly
-generated SGX specific ID to a new incoming connection which would be used by
+generated SGX specific ID to a new incoming connection, which would be used by
 the enclave until an SSL handshake completes and the mapping key changes to the
 now established SSL session ID. We explain further in Section
 \ref{subsec:opensgx} how this scheme enables our system to handle SSL session
@@ -115,13 +115,14 @@ of the TCB. Most of the code executing within the enclave includes
 cryptographic operations, except for a small volume of code responsible for
 SSL state bookkeeping reasons\footnote{As mentioned in Section
 \ref{sec:design}, upon exchange of the \texttt{ChangeCipherSpec} messages the
-enclave prepares the environment for handling crypto operations.}. The rest of
-LibreSSL's code that handles tasks such as establishment/termination
-and state manipulation, executes outside of the enclave and is assumed to
-contain vulnerabilities and be potentially owned.
+enclave prepares the environment for handling crypto operations specific to
+the selected cipher.}. The rest of LibreSSL's code that handles tasks such as
+connection establishment/termination and state manipulation, executes outside
+of the enclave and is assumed to contain vulnerabilities and be potentially
+owned.
 
 Our system supports legacy RSA ciphers without forward secrecy support such as
-AES256-SHA and ECDHE with perfect forward secrecy support such as
+AES256-SHA and ciphers with forward secrecy support such as
 ECDHE-RSA-AES256-GCM-SHA384. We also support the AEAD (Authenticated Encryption
 with Associated Data) mode of operation for encrypting/decrypting the
 application data. The AEAD operation is designed to provide authenticity,
@@ -159,7 +160,7 @@ component switching contexts to execute the \textit{enclave program}.
 Finally, OpenSGX does not provide a way of accurately benchmarking
 CPU cycle counts because it does not account for the number of cycles
 each SGX instruction requires. This led to us estimating cycle counts
-for an SGX instruction for the performance evaluation(see
+for an SGX instruction for the performance evaluation (see
 Section~\ref{sec:perfeval}).
 
 
@@ -192,7 +193,7 @@ Section~\ref{sec:perfeval}).
 
 SGXBridge is a Named Pipe IPC interface developed for exchanging data between
 the trusted and untrusted process. It declares all the functions and data
-structures required by the two components data serialization. Each operation
+structures required by the two components for data serialization. Each operation
 that goes through SGXBridge requires two memcpy() and two I/O operations on the
 named pipe\footnote{Note that, all I/O operations on a named pipe occur on
 kernel buffers whose size may vary from 4K to 64K depending on the kernel
@@ -201,7 +202,7 @@ that in the current version of OpenSGX (v1.0), the interface will read/write
 data to/from the stub (shared memory) in buffers of 512 bytes. This immediately
 cancels a pipe buffer larger than this size, thus we designed SGXBridge to
 follow this assumption. We mention though, this does not affect our performance
-results, as our evaluation environment executes outside of the OpenSGX's
+results, as our evaluation environment executes outside of OpenSGX's
 runtime. For simplicity, we designed SGXBridge read()/write() operations to
 follow a similar API to UNIX's I/O interface. For brevity reasons, we omit the
 implementation details and we refer the reader to the documented code.
@@ -211,8 +212,8 @@ memory and can be accessed directly without the requirement of an IPC
 mechanism. We decided to use these interfaces for our project as it was an IPC
 facility already available within the OpenSGX library.
 
-\subsection{Compiler, Tools and Build system}.
-All the implementation parts were written in ‘C’ programming language. At
+\subsection{Compiler, Tools and Build system}
+All the implementation parts were written in `C' programming language. At
 various phases of the developments, we had to use tools such as Valgrind for
 profiling, Callgrind for call stack analysis and GDB for debugging. We
 developed and maintained a single bash script that automates the building and

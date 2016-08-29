@@ -6,7 +6,7 @@ utilised to scope the discussion. We consider a threat model similar
 to the one presented in Haven~\cite{Baumann14}. Our TCB includes a
 correctly implemented and SGX enabled CPU and all instructions
 executing and data resident within an enclave. Therefore, we assume an
-attacker cannot access the SGX processor key provisioned by Intel
+attacker cannot access the SGX processor key provisioned by \Intel
 itself, which is used to generate subsequent cryptographic keys that
 preserve the confidentiality, integrity and authenticity of an
 enclave.
@@ -19,7 +19,7 @@ attacks that originate from other sources such as CPU cache timing
 information (L1, L2, L3), power consumption or other entropy source
 are considered as out of scope of this work. We also assume an
 attacker may act as man-in-the-middle to eavesdrop active sessions
-and, as further analysed in the Section \ref{sec:limitations}, launch
+and as further analysed in Section \ref{subsec:limitations}, launch
 a denial-of-service attack, though without compromising any secret
 isolation guarantees of our design.
 
