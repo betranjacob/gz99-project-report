@@ -77,8 +77,7 @@ hardware where multi-threading is natively supported. Thus we limit our current
 model to a single core, and in the lack of possesion of real SGX hardware we
 leave multi-core support as future work.
 
-
-Nginx process will establish a unique SSL session ID for any 
+Second, Nginx process will establish a unique SSL session ID for any 
 connection only after the SSL handshake has successfully completed. It posed a 
 challenge how to distinguish multiple concorrent connection data in the enclave,
 prior to the TLS handshake completion.\footnote{In order to maximize
