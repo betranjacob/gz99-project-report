@@ -88,13 +88,14 @@ Note the logscale on the x axis.
  \end{figure}
 
 \subsubsection*{Analysis}
-As discussed in Section \ref{sec:cpu-instr-analysis}, note that there occur
-13 context switches for a request in the case for RSA and 21 context switches
-for each request in the case of ECDHE. We expected the performance penalty
-to be around 15\%, because each context switch causes a TLB flush, which in
-turn results in slower execution until the TLB is repopulated. Figure
-\ref{fig:cycles-requests} validates our hypothesis. It shows a performance
-penalty of \~18\% for RSA ciphers and \~33\% for ECDHE ciphers.
+As discussed in Section \ref{sec:cpu-instr-analysis}, note that there
+occur 13 context switches for a request in the case for RSA and 21
+context switches for each request in the case of ECDHE. We expected
+the performance penalty to be around 15\%, because each context switch
+causes a TLB flush, which in turn results in slower execution until
+the TLB is repopulated. Figure \ref{fig:cycles-requests} validates our
+hypothesis. It shows a performance penalty of \textasciitilde18\% for
+RSA ciphers and \textasciitilde33\% for ECDHE ciphers.
 
 % TODO: document keys inside/outside for the first graph
 % TODO: document the second graph
