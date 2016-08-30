@@ -9,8 +9,95 @@ we evaluated the effect of response size on end-to-end performance by
 varying the size of the response to a client's request.
 
 \subsubsection*{Test Setup}
+We run our tests on two Amazon EC2 m4.large instances, one for the server and
+the other for the client, located on different virtual machines within the same
+data center. These machines are comprised of 2 virtual CPUs with 8 GB RAM and
+and, according to \textit{iperf} (a network diagnostics tool), the network
+bandwidth between the two machines is 500 Mbits/s. The underlying hardware is
+an Intel Xeon E5-2676 v3 clocked @ 2.4 GHz with 30MB of CPU cache
+\cite{aws_instances}, running Ubuntu 14.04 with kernel version
+4.4.0-34-generic. We used \Apache~Benchmark to generate 5000 HTTPS requests
+across 10 concurrent connections and measure the performance of the server. We
+consider the following four scenarios:
+\begin{enumerate}
+  \item Using a cipher lacking support for forward secrecy, RSA-AES256-SHA,
+    with the design where session keys reside in the untrusted component
+  \item Using a cipher lacking support for forward secrecy,
+    RSA-AES256-GCM-SHA384, with the design where session keys reside in the
+    trusted component
+  \item Using a cipher offering support for forward secrecy,
+    ECDHE-AES256-GCM-SHA384, with the design where session keys reside in the
+    untrusted component
+  \item Using a cipher offering support for forward secrecy,
+    ECDHE-AES256-GCM-SHA384, with the design where session keys reside in
+    the trusted component
+\end{enumerate}
+
+For each of the above scenarios we run the test for a variable number of
+busywait cycles (from 0 to 50,000) and response sizes (from 1KB to 4MB). We
+setup NGINX with a single worker process due to the limitations mentioned in
+Section \ref{sec:implementation}.
+
 \subsubsection*{Results}
+Figure \ref{fig:cycles-requests} displays the server responses/s for varying
+number of busywait cycles. Figure \ref{fig:sizreqs} demonstrates the server
+responses/s for variable response size and zero number of busywait cycles.
+Note the logscale on the x axis.
+ \begin{figure}[H]
+   \centering
+   \begin{tikzpicture}
+     \begin{axis}[pretty,ylabel = Responses/Second, ymin = 0, xlabel =
+       Number Of Busywait Cycles (Cycles * $10^4$), legend pos=outer
+       north east, xtick scale label code/.code = {}]
+       \addplot table[y=Key Outside RSA, mark = *] from \cyclereqs;
+       \addlegendentry{Session Keys Outside \textit{RSA}}; \addplot
+       table[y=Stock RSA, mark = *] from \cyclereqs;
+       \addlegendentry{Stock \textit{RSA}}; \addplot
+       table[y=Stock ECDHE, mark = *] from \cyclereqs;
+       \addlegendentry{Stock \textit{ECDHE}}; \addplot
+       table[y=Key Outside ECDHE, mark = *] from \cyclereqs;
+       \addlegendentry{Session Keys Outside \textit{ECDHE}}; \addplot
+       table[y=Key Inside RSA, mark = *] from \cyclereqs;
+       \addlegendentry{Session Keys Inside\textit{RSA}}; \addplot
+       table[y=Key Inside ECDHE, mark = *] from \cyclereqs;
+       \addlegendentry{Session Keys Inside \textit{ECDHE}};
+     \end{axis}
+   \end{tikzpicture}
+   \caption{Graph of busywait cycles vs. requests per second}
+   \label{fig:cycles-requests}
+ \end{figure}
+
+ \begin{figure}[H]
+   \centering
+   \begin{tikzpicture}
+     \begin{axis}[pretty,ylabel = Responses/Second, ymin = 0, xmode =
+       log,xlabel = Response Size (KB), legend pos=outer north east,
+       xtick scale label code/.code = {}]
+       \addplot table[y=Stock RSA, mark = *] from \sizereqs;
+       \addlegendentry{Stock \textit{RSA}}; \addplot table[y=Stock
+       ECDHE, mark = *] from \sizereqs; \addlegendentry{Stock
+         \textit{ECDHE}}; \addplot table[y=Key Outside RSA, mark = *]
+       from \sizereqs; \addlegendentry{Session Keys Outside
+         \textit{RSA}}; \addplot table[y=Key Outside ECDHE, mark = *]
+       from \sizereqs; \addlegendentry{Session Keys Outside
+         \textit{ECDHE}};
+     \end{axis}
+   \end{tikzpicture}
+   \caption{Graph of response size vs. requests per second}
+   \label{fig:sizreqs}
+ \end{figure}
+
 \subsubsection*{Analysis}
+As discussed in Section \ref{sec:cpu-instr-analysis}, note that there occur
+13 context switches for a request in the case for RSA and 21 context switches
+for each request in the case of ECDHE. We expected the performance penalty
+to be around 15\%, because each context switch causes a TLB flush, which in
+turn results in slower execution until the TLB is repopulated. Figure
+\ref{fig:cycles-requests} validates our hypothesis. It shows a performance
+penalty of \~18\% for RSA ciphers and \~33\% for ECDHE ciphers.
+
+% TODO: document keys inside/outside for the first graph
+% TODO: document the second graph
 \end{document}
 
 %%% Local Variables:

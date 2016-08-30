@@ -46,7 +46,7 @@ of 1000 HTTPS requests/s, to NGINX. We ran the test four times:
     RSA-AES256-SHA, with the design where session keys reside in the
     untrusted component
   \item Using a cipher lacking support for forward secrecy,
-    RSA-AES256-SHA, with the design where session keys reside in the
+    RSA-AES256-GCM-SHA384, with the design where session keys reside in the
     enclave
   \item Using a cipher offering support for forward secrecy,
     ECDHE-AES256-GCM-SHA384, with the design where session keys reside in
