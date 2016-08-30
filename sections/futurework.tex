@@ -11,11 +11,14 @@ can distribute the workload generated from different NGINX worker processes to
 separate threads. Consequently a large number of client requests can be
 honoured concurrently.
 
-In the interest of time, we also deferred the support for SSL SessionTickets in
-the current implementation. We consider incorporating this feature in the
-future, so the server does not have to cache any SSL session information except
-from the ticket's keys. This will significantly reduce the memory overhead
-generated to support larger number of clients within an enclave.
+We also deferred the support for SSL SessionTickets in the current
+implementation. We consider incorporating this feature in the future, so the
+server does not need to cache any SSL session information except from the
+ticket's keys. This will significantly reduce the memory overhead generated to
+support larger number of clients within an enclave. Also, having observed the
+evaluation results, we identified certain performance optimizations we could do
+to reduce the number of context switches. In the interest of time, we left
+such improvements in our implementation as future work.
 \end{document}
 
 %%% Local Variables:
