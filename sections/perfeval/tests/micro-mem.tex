@@ -80,9 +80,17 @@ enclave program wasted on waiting for cache misses\footnote{According
 \end{table}
 
 \subsubsection*{Analysis of Results}
-% Before running this microbenchmark, we expected to see
-% little to no cache 
-
+Before running this microbenchmark, we expected to see little memory
+ accesses on key-outside implementation because it only process ssl
+ handshake. All data should be able to fit in the cache and not require
+ memory access. From the test result, we found that memory access rate can 
+ range from 0% to 0.11% of total cycles spent.  In the best case, we may 
+ have no overhead from memory encryption because all data fit in cache. 
+ Testing from Intel[REFERENCE] indicate that application can slowdown from 
+ 5% to 14%. Intel tuning guide suggest that typical programs have cache 
+ misses at 0.2%. Therefore, we estimate that our implementation could slow 
+ down for up to 9.5% based on the assumption that our implementation has 
+ 0.55 of typical application cache miss rate.
 \end{document}
 
 %%% Local Variables:
