@@ -78,19 +78,18 @@ model to a single core, and in the lack of possesion of real SGX hardware we
 leave multi-core support as future work.
 
 
-Since Nginx and SGX Enclave run as two independant process, it posed a challenge
-how to distinguish multiple concorrent connection data in the enclave, even at the 
-very begining of a TLS handshake process.\footnote{In order to maximize
+Nginx process will establish a unique SSL session ID for any 
+connection only after the SSL handshake has successfully completed. It posed a 
+challenge how to distinguish multiple concorrent connection data in the enclave,
+prior to the TLS handshake completion.\footnote{In order to maximize
 performance, a web server will try to switch between ongoing connections while
 it waits for network I/O, which immediately poses the requirement for an
 enclave to be aware of multiple SSL sessions. Regarding our design, not dealing
 with concurrent connections, would mean that the enclave would only be able to
 handle a single connection at a time which would have severe perfomance impact
-to our design.}.Nginx process will establish a unique SSL session ID for every 
-connection only after the SSL handshake has successfully completed. To remedy this, 
-we had to modify NGINX to generate an SGX specific ID, whenever a new connection 
-request arrives. The enclave process uses this ID to distinguish the data specific 
-to a particular connection. Upon successful completion of the SSL handshake, the 
+to our design.}.To remedy this, we had to modify NGINX to generate an SGX specific ID, 
+whenever a new connection request arrives. The enclave process uses this ID to distinguish
+the data specific to a particular connection. Upon successful completion of the SSL handshake, the 
 mapping key in the enclave will be switched to the appropriate session ID. We explain 
 further in Section\ref{subsec:opensgx} how this scheme enables our system to handle 
 SSL session resumption.
