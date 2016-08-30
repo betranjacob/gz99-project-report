@@ -1,8 +1,12 @@
 \documentclass[../../../main.tex]{subfiles}
 
 \begin{document}
-We conducted this analysis to uncover the impact of our
-design and SGX instructions on end-to-end web server performance.
+We conducted this analysis to uncover the impact of our design and SGX
+instructions on end-to-end web server performance. To this end, we
+utilised the performance model, while varying the number of busywait
+cycles, to approximate the overhead of SGX instructions. Additionally,
+we evaluated the effect of response size on end-to-end performance by
+varying the size of the response to a client's request.
 
 \subsubsection*{Test Setup}
 \subsubsection*{Results}
