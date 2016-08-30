@@ -32,10 +32,10 @@
 
 \begin{document}
 
-In this section, we highlight the system's components along with their
-necessary modifications, the rationale and challenges behind them and discuss
-the implementation considerations we made in realizing the final design. We
-built a prototype of our design which consists of the following parts: NGINX
+In this section, we discuss about the system components along with their
+necessary modifications. We also emphasize on the challenges and the rationale
+leading to a particular design approach that we have taken. We built a 
+prototype of our design which consists of the following parts: NGINX, 
 which is an event-driven web server achieving state-of-the-art performance,
 LibreSSL as an implementation of the SSL/TLS protocol, OpenSGX as an emulation
 environment of \Intel's SGX hardware and SGXBridge, a narrow interface that
@@ -77,23 +77,21 @@ hardware where multi-threading is natively supported. Thus we limit our current
 model to a single core, and in the lack of possesion of real SGX hardware we
 leave multi-core support as future work.
 
-Second, although not directly connected to NGINX's event-driven architecture
-but an implementation detail we would have to deal with regardless of our
-choice of web server, we discuss a simple scheme we used for enabling the
-enclave to handle multiple connections at a time \footnote{In order to maximize
+Second, Nginx process will establish a unique SSL session ID for any 
+connection only after the SSL handshake has successfully completed. It posed a 
+challenge how to distinguish multiple concorrent connection data in the enclave,
+prior to the TLS handshake completion.\footnote{In order to maximize
 performance, a web server will try to switch between ongoing connections while
 it waits for network I/O, which immediately poses the requirement for an
 enclave to be aware of multiple SSL sessions. Regarding our design, not dealing
 with concurrent connections, would mean that the enclave would only be able to
 handle a single connection at a time which would have severe perfomance impact
-to our design.}. Ultimately, the SSL session ID is used to map against a
-session's state within the enclave, though this ID is only available when the
-SSL handshake successfully completes. We modified NGINX to assign a randomly
-generated SGX specific ID to a new incoming connection, which would be used by
-the enclave until an SSL handshake completes and the mapping key changes to the
-now established SSL session ID. We explain further in Section
-\ref{subsec:opensgx} how this scheme enables our system to handle SSL session
-resumption.
+to our design.}.To remedy this, we had to modify NGINX to generate an SGX specific ID, 
+whenever a new connection request arrives. The enclave process uses this ID to distinguish
+the data specific to a particular connection. Upon successful completion of the SSL handshake, the 
+mapping key in the enclave will be switched to the appropriate session ID. We explain 
+further in Section\ref{subsec:opensgx} how this scheme enables our system to handle 
+SSL session resumption.
 
 \subsection{LibreSSL}
 \label{subsec:libressl}
