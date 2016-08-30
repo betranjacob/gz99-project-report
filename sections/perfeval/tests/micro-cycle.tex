@@ -1,0 +1,75 @@
+\documentclass[../../../main.tex]{subfiles}
+
+\begin{document}
+\label{sec:cpu-instr-analysis}
+This test is designed to measure the overhead of the enclave implementation
+against the stock version. The benchmark consists of two parts.  In the first
+part, we count the number of instructions for NGINX with model implementation
+to evaluate the cost our design. After the results from model implementation
+wereobtained, we run the \textit{enclave program} in OpenSGX to emulate the SGX
+instruction set.
+
+\subsubsection*{Test Setup}
+In the first test, we instrument NGINX with model enclave implementation using
+\textit{Perf}. Perf is a standard linux tool to measure various performance
+counters. The requests are generated from \Apache~Benchmark. Due to limitation
+of OpenSGX performance, we run only 50 requests for each cipher with 2
+concurrent connections.
+
+In the second test, the enclave is run on OpenSGX platform to emulate SGX
+instructions. OpenSGX is modified to display application statistics of executed
+SGX instructions. We have to ignore the cost of the SGX instructions during
+enclave startup, because these instructions are executed only once to prepare
+the SGX environment and do not affect the application's response rate in the
+long run. Therefore, we have to measure SGX instructions that run on each
+request.
+
+\subsubsection*{Results}
+Table \ref{tab:cpu-instr-count} shows the number of instructions that were
+combined from both parts of this test. The number of executed instructions
+in NGINX and in the \textit{enclave program} were obtained from \textit{perf}.
+The detailed SGX instruction count in Table \ref{tab:sgx-encls} are executed
+only once during startup. Table \ref{tab:sgx-enclu}, shows the SGX instructions
+executed in each request. Results for both Tables \ref{tab:sgx-encls} and
+\ref{tab:sgx-enclu} were obtained from OpenSGX.
+
+\begin{table}[H]
+  \resizebox{\linewidth}{!}{ \pgfplotstabletypeset[assign column
+    name/.style={/pgfplots/table/column name={\textbf{#1}}},col
+    sep=comma, header=has colnames]{results/instruction_count.csv}}
+  \caption{CPU Instruction Count Analysis}
+  \label{tab:cpu-instr-count}
+\end{table}
+
+\begin{table}[H]
+  \center
+  \footnotesize
+  \pgfplotstabletypeset[assign column
+    name/.style={/pgfplots/table/column name={\textbf{#1}}},col
+    sep=comma, header=has colnames]{results/sgx_detail_instruction_count_s.csv}
+  \caption{SGX Privileged Instructions Count}
+  \label{tab:sgx-encls}
+\end{table}
+
+\begin{table}[H]
+  \resizebox{\linewidth}{!}{ \pgfplotstabletypeset[assign column
+    name/.style={/pgfplots/table/column name={\textbf{#1}}},col
+    sep=comma, header=has colnames]{results/sgx_detail_instruction_count_u.csv}}
+  \caption{SGX Unprivileged User Instructions Count}
+  \label{tab:sgx-enclu}
+\end{table}
+
+\subsubsection*{Analysis of Results}
+As shown in Table \ref{tab:cpu-instr-count}, our implementation added 14.5\% of
+executed instructions regarding the design where the session keys reside
+outside of the enclave and 16.5\% regarding the design with session keys
+reside inside the enclave. While the difference between the number of executed
+instructions between the keys-outside and keys-inside are small, the proportion
+of instructions executed between the untrusted and trusted component are very
+different. Only 4.2\% of instructions were executed in the enclave with the
+key-outside implementation but there were 97.7\% of instructions executed in
+the enclave for the key-inside implementation. There could be a performance
+impact on the key-inside compared to the key-outside implementation, because of
+the effect of memory encryption in the enclave, as discussed in Section
+\ref{sec:mem-analysis}.
+\end{document}

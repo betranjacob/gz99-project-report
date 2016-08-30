@@ -1,1 +1,17 @@
-sgx instruction,count,,,,,,encls,16679,,,,,,ecreate,1,,,,,,eadd,981,,,,,,eextend,15696,,,,,,einit,1,,,,,,eaug,0,,,,,,enclu,16,,,,,,eenter,1,,,,,,eresume,7,,,,,,eexit,8,,,,,,egetkey,0,,,,,,ereport,0,,,,,,eaccept,0,,,,,,mode switch,16,,,,,,tlb flush,16,,,,,,total,33422,,,,,,
+SGX Instruction,Count
+ENCLS,16679
+ECREATE,1
+EADD,981
+EEXTEND,15696
+EINIT,1
+EAUG,0
+ENCLU,16
+EENTER,1
+ERESUME,7
+EEXIT,8
+EGETKEY,0
+EREPORT,0
+EACCEPT,0
+Mode Switch,16
+TLB Flush,16
+Total,33422
