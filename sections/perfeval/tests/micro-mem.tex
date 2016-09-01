@@ -60,13 +60,13 @@ requests/s to NGINX.
 We ran the test eight times, requesting 1 KB and 32 MB objects for each of the
 cases below:
 \begin{enumerate}
-  \item Using RSA-AES256-GCM-SHA cipher, lacking support for forward secrecy,
+  \item Using AES256-GCM-SHA384 cipher, lacking support for forward secrecy,
     with the design where session keys reside in the untrusted component.
-  \item Using RSA-AES256-GCM-SHA384 cipher, with the design where session keys
+  \item Using AES256-GCM-SHA384 cipher, with the design where session keys
     reside inside the enclave.
-  \item Using ECDHE-AES256-GCM-SHA384, cipher offering forward secrecy, with
+  \item Using ECDHE-RSA-AES256-GCM-SHA384, cipher offering forward secrecy, with
     the design where session keys reside in the untrusted component.
-  \item Using ECDHE-AES256-GCM-SHA384, with the design where session keys
+  \item Using ECDHE-RSA-AES256-GCM-SHA384, with the design where session keys
     reside inside the enclave.
 \end{enumerate}
 
