@@ -40,9 +40,11 @@ are as follows:
 The first and second requirement are met by a process called
 inter-platform attestation, outlined by \Intel~
 in~\cite{IntelCorporation2010} and summarized in the following
-section\footnote{\Intel~ did not devise this mechanism, and it has been
-used before in other Trusted Execution Environments (TEE) to
-provision the TEE with highly sensitive secrets}.
+section\footnote{\Intel~ did not devise this mechanism, and it has
+  been used before in other Trusted Execution Environments (TEE) to
+  provision the TEE with highly sensitive secrets}. To meet the last
+requirement, however, we extended the scheme outlined by \Intel to
+permit the verification of provisioning entity.
 
 \subsubsection{Inter-platform attestation and secret provisioning}
 
@@ -117,10 +119,10 @@ The steps involved in the attestation process are as follows
 
 \Intel has also added a construct that allows an \textit{enclave
 program} to generate keys that can be used to encrypt sensitive data
-and persisit it on disk. The only entities privy to the key are the
+and persist it on disk. The only entities privy to the key are the
 \textit{enclave program} and the CPU, therefore, only these two
 entities can access the sealed data\footnote{This is not entirely
-true, \Intel defined the EGETKEY instruction, the one that generates
+true. \Intel defined the EGETKEY instruction, the one that generates
 the sealing keys such that it takes an argument of either MRENCLAVE or
 MRSIGNER. If MRENCLAVE is used, then the sealing key generated is
 unique to the invoking \textit{enclave program}. If MRSIGNER is used,
@@ -138,10 +140,10 @@ cryptography and SGX's guarantees.
 First, the server-administrator, before shipping the server program to
 the cloud-provider, stores the public key for the challenger within
 the text-area of the trusted component. The reason for this comes from
-realizing that doing so binds the public key to the identity of the
+realising that doing so binds the public key to the identity of the
 trusted component, and as a result, the SGX-enabled CPU would not
 start the trusted-component if the public key has been tampered
-with. All that remains now is for challenger to sign the long term
+with. All that remains now is for challenger to sign the long-term
 private key with their own key, enabling the trusted-component to
 verify it using the challenger's public-key that was shipped along
 with the server-program.

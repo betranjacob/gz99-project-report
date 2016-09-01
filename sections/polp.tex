@@ -2,7 +2,7 @@
 
 \begin{document}
 The first of our goals (see Section~\ref{sec:introduction}) has been
-extensively addressed in previous works ~\cite{Bittau08, Krohn2004}
+extensively addressed in previous work ~\cite{Bittau08, Krohn2004}
 through use of the principle of least privilege. The principle of
 least privilege (PoLP) requires that components of a system operate
 with the minimum resources required to complete their respective
@@ -18,20 +18,21 @@ compromising the long-term private key.
 To motivate the design of our system, we begin by discussing a system
 called Wedge~\cite{Bittau08} that was used to refactor Apache, by
 enforcing PoLP, securing the private key in the face of an adversary
-who is capable of exploiting the web server application. Wedge's
-authors concentrated their efforts on SSL/TLS ciphers that do not
-offer forward secrecy, and the scenario where only the client verifies
-the server's identity as part of the SSL/TLS handshake.
-Figure~\ref{fig:pristrsashake} illustrates the resulting SSL/TLS
-handshake. We refer to this handshake as the ``RSA'' handshake for
-brevity\footnote{The cipher usually used in this handshake is RSA;
-  hence the name}. The asymmetric key exchange step is not necessary
-here, as mentioned in the previous section. The symmetric key
-negotiation step comprises of the client generating a random value for
-\texttt{PremasterSecret}, encrypting it in the server's public key,
-and sending the resulting packet to the server. Observe that the
-long-term private key, as a result, is only used in decrypting
-\premaster.
+who is capable of exploiting the web server application. However, the
+design introduced in the Wedge paper assumed a trusted OS, hypervisor,
+and cloud-provider. Moreover, Wedge's authors concentrated their
+efforts on SSL/TLS cipher suites that do not offer forward secrecy,
+and the scenario where only the client verifies the server's identity
+as part of the SSL/TLS handshake. Figure~\ref{fig:pristrsashake}
+illustrates the resulting SSL/TLS handshake. We refer to this
+handshake as the ``RSA'' handshake for brevity\footnote{The asymmetric
+  cipher usually used in this handshake is RSA; hence the name}. The
+asymmetric key exchange step is not necessary here, as mentioned in
+the previous section. The symmetric key negotiation step comprises of
+the client generating a random value for \texttt{PremasterSecret},
+encrypting it in the server's public key, and sending the resulting
+payload to the server. Observe that the long-term private key, as a
+result, is only used in decrypting \premaster.
 
 \begin{figure}[H]
   \centering
@@ -39,7 +40,7 @@ long-term private key, as a result, is only used in decrypting
   \caption[SSL/TLS ``RSA'' handshake]{SSL/TLS handshake for ciphers
     that do not offer forward secrecy. $K$ here is the server's public
     key, and the braces around \texttt{PremasterSecret} indicate the
-    packet is encrypted}
+    payload is encrypted}
   \label{fig:pristrsashake}
 \end{figure}
 
@@ -50,8 +51,8 @@ model where the adversary is capable of passively eavesdropping on
 secure communication channels and exploiting unprivileged components
 of the server. We did not consider the second threat model detailed in
 the Wedge paper, wherein an attacker is capable of actively modifying
-packets exchanged between the web server and client, because the
-solution presented in there does not hold if we remove the assumption
+payloads exchanged between the web server and client, because the
+solution presented there does not hold if we remove the assumption
 that the OS and cloud provider are trusted. This is a consequence of
 the web server's user-level processes (dynamic content generation
 scripts, databases \&c.)  requiring data in plain-text to complete
@@ -64,7 +65,7 @@ discussed in Section~\ref{sec:design}.
 
 There are two main attacks that may be mounted by an adversary capable
 of exploiting \textit{only} unprivileged components of the web
-server application and passively eavesdropping on packets exchanged
+server application and passively eavesdropping on payloads exchanged
 between the server and the client:
  
 \begin{enumerate}
@@ -80,16 +81,16 @@ between the server and the client:
       \label{fig:attack1}
     \end{figure}
 
-  \item The adversary may record traffic exchanged over the SSL/TLS
+  \item The adversary may record traffic previously exchanged over the SSL/TLS
     channel and then exploit a naive session key generation interface to
-    acquire the session keys used in that exchange. A naive interface is
+    acquire the session keys generated in that prior exchange. A naive interface is
     one that accepts \crandom, \srandom, and \premaster~ where $K$ is the
     web server's public key. Such an interface allows an adversary, after
     exploiting the unprivileged component, to generate any previously
     eavesdropped session's symmetric key and is, therefore, no different
     to having read access to the private key from the adversary's
-    perspective. This exploit only works if the cipher used does not offer
-    forward secrecy, and it only affects the single session which was
+    perspective. This exploit only works if the cipher suite used does not offer
+    forward secrecy, and it only affects the single session that was
     eavesdropped. The attack is illustrated in Figure~\ref{fig:attack2}.
 
     \begin{figure}[H] \centering
@@ -113,7 +114,13 @@ be seen in Figure~\ref{fig:wedge-partition}.
   \centering
   \includegraphics[scale=0.25]{images/compartment_01.png}
   \caption{Partitioning Scheme to protect against leaking the private
-    key~\cite{Bittau08}}
+    key. The ovals represent system components, shaded ones are
+    privileged. Dashed arrows from one component to another indicate a
+    component's abillity to invoke a privileged component's interface.
+    Boxes correspond to memory objects. The double-headed arrows
+    between a system component and a memory object indicates a
+    component's read/write privileges to the memory object. A single
+    headed arrow corresponds to read-only access.~\cite{Bittau08}}
   \label{fig:wedge-partition}
 \end{figure}
 
@@ -136,9 +143,9 @@ cloud provider, simply read the key from disk\footnote{Even if the
   long-term private key is encrypted on disk, the key for decrypting
   it must be present in the binary file of the privileged component
   (which is unencrypted), or in the process's memory at runtime in
-  plain-text}. A hardware component, called a trusted platform module,
-has been utilised in an effort to secure the private key against the
-adversaries described above.
+  plain-text}. Other prior works has used a hardware component called
+a trusted platform module in an effort to secure the private key
+against the adversaries described above.
 
 \end{document}
 
