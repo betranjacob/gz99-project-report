@@ -90,7 +90,7 @@ to our design.}. To remedy this, we had to modify NGINX to generate an SGX speci
 whenever a new connection request arrives. The enclave process uses this ID to distinguish
 the data specific to a particular connection. Upon successful completion of the SSL handshake, the 
 mapping key in the enclave will be switched to the appropriate session ID. We explain 
-further in Section\ref{subsec:opensgx} how this scheme enables our system to handle 
+further in Section~\ref{subsec:opensgx} how this scheme enables our system to handle 
 SSL session resumption.
 
 \subsection{LibreSSL}
@@ -200,7 +200,7 @@ mechanism. We decided to use these interfaces for our project as it was an IPC
 facility already available within the OpenSGX library.
 
 \subsection{Implementation Phases and Tools used}
-\label{subsec:Implementation Phases and Tools used}
+% \label{subsec:Implementation Phases and Tools used}
 Our primary goal in implementation part was to understand the code flow in LibreSSL
 engine and identify the specific functions and data structures that handles Server’s 
 private key. We used a tool called Callgrind to discover the dynamic flow of execution 
@@ -209,30 +209,30 @@ and provides a snapshot of the runtime behaviour of an application. We further u
 tool called KCachegrind, which graphically represent the large amount of data 
 Callgrind produces and made it easy to navigate.
  
-LibreSSL holds an SSL factory (SSL_CTX) which can be used to create separate SSL objects
+LibreSSL holds an SSL factory (SSL\_CTX) which can be used to create separate SSL objects
 to identify each individual connection. SSL connection objects holds the entire 
 data structures related to any particular connection and are used to do SSL handshakes
-routines, reads, and writes. In the enclave we created a new SSL_CTX factory and loaded
+routines, reads, and writes. In the enclave we created a new SSL\_CTX factory and loaded
 private key and certificate. Furthermore, we maintain a separate SSL connection object (SSL)
 to isolate the data specific to a connection.   
  
 Most of the abstract level functions pertaining to private/session key isolation were defined  
 in following source files from Libressl library.
 \begin{enumerate}
-  \item S3_srvr.c
-  \item t1_enc.c
+  \item S3\_srvr.c
+  \item t1\_enc.c
 \end{enumerate}
  
 When NGINX receives a new HTTPS connection request after a classic \textit{accept()} function 
-on the socket, it invokes the \textit{SSL_Accept()} which causes the LibreSSL to perform the 
+on the socket, it invokes the \textit{SSL\_Accept()} which causes the LibreSSL to perform the 
 server side of SSL handshake. It is a blocking call until the entire handshake is complete. 
 we had a comprehensive review of every switch-cases within this API and identified various 
 internal functions (and associated data structures) invoked during the different steps 
 involved in a handshake. At appropriate points within the sub functions we forwarded and read 
-data to and from the enclave. For instance, during handshake after receiving a \textit{client_hello}
+data to and from the enclave. For instance, during handshake after receiving a \textit{client\_hello}
 message,LibreSSL loads the \textit{client-random} to SSL connection object and generates a \textit{server-random}. 
-We have replaced this code such that \textit{client_random} will be send to the enclave and read
-the \textit{server_random} generated within the enclave. Similarly, we identified specific snippets within
+We have replaced this code such that \textit{client\_random} will be send to the enclave and read
+the \textit{server\_random} generated within the enclave. Similarly, we identified specific snippets within
 the code base, that require private key, then send the data to enclave to perform operations such as 
 decrypting, signing, etc. 
 
