@@ -1,6 +1,7 @@
 \documentclass[../../../main.tex]{subfiles}
 
 \begin{document}
+\label{sec:endtoend}
 We conducted this analysis to uncover the impact of our design and SGX
 instructions on end-to-end web server performance. To this end, we
 utilised the performance model, while varying the number of busywait
@@ -43,7 +44,7 @@ limitations mentioned in Section \ref{sec:implementation}.
 Figure \ref{fig:cycles-requests} displays the server responses/s for
 varying number of busywait cycles. Figure \ref{fig:sizreqs}
 demonstrates the server responses/s for variable response size and
-zero number of busywait cycles. Note the logscale on the x axis.
+zero number of busywait cycles. Note that each point represents a response double the size of the previous point and the logscale on the x axis.
 \begin{figure}[H]
   \centering
   \begin{tikzpicture}

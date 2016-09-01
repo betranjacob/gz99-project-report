@@ -2,7 +2,23 @@
  
 \begin{document}
 \subfile{sections/perfeval/intro-perfeval.tex}
-\subfile{sections/perfeval/root.tex}
+
+% \subfile{sections/perfeval/root.tex}
+\subsection{Performance Model}
+\subfile{sections/perfeval/tests/perf-model.tex}
+
+\subsection{Microbenchmarks}
+\subsubsection{Memory Overhead Analysis}
+\subfile{sections/perfeval/tests/micro-mem.tex}
+\subsubsection{CPU Instruction Count Analysis}
+\subfile{sections/perfeval/tests/micro-cycle.tex}
+\subsubsection{TCB Size Analysis}
+\subfile{sections/perfeval/tests/tcb.tex}
+
+\subsection{End-to-end Evaluation}
+\subfile{sections/perfeval/tests/end-to-end.tex}
+\end{document}
+
 
 
 % We developed our prototype using OpenSGX which, as detailed in
@@ -243,7 +259,7 @@
 
 % \subsection{Discussion}
 
-\end{document}
+% \end{document}
 
 %%% Local Variables:
 %%% mode: latex

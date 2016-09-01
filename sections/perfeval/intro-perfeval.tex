@@ -1,27 +1,24 @@
 \documentclass[../../main.tex]{subfiles}
 
 \begin{document}
-We wanted to evaluate the performance overhead introduced by: (1) our
-design (2) executing within an SGX enclave. However, we developed our
-prototype using OpenSGX which, as detailed in
-Section~\ref{sec:background}, is an emulator for the SGX instruction
-set and relies on QEMU to execute the trusted code. Consequently, we
-could not evaluate the prototype's performance by executing it and
-capturing performance measures.
+We wanted to evaluate the performance overhead introduced by: (1) our design
+and (2) executing within an SGX enclave. However, we developed our prototype
+using OpenSGX which, as detailed in Section~\ref{sec:background}, is an
+emulator for the SGX instruction set and relies on QEMU to execute the trusted
+code. Consequently, we could not evaluate the prototype's performance by
+simply executing it and capturing performance measures.
 
-The remainder of this section describes a performance model we
-employed, similar to the one used by~\cite{Baumann14}, to circumvent
-the aformentioned issue, a set of microbenchmarks developed to
-measure:
+The remainder of this section describes the performance model we employed to
+circumvent the lack of real SGX hardware, a set of microbenchmarks developed
+to measure:
 \begin{enumerate}
   \item The number of CPU instructions added by our design to the
     stock implementation of NGINX + LibreSSL.
-  \item The performance impact introduced by the memory encryption
-    engine in accessing main memory. Since we do not have access to SGX
-    hardware, we used Last Level Cache (LLC) miss rates as a proxy for
-    estimating the overhead.
+  \item The performance impact, due to accessing main memory, introduced by
+    the SGX memory encryption engine.
+  \item The size of the TCB compared to the stock implementation.
 \end{enumerate}
-and an evaluation of end-to-end performance.
+and the evaluation of end-to-end performance.
 \end{document}
 
 %%% Local Variables:

@@ -6,7 +6,7 @@ This test is designed to measure the overhead of the enclave implementation
 against the stock version. The benchmark consists of two parts.  In the first
 part, we count the number of instructions for NGINX with model implementation
 to evaluate the cost our design. After the results from model implementation
-wereobtained, we run the \textit{enclave program} in OpenSGX to emulate the SGX
+wereobtained, we run the \enclaveprogram in OpenSGX to emulate the SGX
 instruction set.
 
 \subsubsection*{Test Setup}
@@ -27,7 +27,7 @@ request.
 \subsubsection*{Results}
 Table \ref{tab:cpu-instr-count} shows the number of instructions that were
 combined from both parts of this test. The number of executed instructions
-in NGINX and in the \textit{enclave program} were obtained from \textit{perf}.
+in NGINX and in the \enclaveprogram were obtained from \textit{perf}.
 The detailed SGX instruction count in Table \ref{tab:sgx-encls} are executed
 only once during startup. Table \ref{tab:sgx-enclu}, shows the SGX instructions
 executed in each request. Results for both Tables \ref{tab:sgx-encls} and
