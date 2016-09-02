@@ -3,7 +3,7 @@
 \begin{document}
 \label{sec:perfmodel}
 To model the performance of our prototype we implemented a second version of
-the \enclaveprogram, that we call \busywait or \enclavemodel, which
+the \enclaveprogram, that we call \busywait~or \enclavemodel, which
 has no dependencies on OpenSGX. For our model, we make the same assumptions
 as~\cite{Baumann14}, namely we assume that:
 \begin{enumerate}
@@ -13,7 +13,12 @@ as~\cite{Baumann14}, namely we assume that:
     component and any data structures created after program start-up.
 \end{enumerate}
 
-The \busywait replaces certain SGX instructions with busy waits (by looping on the RDTSC register), simulating the overhead in executing them. SGX instructions that bootstrap the enclave and verify its integrity are executed only once, at startup, and therefore have no effect on runtime performance. As a result, we only simulate the overhead of instructions used to switch to and from the \enclaveprogram, i.e.\ EENTER, ERESUME and EEXIT.
+The \busywait~replaces certain SGX instructions with busy waits (by looping on
+the RDTSC register), simulating the overhead in executing them. SGX
+instructions that bootstrap the enclave and verify its integrity are executed
+only once, at startup, and therefore have no effect on runtime performance. As
+a result, we only simulate the overhead of instructions used to switch to and
+from the \enclaveprogram, i.e.\ EENTER, ERESUME and EEXIT.
 
 Simulating the slow down in memory accesses due to the need for decrypting
 DRAM contents before being able to access them in processors cache was carried

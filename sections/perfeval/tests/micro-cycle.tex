@@ -10,16 +10,16 @@ stock version.
 
 % TODO: is there a better place for this?
 OpenSGX comes with two options that should report the SGX instruction counts,
-\textit{-i} and \textit{--perf}. Unfortunatelly, neither of them worked
+\textit{-i} and \textit{-{}-perf}. Unfortunatelly, neither of them worked
 correctly so we modified OpenSGX to always return the program statistics upon
 enclave termination.
 
 \subsubsection*{Test Setup}
 This benchmark consists of multiple parts: (1) we count the number of
 instructions executed for vanilla NGINX + LibreSSL; (2) we measure the
-instruction counts, of modified NGINX and \enclavemodel (untrusted and trusted
+instruction counts, of modified NGINX and \enclavemodel~(untrusted and trusted
 components) separately; (3) we capture the number and type of SGX instructions
-executed by the \enclaveprogram during:
+executed by the \enclaveprogram~during:
 \begin{enumerate}
   \item The enclave startup.
   \item Normal operation.
@@ -28,12 +28,12 @@ executed by the \enclaveprogram during:
 For parts (1) and (2), we capture the instruction counts using \textit{perf},
 a standard linux tool for program profiling.
 
-For part (3a), we launch the \enclaveprogram under OpenSGX and instrumented
+For part (3a), we launch the \enclaveprogram~under OpenSGX and instrumented
 NGINX as usual, wait for 30 seconds to ensure the startup has fully completed
 and terminate the NGINX which also terminates the \enclaveprogram.
 
 For part (3b), we run the same workload as for parts (1) and~(2), executing
-the \enclaveprogram under OpenSGX.
+the \enclaveprogram~under OpenSGX.
 
 The requests for (1), (2) and (3b) are generated using \Apache~Benchmark. Due
 to limitation of OpenSGX performance (very long encryption/decrypton times),
@@ -45,7 +45,7 @@ designs, for each of the following ciphers:
 \end{enumerate}
 
 \subsubsection*{Results}
-Table \ref{tab:cpu-instr-count} combines the results obtained from parts (1),
+Table~\ref{tab:cpu-instr-count} combines the results obtained from parts (1),
 (2) and (3b). It shows the sum of instructions executed over 50 requests.
 Currently it also combines the instructions for RSA and ECDHE ciphers. The SGX
 instructions reported exclude the the instructions executed at enclave startup.
@@ -54,7 +54,7 @@ instructions reported exclude the the instructions executed at enclave startup.
 The SGX instruction counts detailed in Table~\ref{tab:sgx-encls} are executed
 only once during startup and are the result of part (3a) of the benchmark.
 
-Table \ref{tab:sgx-enclu} shows the SGX instructions executed per request. It
+Table~\ref{tab:sgx-enclu} shows the SGX instructions executed per request. It
 was obtained by subtracting the values in Table~\ref{tab:sgx-encls} from the
 values obtained from part (3b) and dividing the result by number of requests.
 We also verified that these match the values reported when executing only one
@@ -100,7 +100,7 @@ request.
 
 \subsubsection*{Analysis of Results}
 % TODO: i havent touched this yet, Ahmed please help
-As shown in Table \ref{tab:cpu-instr-count}, our implementation added 14.5\% of
+As shown in Table~\ref{tab:cpu-instr-count}, our implementation added 14.5\% of
 executed instructions regarding the design where the session keys reside
 outside of the enclave and 16.5\% regarding the design with session keys
 reside inside the enclave. While the difference between the number of executed
@@ -110,6 +110,6 @@ different. Only 4.2\% of instructions were executed in the enclave with the
 key-outside implementation but there were 97.7\% of instructions executed in
 the enclave for the key-inside implementation. There could be a performance
 impact on the key-inside compared to the key-outside implementation, because of
-the effect of memory encryption in the enclave, as discussed in Section
-\ref{sec:mem-analysis}.
+the effect of memory encryption in the enclave, as discussed in
+Section~\ref{sec:mem-analysis}.
 \end{document}

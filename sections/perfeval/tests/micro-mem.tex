@@ -6,7 +6,7 @@ SGX incorporates a hardware memory encryption engine (MEE) that encrypts any
 data that resides in an enclave's reserved area in DRAM. The MEE also decrypts
 data that is required by the CPU during the course of executing an
 \enclaveprogram. Nevertheless, the MEE is not used on data in the CPU's cache.
-As a result, an \enclaveprogram incurs additional overhead whenever the CPU
+As a result, an \enclaveprogram~incurs additional overhead whenever the CPU
 cannot find the data required for an instruction in the cache. This is because
 a cache miss results in two things:
 \begin{enumerate}
@@ -25,7 +25,7 @@ We utilised an application from \Intel~called \VTune~Amplifier XE 2016. It
 captures the number of CPU cycles required to execute a program and the number
 of LLC missed load operations. 
 
-Given those two numbers, the fraction of the \enclaveprogram execution (in CPU
+Given those two numbers, the fraction of the \enclaveprogram~execution (in CPU
 cycles) wasted on accessing the main memory can be calculated using the
 equation below~\cite{intel-eqn}
 
@@ -38,12 +38,12 @@ equation below~\cite{intel-eqn}
 \footnotetext{According to \Intel, each memory load from DRAM, on an i5-2520M
 processor, consumes approximately 180 cycles.}
 
-We combine this fraction obtained for our \busywait with the MEE overhead
+We combine this fraction obtained for our \busywait~with the MEE overhead
 results reported by \Intel~\cite{REFERENCE}, i.e.\ 5\% to 14\% slowdown in
 DRAM access, to estimate the overhead of the MEE's execution in our program. 
 
 \subsubsection*{Test Setup}
-We ran the \enclavemodel within \VTune~Amplifier on a personal laptop that
+We ran the \enclavemodel~within \VTune~Amplifier on a personal laptop that
 comprised of an \Intel~Core i5 2520M @ 2.50GHz with 3MB of L3 cache (LLC) and
 16GB of RAM @ 1600MHz. Note that this setup is not the same as the one used to
 evaluate the end-to-end perforance described in Section~\ref{sec:endtoend}
@@ -71,15 +71,15 @@ cases below:
 \end{enumerate}
 
 We test the request of the (quite unreasonable) 32 MB object to force our
-\enclavemodel to access the DRAM and place an upper bound on the performance
+\enclavemodel~to access the DRAM and place an upper bound on the performance
 hit due to the MEE.
 
 \subsubsection*{Results}
 The values obtained from \VTune~Amplifier for the above-mentioned tests are
-reported in Table~\ref{tab:mem}. Note that these concern only the \enclavemodel
-execution and do not include the execution of untrusted component. This is
-because only the \enclaveprogram suffers from MEE overhead. The number of
-cycles waiting on LLC misses is calculated from
+reported in Table~\ref{tab:mem}. Note that these concern only the
+\enclavemodel~execution and do not include the execution of untrusted
+component. This is because only the \enclaveprogram~suffers from MEE overhead.
+The number of cycles waiting on LLC misses is calculated from
 \textit{LOAD\_UOPS\_MISC\_RETIRED.LLC\_MISS} metric as presented in the
 nominator of the equation above and the CPU Cycles Wasted column is calculated
 according to the full equation.
@@ -106,16 +106,16 @@ required to execute our program during a test.} is wasted even for the more
 expensive design, where session keys reside within the enclave.
 
 The results also show that when handling large objects inside the enclave up
-to 0.2 \% of the \enclavemodel CPU time is spent waiting on LLC misses.
+to 0.2 \% of the \enclavemodel~CPU time is spent waiting on LLC misses.
 Incorporating the results from~\cite{REFERENCE}, in the worst case our
-\enclaveprogram would spend between 0.21 \% - 0.23 \% of its CPU time on
+\enclaveprogram~would spend between 0.21 \% - 0.23 \% of its CPU time on
 fetching data from DRAM. Note, that in the cloud environment this would have
 been much smaller due to the much larger cache size available.
 
 In the best case, when all the data fits in cache, we may have neglectable or
 no overhead from memory encryption/decryption.
 
-We also note that \Intel tuning guide~\cite{intel-eqn} suggests typical
+We also note that \Intel~tuning guide~\cite{intel-eqn} suggests typical
 programs experience up to 0.2 \% of CPU time on LLC misses and the performance
 hit need not be investigated unless this is considerably larger.
 \end{document}
