@@ -27,15 +27,15 @@ As further described in Section \ref{sec:implementation}, our design
 uses a single enclave where state for all active SSL connections is
 stored in memory. If an adversary compromises the code running within
 the trusted component, security parameters such as session keys could
-be owned as well. Note that, this would not be of great interest as
+be exposed as well. Note that, this would not be of great interest as
 in this case the private key itself is exposed as well. Thus, it
 would be trivial for the attacker to generate all past and current
 connections' session keys for ciphers with no forward secrecy support
-and all current connection's session keys for ciphers with forward
-secrecy support. Nevertheless, we consider adapting any software
-fault isolation scheme within the trusted component as out of scope
-of this work and we assume all code running within the enclave is
-trusted.
+and all current connections' session keys for ciphers with forward
+secrecy support. Nevertheless, we assume all code running within
+an enclave is trusted and we leave hardening the trusted code
+with fault isolation schemes such as SFI \cite{wahbe1994efficient}
+for future work.
 \end{document}
 
 %%% Local Variables:

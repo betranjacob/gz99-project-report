@@ -9,9 +9,11 @@ required for the SSL/TLS handshake routine. For our design, we adopt
 PoLP in a manner similar to Wedge, placing the long-term private key
 in an SGX enclave, and defining an interface to the private key. The
 interface is designed to allow an SSL/TLS handshake to complete
-successfully, without compromising the long-term private key. The
-resulting, high level system architecture is depicted in
-Figure~\ref{fig:sysarch}.
+successfully, without compromising the long-term private key. We also
+augment our initial design to further isolate the session keys of
+ongoing SSL/TLS connections, which leaves no secret key material
+exposed to the untrusted component. The resulting, high level system
+architecture is depicted in Figure~\ref{fig:sysarch}.
 
 \begin{figure}[H]
   \centering
@@ -24,7 +26,8 @@ We assume that we have already invoked the above-detailed
 remote-attestation mechanism to provision the enclave with the
 long-term private key. The remainder of this section details the
 interface design for: (1) Ciphers that do not offer forward secrecy
-(2) Ciphers that offer forward secrecy.
+(2) Ciphers that offer forward secrecy (3) Isolating SSL/TLS session
+keys.
 
 %None of our designs modify the SSL handshake itself, though we carefully
 %compartmentalize the protocol's execution in trusted and untrusted

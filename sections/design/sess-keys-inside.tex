@@ -50,7 +50,7 @@ untrusted component. Second, the \texttt{Change\-CipherSpec} message
 is passed to the \textit{encalve program}. This is because
 \texttt{ChangeCipherSpec} indicates to the recepient the transition to
 using the just-negotiated keys. As a result, the message is forwarded
-to the \texttt{enclave program}, signalling the need for generating
+to the \textit{enclave program}, signalling the need for generating
 the session key block, and initializing a cipher specific
 context\footnote{\texttt{ChangeCipherSpec} signals the transition to
   the symmetric cipher, indicating that all packets exchanged beyond
