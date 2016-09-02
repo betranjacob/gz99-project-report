@@ -2,37 +2,75 @@
 
 \begin{document}
 \label{sec:cpu-instr-analysis}
-This test is designed to measure the overhead of the enclave implementation
-against the stock version. The benchmark consists of two parts.  In the first
-part, we count the number of instructions for NGINX with model implementation
-to evaluate the cost our design. After the results from model implementation
-wereobtained, we run the \enclaveprogram in OpenSGX to emulate the SGX
-instruction set.
+To be able to reason about the end-to-end performance impact we designed a set
+of tests to measure the overhead of the enclave implementation compared to the
+stock version.
+
+% TODO: some more introduction here
+
+% TODO: is there a better place for this?
+OpenSGX comes with two options that should report the SGX instruction counts,
+\textit{-i} and \textit{--perf}. Unfortunatelly, neither of them worked
+correctly so we modified OpenSGX to always return the program statistics upon
+enclave termination.
 
 \subsubsection*{Test Setup}
-In the first test, we instrument NGINX with model enclave implementation using
-\textit{Perf}. Perf is a standard linux tool to measure various performance
-counters. The requests are generated from \Apache~Benchmark. Due to limitation
-of OpenSGX performance, we run only 50 requests for each cipher with 2
-concurrent connections.
+This benchmark consists of multiple parts: (1) we count the number of
+instructions executed for vanilla NGINX + LibreSSL; (2) we measure the
+instruction counts, of modified NGINX and \enclavemodel (untrusted and trusted
+components) separately; (3) we capture the number and type of SGX instructions
+executed by the \enclaveprogram during:
+\begin{enumerate}[label=3\alph*)]
+  \item The enclave startup.
+  \item Normal operation.
+\end{enumerate}
 
-In the second test, the enclave is run on OpenSGX platform to emulate SGX
-instructions. OpenSGX is modified to display application statistics of executed
-SGX instructions. We have to ignore the cost of the SGX instructions during
-enclave startup, because these instructions are executed only once to prepare
-the SGX environment and do not affect the application's response rate in the
-long run. Therefore, we have to measure SGX instructions that run on each
-request.
+For parts (1) and (2), we capture the instruction counts using \textit{perf},
+a standard linux tool for program profiling.
+
+For part (3a), we launch the \enclaveprogram under OpenSGX and instrumented
+NGINX as usual, wait for 30 seconds to ensure the startup has fully completed
+and terminate the NGINX which also terminates the \enclaveprogram.
+
+For part (3b), we run the same workload as for parts (1) and~(2), executing
+the \enclaveprogram under OpenSGX.
+
+The requests for (1), (2) and (3b) are generated using \Apache~Benchmark. Due
+to limitation of OpenSGX performance (very long encryption/decrypton times),
+we only run 50 requests with 2 concurrent connections, for both of our
+designs, for each of the following ciphers:
+\begin{enumerate}
+  \item AES256-GCM-SHA384
+  \item ECDHE-AES256-GCM-SHA384
+\end{enumerate}
 
 \subsubsection*{Results}
-Table \ref{tab:cpu-instr-count} shows the number of instructions that were
-combined from both parts of this test. The number of executed instructions
-in NGINX and in the \enclaveprogram were obtained from \textit{perf}.
-The detailed SGX instruction count in Table \ref{tab:sgx-encls} are executed
-only once during startup. Table \ref{tab:sgx-enclu}, shows the SGX instructions
-executed in each request. Results for both Tables \ref{tab:sgx-encls} and
-\ref{tab:sgx-enclu} were obtained from OpenSGX.
+Table \ref{tab:cpu-instr-count} combines the results obtained from parts (1),
+(2) and (3b). It shows the sum of instructions executed over 50 requests.
+Currently it also combines the instructions for RSA and ECDHE ciphers. The SGX
+instructions reported exclude the the instructions executed at enclave startup.
+% TODO: the sgx column should probably include the startup sgx instructions
 
+The SGX instruction counts detailed in Table~\ref{tab:sgx-encls} are executed
+only once during startup and are the result of part (3a) of the benchmark.
+
+Table \ref{tab:sgx-enclu} shows the SGX instructions executed per request. It
+was obtained by subtracting the values in Table~\ref{tab:sgx-encls} from the
+values obtained from part (3b) and dividing the result by number of requests.
+We also verified that these match the values reported when executing only one
+request.
+
+% TODO: i think all of that was already mentioned, but maybe it'll still be
+% useful
+% When reporting the instructions executed per request, we ignore the cost of
+% the SGX instructions executed during enclave startup, because the latter are
+% executed only once, to prepare the SGX environment, and do not affect the
+% application's response rate.
+
+% TODO: i think it would be clearer if we show the instructions in millions
+% need to add `%` to the change over stock column
+% would be nice to have the results separated for RSA and ECDHE
+% revisit the table captions
 \begin{table}[H]
   \resizebox{\linewidth}{!}{ \pgfplotstabletypeset[assign column
     name/.style={/pgfplots/table/column name={\textbf{#1}}},col
@@ -54,12 +92,14 @@ executed in each request. Results for both Tables \ref{tab:sgx-encls} and
 \begin{table}[H]
   \resizebox{\linewidth}{!}{ \pgfplotstabletypeset[assign column
     name/.style={/pgfplots/table/column name={\textbf{#1}}},col
-    sep=comma, header=has colnames]{results/sgx_detail_instruction_count_u.csv}}
+    sep=comma, header=has colnames]
+    {results/sgx_detail_instruction_count_u.csv}}
   \caption{SGX Unprivileged User Instructions Count}
   \label{tab:sgx-enclu}
 \end{table}
 
 \subsubsection*{Analysis of Results}
+% TODO: i havent touched this yet, Ahmed please help
 As shown in Table \ref{tab:cpu-instr-count}, our implementation added 14.5\% of
 executed instructions regarding the design where the session keys reside
 outside of the enclave and 16.5\% regarding the design with session keys
