@@ -45,8 +45,8 @@ DRAM access, to estimate the overhead of the MEE's execution in our program.
 \subsubsection*{Test Setup}
 We ran the \enclavemodel~within \VTune~Amplifier on a personal laptop that
 comprised of an \Intel~Core i5 2520M @ 2.50GHz with 3MB of L3 cache (LLC) and
-16GB of RAM @ 1600MHz. Note that this setup is not the same as the one used to
-evaluate the end-to-end perforance described in Section~\ref{sec:endtoend}
+16GB of RAM @ 1600MHz. Note that this set-up is not the same as the one used to
+evaluate the end-to-end performance described in Section~\ref{sec:endtoend}
 since \VTune~Amplifier needs access to CPU registers not available in the
 virtual machine environment. The main difference is the amount of available
 LLC which is 10x larger (30 MB) on the machine hosted in the AWS cloud.
@@ -94,7 +94,7 @@ according to the full equation.
 \end{table}
 
 \subsubsection*{Analysis of Results}
-Before running this microbenchmark, we expected to see little memory
+Before running this micro benchmark, we expected to see little memory
 accesses for the keys outside design because it only instruments the SSL
 handshake, which does not involve large amount of data handling. All data
 should, therefore, be able to fit in the cache and not require DRAM access.
@@ -112,7 +112,7 @@ Incorporating the results from~\cite{REFERENCE}, in the worst case our
 fetching data from DRAM. Note, that in the cloud environment this would have
 been much smaller due to the much larger cache size available.
 
-In the best case, when all the data fits in cache, we may have neglectable or
+In the best case, when all the data fits in cache, we may have negligible or
 no overhead from memory encryption/decryption.
 
 We also note that \Intel~tuning guide~\cite{intel-eqn} suggests typical
