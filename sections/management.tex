@@ -75,22 +75,22 @@ initially planned. We could then shift the effort to support ciphers offering
 forward security and compartmentalization of session keys. The work was roughly
 split as follows:
 
-Ahmed fixed OpenSGX remote attestation and provinsioning mechanism, he
+Ahmed fixed OpenSGX remote attestation and provisioning mechanism, he
 developed SGX expertise that was helping us with correct design decisions and
 identification of SGX performance hits. He was also the mastermind behind
 report structure and editorial work.
 
 Ioannis initially helped in setting up OpenSGX and then focused on LibreSSL
-compartmentization. He isolated the computation of session keyblock inside the
-enclave, implemented the encrypt/decrypt oracle interface and added support
+compartmentalization. He isolated the computation of session keyblock inside
+the enclave, implemented the encrypt/decrypt oracle interface and added support
 for concurrent connections and SSL session resumption within the enclave. He
 also worked on the build scripts and setting up AWS.
 
 Betran was responsible for initial NGINX and LibreSSL exploration. He then
 added support for forward secrecy ciphers and carried initial work on the
-encrypt/decrypt interface.Also contributed to various sections in the report. 
+encrypt/decrypt interface. Also contributed to various sections in the report. 
 
-Wiktor prepared the initial build environment and developed callgate interface
+Wiktor prepared the initial build environment and developed call gate interface
 between untrusted and trusted code for the RSA ciphers. He also helped with
 the setup of the test environment and integration between different versions
 of our programs.
