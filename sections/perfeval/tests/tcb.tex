@@ -2,17 +2,48 @@
 
 \begin{document}
 \label{sec:tcb-analysis}
-we would like to know how does the tcb look like after our partitioning.
+To estimate the size of the TCB of the \enclaveprogram after our partitioning, we generated a dynamic call graph (using callgrind) under RSA and ECDHE requests, separately for session keys inside and outside the enclave. We then manually copied the source of all functions used as well as the source of the \enclaveprogram to one file and counted the resulting SLOC with cloc. The results are presented in Table~\ref{XXX}.
 
-\subsubsection*{Test Setup}
-we run the \enclaveprogram under callgrind 
-gather the functions called and manually copy over
-for the modifications we run cloc, we do not distinguish between the different versions
+Using cloc, we also compared the modified source code of LibreSSL and NGINX to their stock versions. We report these results in Table~\ref{tab:libressl-diff} and Table~\ref{tab:nginx-diff}.
 
 \subsubsection*{Results}
-we modified this much and added this much
-we use this many functins from this many files
-this is the table
+
+\begin{table}[H]
+  \center
+  \footnotesize
+  PLACEHOLDER
+  % \pgfplotstabletypeset[assign column
+  %   name/.style={/pgfplots/table/column name={\textbf{#1}}},col
+  %   sep=comma, header=has colnames]{results/sgx_detail_instruction_count_s.csv}
+  \caption{TCB estimation based on the SLOC}
+  \label{tab:tcb-estimate}
+\end{table}
+
+\begin{table}[H]
+  \resizebox{\linewidth}{!}{
+  \pgfplotstabletypeset[
+    /pgfplots/table/columns={Language, == files, != files, + files, == code, != code, + code, - code},
+    assign column name/.style={/pgfplots/table/column name={\textbf{#1}}},
+    col sep=comma,
+    header=has colnames
+  ]
+  {results/libressl_sloc_diff.csv}}
+  \caption{LibreSSL instrumentation}
+  \label{tab:libressl-diff}
+\end{table}
+
+\begin{table}[H]
+  \resizebox{\linewidth}{!}{
+  \pgfplotstabletypeset[
+    /pgfplots/table/columns={Language, == files, != files, + files, == code, != code, + code, - code},
+    assign column name/.style={/pgfplots/table/column name={\textbf{#1}}},
+    col sep=comma,
+    header=has colnames
+  ]
+  {results/nginx_sloc_diff.csv}}
+  \caption{NGINX instrumentation}
+  \label{tab:nginx-diff}
+\end{table}
 
 \subsubsection*{Analysis of Results}
 tcb is much smaller
