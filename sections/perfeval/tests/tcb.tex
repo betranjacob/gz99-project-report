@@ -2,11 +2,29 @@
 
 \begin{document}
 \label{sec:tcb-analysis}
-To estimate the size of the TCB of the \enclaveprogram after our partitioning, we generated a dynamic call graph (using callgrind) under RSA and ECDHE requests, separately for session keys inside and outside the enclave. We then manually copied the source of all functions used as well as the source of the \enclaveprogram to one file and counted the resulting SLOC with cloc. The results are presented in Table~\ref{XXX}.
+To estimate the size of the TCB of the \enclaveprogram~after our partitioning,
+we generated a dynamic call graph (using callgrind) under RSA and ECDHE
+requests, separately for session keys inside and outside the enclave. We then
+manually copied the source of all functions used as well as the source of the
+\enclaveprogram~to one file and counted the resulting SLOC with cloc. The
+results are presented in Table~\ref{tab:tcb-estimate}.
 
-Using cloc, we also compared the modified source code of LibreSSL and NGINX to their stock versions. We report these results in Table~\ref{tab:libressl-diff} and Table~\ref{tab:nginx-diff}.
+Using cloc, we also compared the modified source code of LibreSSL and NGINX to
+their stock versions. We report these results in Table~\ref{tab:libressl-diff}
+and Table~\ref{tab:nginx-diff}.
 
 \subsubsection*{Results}
+The columns in tables \ref{tab:libressl-diff} and~\ref{tab:nginx-diff} have the following meaning:
+\begin{itemize}
+  \item \textit{\footnotesize == files}: files that have not been changed;
+  \item \textit{\footnotesize != files}: modified files;
+  \item \textit{\footnotesize + files}: new files;
+  \item \textit{\footnotesize == code}: lines of code that have not been
+    changed;
+  \item \textit{\footnotesize != code}:  modified lines of code;
+  \item \textit{\footnotesize + code}: new lines od code;
+  \item \textit{\footnotesize - code}: removed lines of code;
+\end{itemize}
 
 \begin{table}[H]
   \center
