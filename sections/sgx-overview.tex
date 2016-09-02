@@ -14,7 +14,7 @@ pre-allocates an area of DRAM called the Enclave Page Cache
 (EPC)\footnote{This statement is not entirely accurate, the BIOS is
   responsible for allocating an area of memory, called the Processor
   Reserved Memory (PRM), from the which the CPU designates memory for
-  the EPC. } where the enclave's data and data strucutres required by
+  the EPC. } where the enclave's data and data structures required by
 SGX reside in ciphertext form. All data pertaining to an enclave
 present in the CPU's caches and registers is held in clear text. Any
 data written from the CPU's caches or registers to the EPC is
