@@ -39,8 +39,9 @@ equation below~\cite{intel-eqn}
 processor, consumes approximately 180 cycles.}
 
 We combine this fraction obtained for our \busywait~with the MEE overhead
-results reported by \Intel~\cite{REFERENCE}, i.e.\ 5\% to 14\% slowdown in
-DRAM access, to estimate the overhead of the MEE's execution in our program. 
+results reported by \Intel~\cite{cryptoeprint:2016:204}, i.e.\ 5\% to 14\%
+slowdown in DRAM access, to estimate the overhead of the MEE's execution in
+our program.
 
 \subsubsection*{Test Setup}
 We ran the \enclavemodel~within \VTune~Amplifier on a personal laptop that
@@ -107,8 +108,8 @@ expensive design, where session keys reside within the enclave.
 
 The results also show that when handling large objects inside the enclave up
 to 0.2 \% of the \enclavemodel~CPU time is spent waiting on LLC misses.
-Incorporating the results from~\cite{REFERENCE}, in the worst case our
-\enclaveprogram~would spend between 0.21 \% - 0.23 \% of its CPU time on
+Incorporating the results from~\cite{cryptoeprint:2016:204}, in the worst case
+our \enclaveprogram~would spend between 0.21 \% - 0.23 \% of its CPU time on
 fetching data from DRAM. Note, that in the cloud environment this would have
 been much smaller due to the much larger cache size available.
 
