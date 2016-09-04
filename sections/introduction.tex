@@ -26,12 +26,12 @@ vulnerability within their platform could lead to leaking the private
 key if exploited by an adversary. Moreover, if the cloud provider is
 indeed malicious, they could simply read the private key from the hard
 disk, assuming the key is not encrypted, or mount some form of memory
-sniffing attack to read the key from the web server's memory since
-data in RAM is not encrypted. A compromised private key allows an
-adversary to do the following:
+sniffing attack to read the key from the web server process's
+adddres space since data in RAM is not encrypted. A compromised private key
+allows an adversary to do the following:
 \begin{itemize}
   \item Decrypt past, stored communication between the web server and a
-    client (assuming a cipher that does not provide perfect forward
+    client (assuming a cipher suite that does not provide perfect forward
     secrecy is in use)
   \item Decrypt any ongoing communication between the web server and a
     client

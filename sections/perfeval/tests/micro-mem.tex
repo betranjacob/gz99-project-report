@@ -2,55 +2,50 @@
 
 \begin{document}
 \label{sec:mem-analysis}
-SGX incorporates a hardware memory encryption engine (MEE) that encrypts any
-data that resides in an enclave's reserved area in DRAM. The MEE also decrypts
-data that is required by the CPU during the course of executing an
-\enclaveprogram. Nevertheless, the MEE is not used on data in the CPU's cache.
-As a result, an \enclaveprogram~incurs additional overhead whenever the CPU
-cannot find the data required for an instruction in the cache. This is because
-a cache miss results in two things:
+SGX incorporates a hardware memory encryption engine (MEE) that
+encrypts any data that resides in an enclave's reserved area in DRAM.
+The MEE also decrypts data that is required by the CPU during the
+course of executing an \enclaveprogram. Nevertheless, the MEE is not
+used on data in the CPU's cache. As a result, an
+\enclaveprogram~incurs additional overhead whenever the CPU cannot
+find an instruction's operand in the cache. The overhead of the MEE is
+due to the following:
 \begin{enumerate}
-  \item Allocating space in the CPU cache for the needed data. This may entail
-    removal of data from the CPU cache. Data removed, if it belonged to an
-    enclave and has been modified, may require encryption by the MEE.
-  \item Decryption of the requested data, incoming from main memory (DRAM), by
-    the MEE.
+  \item Allocating space in the CPU cache for the needed data. This
+    may entail evicting data from the CPU cache. Data removed, if it
+    belonged to an enclave and has been modified, may require encryption
+    by the MEE.
+  \item Decryption of the requested data, incoming from main memory
+    (DRAM), by the MEE.
 \end{enumerate}
 
-To estimate the impact of the MEE we decided to measure the number of last
-level cache (LLC) misses as only those operations lead to accessing the main
-memory (DRAM).
-
-We utilised an application from \Intel~called \VTune~Amplifier XE 2016. It
-captures the number of CPU cycles required to execute a program and the number
-of LLC missed load operations. 
-
-Given those two numbers, the fraction of the \enclaveprogram~execution (in CPU
-cycles) wasted on accessing the main memory can be calculated using the
-equation below~\cite{intel-eqn}
+To estimate the impact of the MEE we measured the number of last level
+cache (LLC) misses as only those operations lead to accessing the main
+memory (DRAM). We utilised an application from \Intel~called
+\VTune~Amplifier XE 2016. It captures the number of CPU cycles
+required to execute a program and the number of LLC misses when
+executing a \texttt{load} instruction. Given those two numbers, the
+fraction of the \enclaveprogram~execution (in CPU cycles) wasted on
+accessing the main memory can be calculated using the equation
+below~\cite{intel-eqn}(According to \Intel, each memory load from DRAM
+on an i5-2520M processor consumes approximately 180 CPU cycles).
 
 \begin{align*}
- \text{fraction of CPU Cycles Wasted} = 
-    \frac{\text{LLC missed load operations} * 180\footnotemark}
-      {\text{Total CPU Cycles}}
+  \text{Fraction of CPU Cycles Wasted} = 
+  \frac{\text{Number of LLC Misses} * 180}
+  {\text{Total CPU Cycles}}
 \end{align*}
 
-\footnotetext{According to \Intel, each memory load from DRAM, on an i5-2520M
-processor, consumes approximately 180 cycles.}
-
-We combine this fraction obtained for our \busywait~with the MEE overhead
-results reported by \Intel~\cite{cryptoeprint:2016:204}, i.e.\ 5\% to 14\%
-slowdown in DRAM access, to estimate the overhead of the MEE's execution in
-our program.
 
 \subsubsection*{Test Setup}
-We ran the \enclavemodel~within \VTune~Amplifier on a personal laptop that
-comprised of an \Intel~Core i5 2520M @ 2.50GHz with 3MB of L3 cache (LLC) and
-16GB of RAM @ 1600MHz. Note that this set-up is not the same as the one used to
-evaluate the end-to-end performance described in Section~\ref{sec:endtoend}
-since \VTune~Amplifier needs access to CPU registers not available in the
-virtual machine environment. The main difference is the amount of available
-LLC which is 10x larger (30 MB) on the machine hosted in the AWS cloud.
+We ran the \enclavemodel~within \VTune~Amplifier on a personal laptop
+that comprised of an \Intel~Core i5 2520M @ 2.50GHz with 3MB of L3
+cache (LLC) and 16GB of RAM @ 1600MHz. Note that this set-up is not
+the same as the one used to evaluate the end-to-end performance
+described in Section~\ref{sec:endtoend} since \VTune~Amplifier needs
+access to CPU registers not available in the virtual machine
+environment. The main difference is the amount of available LLC which
+is 10x larger (30 MB) on the machine hosted in the AWS cloud.
 
 We saturate the web server (NGINX), and by extension the \enclavemodel, with
 requests to produce a reliable estimate. For this task we used
@@ -61,12 +56,12 @@ requests/s to NGINX.
 We ran the test eight times, requesting 1 KB and 32 MB objects for each of the
 cases below:
 \begin{enumerate}
-  \item Using a cipher lacking support for forward secrecy, AES256-GCM-SHA384,
-    with the design where session keys reside \textbf{outside} the trusted
-    component
-  \item Using a cipher lacking support for forward secrecy, AES256-GCM-SHA384,
-    with the design where session keys reside \textbf{inside} the trusted
-    component
+  \item Using a cipher lacking support for forward secrecy,
+    AES256-GCM-SHA384, with the design where session keys reside
+    \textbf{outside} the trusted component
+  \item Using a cipher lacking support for forward secrecy,
+    AES256-GCM-SHA384, with the design where session keys reside
+    \textbf{inside} the trusted component
   \item Using a cipher offering support for forward secrecy,
     ECDHE-RSA-AES256-GCM-SHA384, with the design where session keys reside
     \textbf{outside} the trusted component
@@ -75,54 +70,71 @@ cases below:
     \textbf{inside} the trusted component
 \end{enumerate}
 
-We test the request of the (quite unreasonable) 32 MB object to force our
-\enclavemodel~to access the DRAM and place an upper bound on the performance
-hit due to the MEE.
+We test the request of the (quite unreasonable) 32 MB object to force
+our \enclavemodel~to access the DRAM and place an upper bound on the
+performance hit due to the MEE.
 
 \subsubsection*{Results}
-The values obtained from \VTune~Amplifier for the above-mentioned tests are
-reported in Table~\ref{tab:mem}. Note that these concern only the
-\enclavemodel~execution and do not include the execution of untrusted
-component. This is because only the \enclaveprogram~suffers from MEE overhead.
-The number of cycles waiting on LLC misses is calculated from
-\textit{LOAD\_UOPS\_MISC\_RETIRED.LLC\_MISS} metric as presented in the
-nominator of the equation above and the CPU Cycles Wasted column is calculated
-according to the full equation.
+The values obtained from \VTune~Amplifier for the above-mentioned
+tests are reported in Table~\ref{tab:mem}. Note that these concern
+only the \enclavemodel~execution and do not include the execution of
+untrusted component, because only the \enclaveprogram~suffers from the
+MEE overhead. The CPU Cycles Wasted column is calculated according to
+the full equation.
 
 \begin{table}[H]
   \resizebox{\linewidth}{!}{ \pgfplotstabletypeset[assign column
     name/.style={/pgfplots/table/column name={\textbf{#1}}},col
     sep=comma, header=has colnames, columns/{CPU Cycles Wasted}/.style
-    = {column name = {CPU Cycles Wasted (\%)}}]{results/cache_analysis.csv}}
-  \caption{Memory Analysis}
+    = {column name = {CPU Cycles Wasted (\%)}}, columns/{Number of LLC
+      misses}/.style = {fixed, fixed
+      zerofill}]{results/cache_analysis.csv}}
+  \caption{Proportion of CPU cycles wasted on \texttt{load}
+    instructions}
   \label{tab:mem}
 \end{table}
 
 \subsubsection*{Analysis of Results}
-Before running this micro benchmark, we expected to see little memory
-accesses for the keys outside design because it only instruments the SSL
-handshake, which does not involve large amount of data handling. All data
-should, therefore, be able to fit in the cache and not require DRAM access.
+Given the results in Table~\ref{tab:mem} we can extrapolate the MEE's
+overhead by making the following assumptions:
+\begin{itemize}
+  \item Each \texttt{load} instruction causes the MEE to decrypt data
+  \item We assume that the MEE requires 0.77 cycles to decrypt a byte of data.
+    This assumption comes from \cite{cyclesaes} where it was found that
+    AES in GCM mode consumes 0.77 cycles per byte of data, and, according to
+    ~\Intel, the MEE uses a ``tweaked'' version of AES in counter mode.
+  \item We assume that each \texttt{load} instruction fetches a page
+    of DRAM (4K bytes). This assumption may be too pessimistic, but CPUs
+    tend to pre-fetch additonal data to ameliorate the cost of accessing
+    DRAM.
+\end{itemize}
+The above assumptions result in a simple equation to calculate the number
+of cycles consumed by the MEE:
+\begin{equation*}
+  \text{MEE Overhead} = \frac{\text{Number of LLC Misses
+    * (180 + 4096 * 0.77)}}{\text{Total Number of CPU Cycles}}
+\end{equation*}
+Table~\ref{tab:mem2} shows the estimate of the MEE overhead for each
+of our test scenarios. As can be seen from the table, the maximum
+overhead is 3.70\% even with the pessimistic assumption about the
+number of bytes read per \texttt{load} instruction. This number seems
+reasonable because the only memory object that does not fit completely
+within the cache is the 32MB payload, and a modern CPU will attempt to
+execute another runnable process to avoid stalling on memory
+operations. However, the MEE is only one of many contributors to the
+overall overhead of SGX.
 
-The results confirm our expectation for the design, where session keys reside
-outside the enclave. They also show that small objects are successfully cached
-and no CPU time\footnote{By CPU time we mean the total number of instructions
-required to execute our program during a test.} is wasted even for the more
-expensive design, where session keys reside within the enclave.
+\begin{table}[H]
+  \resizebox{\linewidth}{!}{ \pgfplotstabletypeset[assign column
+    name/.style={/pgfplots/table/column name={\textbf{#1}}},col
+    sep=comma, header=has colnames, columns/{CPU Cycles Wasted}/.style
+    = {numeric type, column name = {MEE Overhead (\%)}, fixed, fixed
+      zerofill,precision = 2, preproc/expr={##1+##1*(0.77*4096/180)}}
+    ]{results/cache_analysis.csv}}
+  \caption{Approximated MEE overhead}
+  \label{tab:mem2}
+\end{table}
 
-The results also show that when handling large objects inside the enclave up
-to 0.2 \% of the \enclavemodel~CPU time is spent waiting on LLC misses.
-Incorporating the results from~\cite{cryptoeprint:2016:204}, in the worst case
-our \enclaveprogram~would spend between 0.21 \% - 0.23 \% of its CPU time on
-fetching data from DRAM. Note, that in the cloud environment this would have
-been much smaller due to the much larger cache size available.
-
-In the best case, when all the data fits in cache, we may have negligible or
-no overhead from memory encryption/decryption.
-
-We also note that \Intel~tuning guide~\cite{intel-eqn} suggests typical
-programs experience up to 0.2 \% of CPU time on LLC misses and the performance
-hit need not be investigated unless this is considerably larger.
 \end{document}
 
 %%% Local Variables:

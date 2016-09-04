@@ -1,5 +1,4 @@
 SGX Instruction,Count
-ENCLS,16679
 ECREATE,1
 EADD,981
 EEXTEND,15696
@@ -14,4 +13,4 @@ EREPORT,0
 EACCEPT,0
 Mode Switch,16
 TLB Flush,16
-Total,33422
+Total,16678
