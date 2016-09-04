@@ -77,26 +77,26 @@ hardware where multi-threading is natively supported. Thus we limit our current
 model to a single core, and in the lack of possession of real SGX hardware we
 leave multi-core support as future work.
 
-Second, Nginx process establishes a SSL session ID only after the SSL handshake 
-has completed. It posed a challenge how to distinguish a connection specific data 
-when multiple concurrent handshakes are proceeding. \footnote{In order to 
-maximise performance, a web server will try to switch between ongoing 
-connections while it waits for network I/O, which immediately poses the
-requirement for an enclave to be aware of multiple SSL sessions. Regarding
-our design, not dealing with concurrent connections, would mean that the 
-enclave would only be able to handle a single connection at a time which
-would have severe performance impact to our design.}. To circumvent
-this, we assigned a SGX specific identifier to an on-going handshake
-and used it in the enclave as a mapping key to distinguish between 
-connection. It is interesting to note that, we used a dynamic hash-table 
-data structure in the enclave to store the state specific to every connection. 
-Upon successful completion of the SSL handshake, the mapping
-key of the hash table is switched to the SSL session ID. 
-Figure \ref{fig:session-management} depicts an overview of 
-the session id establishment process. Note that, this
-mechanism not only enables the enclave to deal with concurrent SSL
-handshakes, but also lets us support SSL session resumption. In the
-interest of time, we left support of SessionTickets as future work. 
+% TODO: isnt it the LibreSSL that sets up the session ID?
+Second, NGINX process establishes the SSL session ID only after the SSL
+handshake has completed. It posed a challenge how to distinguish a connection
+specific data within the enclave when multiple concurrent handshakes are
+proceeding. \footnote{In order to maximise performance, a web server will try
+to switch between ongoing connections while it waits for network I/O, which
+immediately poses the requirement for an enclave to be aware of multiple SSL
+sessions. Regarding our design, not dealing with concurrent connections, would
+mean that the  enclave would only be able to handle a single connection at
+a time which would have severe performance impact to our design.}.
+To circumvent this, we assigned an SGX specific identifier to an on-going
+handshake and used this ID as a mapping key to distinguish between connections
+within the enclave, where we used a dynamic hash-table data structure to store
+the state specific to every connection. Upon successful completion of the SSL
+handshake the mapping key of the hash table is switched to the SSL session ID.
+Figure \ref{fig:session-management} depicts an overview of this process. Note
+that this mechanism not only enables the enclave to deal with concurrent SSL
+handshakes, but also lets us support SSL session resumption through session ID.
+However, due to lack of time, we left support of Session Tickets as future
+work. 
 
 \begin{figure}[H]
   \centering
@@ -107,16 +107,20 @@ interest of time, we left support of SessionTickets as future work.
 
 \subsection{LibreSSL}
 \label{subsec:libressl}
-We used the LibreSSL library as an implementation of the SSL/TLS protocol for
-our system. LibreSSL is a fork of OpenSSL aiming to provide a more secure
-implementation and it has undergone major code pruning. The majority of the
-changes compared to legacy OpenSSL are related to the security vulnerabilities
-found in the latter. In our prototype system, both NGINX and SGX runtime are
-linked to this library.
+We used LibreSSL as the SSL/TLS protocol library of choice for our system. It
+is a fork of OpenSSL aiming to provide a more secure implementation and it has
+undergone major code pruning. Most of the changes compared to legacy OpenSSL
+are related to the security vulnerabilities found in the latter. In our
+prototype system, both NGINX and SGX runtime are linked to this library.
 
+% TODO: proof read this paragraph and fix. i.e. not all crypto operations are
+% replaced (think of the session keys outside case), some non crypto are
+% replcaed too (server random generation). is it correct to say we assume
+% untrusted code contains voulnerabilities and is compromised? maybe its just
+% not the right place to mention this in the implementation section?
 The LibreSSL variant attached to the NGINX process has been modified, such that
 the implementation of all crypto operations are replaced with IPC
-read()/write() stubs to SGXBridge (Section \ref{subsec:sgxbridge}). That is,
+read()/write() stubs to SGXBridge (Section~\ref{subsec:sgxbridge}). That is,
 all the secure operations of an SSL handshake such as signing, verification,
 key generation, encryption or decryption, will invoke an IPC request to the SGX
 counterpart. We made careful cuts in LibreSSL's code in order to minimise the
@@ -133,7 +137,7 @@ compromised.
 
 \subsection{OpenSGX}
 \label{subsec:opensgx}
-As described in Section \ref{sec:opensgx}, OpenSGX is an emulation
+As described in Section~\ref{sec:opensgx}, OpenSGX is an emulation
 environment of \Intel~SGX. We used its runtime to build a prototype of
 the designs description in Section~\ref{sec:design}. OpenSGX, however,
 does not provide a complete implementation of SGX. Consequentially,
@@ -231,12 +235,12 @@ to isolate the data specific to a connection.
 Most of the abstract level functions pertaining to private/session key isolation were defined  
 in following source files from Libressl library.
 \begin{enumerate}
-  \item S3\_srvr.c
+  \item s3\_srvr.c
   \item t1\_enc.c
 \end{enumerate}
  
 When NGINX receives a new HTTPS connection request after a classic \textit{accept()} function 
-on the socket, it invokes the \textit{SSL\_Accept()} which causes the LibreSSL to perform the 
+on the socket, it invokes the \textit{SSL\_accept()} which causes the LibreSSL to perform the 
 server side of SSL handshake. It is a blocking call until the entire handshake is complete. 
 We had a comprehensive review of every switch-cases within this API and identified various 
 internal functions (and associated data structures) invoked during the different steps 
@@ -254,14 +258,14 @@ context structure that holds the algorithm information for a particular cipher w
 of the SSL/TLS protocol.} (after negotiating with client) and the specific functions necessary
 to perform encrypt/decrypt operation. In the enclave, we reproduced these functionalities and 
 supported legacy RSA cipher AES256-SHA and ciphers with forward secrecy support such as 
-CDHE-RSA-AES256-GCM-SHA384. We also support the AEAD (Authenticated Encryption with Associated Data)
+ECDHE-RSA-AES256-GCM-SHA384. We also support the AEAD (Authenticated Encryption with Associated Data)
 mode of operation for encrypting/decrypting the application data. The AEAD operation is designed to 
 provide authenticity, integrity and confidentiality in a single step. The underlying mode of operation
 for the AEAD symmetric key crypto is GCM (Galois Counter Mode). GCM is highly efficient and yields 
 state-of-the-art performance in commodity hardware by extensively utilising an instruction or 
 hardware pipeline, in contrast to CBC mode which incurs significant pipeline stalls.
 
-It’s interesting to note that at various points we used GDB debugger to break the execution and
+It is interesting to note that at various points we used GDB debugger to break the execution and
 step through the code flow. We developed and maintained a single bash script that automates the 
 building and installation of all the software packages used within the system. For convenience, 
 we add two compilation flags in LibreSSL: –enable-sgx and –enablesgx-keyblock. The former enables
