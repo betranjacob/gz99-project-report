@@ -71,7 +71,15 @@ System}
         tick align=outside,
         xlabel near ticks,
         ylabel near ticks,
-        axis on top,        
+        axis on top,
+        yticklabel style={
+        /pgf/number format/fixed,
+        /pgf/number format/precision=0
+      },
+       xticklabel style={
+        /pgf/number format/fixed,
+        /pgf/number format/precision=0
+      },
     }
 }
 

@@ -130,7 +130,7 @@ overall overhead of SGX.
     name/.style={/pgfplots/table/column name={\textbf{#1}}},col
     sep=comma, header=has colnames, columns/{CPU Cycles Wasted}/.style
     = {numeric type, column name = {MEE Overhead (\%)}, fixed, fixed
-      zerofill,precision = 3, preproc/expr={##1+##1*(0.77*4096/180)}},
+      zerofill,precision = 3, preproc/expr={##1*(1+(0.77*4096/180))}},
     columns/{Number of LLC misses}/.style = {numeric type, precision =
       0, preproc/expr={##1/180},fixed, fixed zerofill}
       ]{results/cache_analysis.csv}}

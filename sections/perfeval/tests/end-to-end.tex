@@ -2,11 +2,13 @@
 
 \begin{document}
 \label{sec:endtoend}
-We conducted this analysis to uncover the impact of our design and additional SGX instructions on the end-to-end web server performance. To this end, we
-utilised the performance model, while varying the number of busywait
-cycles, to approximate the overhead of SGX instructions. Additionally,
-we evaluated the effect of the response size on the end-to-end performance by
-varying the size of the response to a client's request.
+We conducted this analysis to uncover the impact of our design and
+additional SGX instructions on the end-to-end web server performance.
+To this end, we used the \enclavemodel, while varying the
+number of busywait cycles, to approximate the overhead of SGX
+instructions. Additionally, we evaluated the effect of the response
+size on the end-to-end performance by varying the size of the response
+to a client's request.
 
 \subsubsection*{Test Setup}
 We run our tests on two Amazon EC2 m4.large instances, one for the
@@ -35,15 +37,20 @@ of the server. We consider the following four scenarios:
     \textbf{inside} the trusted component
 \end{enumerate}
 
-For each of the above scenarios we run the test for a variable number
-of busywait cycles from 0 to 50,000 while keeping the response size constant at 1 KB. Next we removed the busywaits and varied the response sizes from 1 KB to 4 MB. We setup NGINX with a single worker process due to the
-limitations mentioned in Section \ref{sec:implementation}.
+For each of the above scenarios we run the test while varying the
+number of busywait cycles from 0 to 50,000 and keeping the response
+size constant at 1 KB. Next, we removed the busywaits and varied the
+response sizes from 1 KB to 4 MB. We setup NGINX with a single worker
+process due to the limitations mentioned in Section
+\ref{sec:implementation}.
 
 \subsubsection*{Results}
 Figure \ref{fig:cycles-requests} displays the server responses/s for
 varying number of busywait cycles. Figure \ref{fig:sizreqs}
 demonstrates the server responses/s for variable response size and
-zero number of busywait cycles. Note the logscale on the x axis. Each point represents a response double the size of the previous point's response size.
+zero number of busywait cycles. Note the logscale on the x-axis. Each
+point on the plot is for a response double the size of the previous
+point's.
 \begin{figure}[H]
   \centering
   \begin{tikzpicture}
@@ -73,8 +80,8 @@ zero number of busywait cycles. Note the logscale on the x axis. Each point repr
   \centering
   \begin{tikzpicture}[title/.style = {font=\bfseries, align=center}]
     \begin{axis}[pretty,ylabel = Responses/Second, ymin = 0, xmode =
-        log,xlabel = Response Size (KB), legend pos=outer north east,
-        xtick scale label code/.code = {}]
+      log, log basis x = {2},xlabel = Response Size (KB), legend
+      pos=outer north east, xtick scale label code/.code = {}]
       \addplot[color=red, mark=+] table[y=Stock RSA] from \sizereqs;
       \addlegendentry{Stock \textit{RSA}};
       \addplot[color=red, mark=square*] table[y=Key Outside RSA] from \sizereqs;
@@ -95,17 +102,45 @@ zero number of busywait cycles. Note the logscale on the x axis. Each point repr
 \end{figure}
 
 \subsubsection*{Analysis}
-As discussed in Section \ref{sec:cpu-instr-analysis}:
+As discussed in Section \ref{sec:cpu-instr-analysis}, we add an
+overhead of \textasciitilde15\% in additional instructions. This,
+however, does not account for the total overhead we observe in
+Figure~\ref{fig:cycle-requests} when the number of busywait cycles is
+set to 0. The remaining overhead is a result of context switches.
+
+Every invocation of ERESUME and EEXIT implies switching from the
+\textit{enclave program} to the untrusted component and from the
+untrusted component to the \textit{enclave program} respectively. A
+context switch causes a TLB flush, which in turn results in slower
+execution until the TLB is repopulated. This is emulated in our
+\enclavemodel~ by the system calls \texttt{read()}/\texttt{write()}
+which are used to communicated via the named pipe.
+
+From Section~\ref{sec:cpu-instr-analysis} we see that the number of
+context switches are as follows:
 \begin{itemize}
-  \item 13 invocations of ERESUME/EEXIT pair occur, per request, in
+  \item 12200 context switches per second, in
     the case of ciphers lacking forward secrecy, where session keys are
     outside the enclave
-  \item 21 invocations, per request, in the case of ciphers offering
+  \item 11046 context switches per second, in the case of ciphers offering
     forward secrecy and session keys are outside the enclave
-  \item 47 invocations, per request, in the case of ciphers lacking
+  \item 38164 context switches per second, in the case of ciphers lacking
     forward secrecy and session keys are inside the enclave
-  \item 55 invocations, per request, in the case of ciphers offering
+  \item 26510 context switches per second, in the case of ciphers offering
     forward secrecy and session keys are inside the enclave
+\end{itemize}
+
+The overhead for the various scenarios when compard to the stock implementation is
+as follows:
+\begin{itemize}
+  \item Session keys outside \textit{RSA} is 19\%, leaving 4\%
+    attributed to context switching
+  \item Session keys inside \textit{RSA} is 30\%, leaving 15\%
+    attributed to context switches
+  \item Session keys outside \textit{ECDHE} is 29\%, leaving 13\%
+    attributed to context switches
+  \item Session keys inside \textit{ECDHE} is 37\%, leaving 21\%
+    attributed to context switches
 \end{itemize}
 We expected the performance penalty to be around 15\%, because each
 context switch causes a TLB flush, which in turn results in slower
