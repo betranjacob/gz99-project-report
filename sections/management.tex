@@ -9,8 +9,8 @@
 % - How integration and testing was organised.
 
 We spent the initial two weeks of the project in researching about the problem
-definition and what would be the best approach to solve it. We looked at
-available open source software that we could use as a starting point, focusing
+definition and what would be the best approach to solve it. We looked at the
+available open source softwares that we could use as a starting point, focusing
 on documentation available and taking into account its current and projected
 market share. During that time, we also explored relevant research in the area
 and studied approaches we could use for performance evaluation. These tasks
@@ -18,10 +18,10 @@ mostly involved collaborative work, trying to get a better insight into the
 scope of the project and the software landscape and therefore we did not split
 the work between individuals.
 
-We came to the conclusion that support for hardware SGX, including BIOS and
+We came to the conclusion that the support for the hardware SGX, including BIOS and
 Operating System, as well as the \Intel~SDK is very limited or lacking
 documentation; hence, we decided to use the aforementioned emulator OpenSGX
-instead, which required us to be more careful in reasoning about our future
+instead. This required us to be more careful in reasoning about our future
 prototype performance in a real production environment.
 
 As discussed in Section \ref{sec:implementation}, we decided to use NGINX and
@@ -33,7 +33,7 @@ mind, we initially divided our group into three subgroups:
 	\item Betran and Wiktor working on LibreSSL and NGINX.
 	\item Chiraphat working on the tests setup and performance evaluation.
           He has also identified the major and minor goals, tasks and
-          milestones we need to reach for the project to succeed. %These are
+          milestones we needed to reach for the project to succeed. %These are
           %presented in the gant chart in Figure~\ref{fig:gantchart} below.
 \end{itemize}
 
@@ -49,14 +49,14 @@ mind, we initially divided our group into three subgroups:
 Taking into account the available time span of ten weeks, we had to employ a
 management technique that would allow us to rapidly adapt to any delays and
 minimize the risks. We heavily relied on constant communication with the group
-members as well as on meetings with our supervisor, Professor B. Karp, which
+members as well as on the meetings with our supervisor, Professor B. Karp, which
 played a critical role in ensuring our progress. We held these meetings in a
 weekly basis where we would share our progress, discuss design or technical
-issues and present our plans for the following weeks. These meetings, also gave
-us the chance to asses whether to shift manpower to any blocking tasks.
+issues and present our plans for the following weeks. These meetings also gave
+us the chance to assess whether to shift manpower to any blocking tasks.
 Additionally, we held our own meetings to internally discuss the insights and
-hints from our meetings with our supervisor, make sure we agree in the
-understanding of the current state of the project and plan and distribute work
+hints obtained through the discussions with our supervisor. This ensured we agreed
+on the understanding of the current state of the project, plan and distribute work
 for the upcoming week.
 
 We used Slack as our daily and synchronous communication channel since it
@@ -64,10 +64,10 @@ provides several facilities such as file sharing, integration with popular
 version control services such as GitHub, notification system \&c. We used
 Git as a version control system (both for code and report writing) and GitHub
 as a service to store our repositories upstream. We decided to use \LaTeX~for
-ease of collaboration and to follow research best practices.
+the ease of collaboration and to follow the research’s best practices.
 
 Over the course of the project some tasks turned out to take less time than we
-planned. Though, we also encountered a few bottlenecks and implementation
+planned. We also encountered a few bottlenecks and implementation
 difficulties that required assignment of more team members. In particular, we
 managed to accomplish our initial goal in isolating the private key for the RSA
 handshake and performing the necessary remote attestation sooner than we had
