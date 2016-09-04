@@ -43,12 +43,12 @@ limitations mentioned in Section \ref{sec:implementation}.
 Figure \ref{fig:cycles-requests} displays the server responses/s for
 varying number of busywait cycles. Figure \ref{fig:sizreqs}
 demonstrates the server responses/s for variable response size and
-zero number of busywait cycles. Note that each point represents a response double the size of the previous point and the logscale on the x axis.
+zero number of busywait cycles. Note the logscale on the x axis. Each point represents a response double the size of the previous point's response size.
 \begin{figure}[H]
   \centering
   \begin{tikzpicture}
     \begin{axis}[pretty,ylabel = Responses/Second, ymin = 0, xlabel =
-        Number Of Busywait Cycles (Cycles * $10^4$), legend pos=outer
+        Number Of Busywait Cycles ($10^4$), legend pos=outer
         north east, xtick scale label code/.code = {}]
       \addplot[color=red] table[y=Stock RSA] from \cyclereqs;
       \addlegendentry{Stock \textit{RSA}};
@@ -119,7 +119,7 @@ switches (+28\%). The overhead is actually not only related
 to the extra number of context switches, but is also related to the
 number of instructions being executed after each context switch
 as well. As shown in Table \ref{tab:cpu-instr-count}, there is
-a fixed 15\% overhead of instructions up to decrypting the
+a fixed 15\% overhead of instructions up to decryption of the
 \premaster. The remaining \textasciitilde13\% overhead originates
 from the extra context switches and executed instructions that occur
 in the design where the session keys reside within the enclave. This
