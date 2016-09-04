@@ -77,21 +77,33 @@ hardware where multi-threading is natively supported. Thus we limit our current
 model to a single core, and in the lack of possession of real SGX hardware we
 leave multi-core support as future work.
 
-Second, Nginx process will establish a unique SSL session ID for any 
-connection only after the SSL handshake has successfully completed. It posed a 
-challenge how to distinguish multiple concurrent connection data in the enclave,
-prior to the TLS handshake completion.\footnote{In order to maximize
-performance, a web server will try to switch between ongoing connections while
-it waits for network I/O, which immediately poses the requirement for an
-enclave to be aware of multiple SSL sessions. Regarding our design, not dealing
-with concurrent connections, would mean that the enclave would only be able to
-handle a single connection at a time which would have severe performance impact
-to our design.}. To remedy this, we had to modify NGINX to generate an SGX specific ID, 
-whenever a new connection request arrives. The enclave process uses this ID to distinguish
-the data specific to a particular connection. Upon successful completion of the SSL handshake, the 
-mapping key in the enclave will be switched to the appropriate session ID. We explain 
-further in Section~\ref{subsec:opensgx} how this scheme enables our system to handle 
-SSL session resumption.
+Second, Nginx process establishes a SSL session ID only after the SSL handshake 
+has completed. It posed a challenge how to distinguish a connection specific data 
+when multiple concurrent handshakes are proceeding. \footnote{In order to 
+maximise performance, a web server will try to switch between ongoing 
+connections while it waits for network I/O, which immediately poses the
+requirement for an enclave to be aware of multiple SSL sessions. Regarding
+our design, not dealing with concurrent connections, would mean that the 
+enclave would only be able to handle a single connection at a time which
+would have severe performance impact to our design.}. To circumvent
+this, we assigned a SGX specific identifier to an on-going handshake
+and used it in the enclave as a mapping key to distinguish between 
+connection. It is interesting to note that, we used a dynamic hash-table 
+data structure in the enclave to store the state specific to every connection. 
+Upon successful completion of the SSL handshake, the mapping
+key of the hash table is switched to the SSL session ID. 
+Figure \ref{fig:session-management} depicts an overview of 
+the session id establishment process. Note that, this
+mechanism not only enables the enclave to deal with concurrent SSL
+handshakes, but also lets us support SSL session resumption. In the
+interest of time, we left support of SessionTickets as future work. 
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.25]{images/session-management.png}
+  \caption{Session ID establishment process}
+  \label{fig:session-management}
+\end{figure}
 
 \subsection{LibreSSL}
 \label{subsec:libressl}
@@ -107,7 +119,7 @@ the implementation of all crypto operations are replaced with IPC
 read()/write() stubs to SGXBridge (Section \ref{subsec:sgxbridge}). That is,
 all the secure operations of an SSL handshake such as signing, verification,
 key generation, encryption or decryption, will invoke an IPC request to the SGX
-counterpart. We made careful cuts in LibreSSL's code in order to minimize the
+counterpart. We made careful cuts in LibreSSL's code in order to minimise the
 code executed within the trusted component, thus effectively reducing the size
 of the TCB. Most of the code executing within the enclave includes
 cryptographic operations, except for a small volume of code responsible for
