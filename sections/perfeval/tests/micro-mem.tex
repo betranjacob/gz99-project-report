@@ -86,8 +86,9 @@ the full equation.
   \resizebox{\linewidth}{!}{ \pgfplotstabletypeset[assign column
     name/.style={/pgfplots/table/column name={\textbf{#1}}},col
     sep=comma, header=has colnames, columns/{CPU Cycles Wasted}/.style
-    = {column name = {CPU Cycles Wasted (\%)}}, columns/{Number of LLC
-      misses}/.style = {fixed, fixed
+    = {numeric type,precision=3,column name = {CPU Cycles Wasted
+        (\%)}}, columns/{Number of LLC misses}/.style = {numeric type,
+      precision = 0, preproc/expr={##1/180},fixed, fixed
       zerofill}]{results/cache_analysis.csv}}
   \caption{Proportion of CPU cycles wasted on \texttt{load}
     instructions}
@@ -116,7 +117,7 @@ of cycles consumed by the MEE:
 \end{equation*}
 Table~\ref{tab:mem2} shows the estimate of the MEE overhead for each
 of our test scenarios. As can be seen from the table, the maximum
-overhead is 3.70\% even with the pessimistic assumption about the
+overhead is 2.04\% even with the pessimistic assumption about the
 number of bytes read per \texttt{load} instruction. This number seems
 reasonable because the only memory object that does not fit completely
 within the cache is the 32MB payload, and a modern CPU will attempt to
@@ -129,8 +130,10 @@ overall overhead of SGX.
     name/.style={/pgfplots/table/column name={\textbf{#1}}},col
     sep=comma, header=has colnames, columns/{CPU Cycles Wasted}/.style
     = {numeric type, column name = {MEE Overhead (\%)}, fixed, fixed
-      zerofill,precision = 2, preproc/expr={##1+##1*(0.77*4096/180)}}
-    ]{results/cache_analysis.csv}}
+      zerofill,precision = 3, preproc/expr={##1+##1*(0.77*4096/180)}},
+    columns/{Number of LLC misses}/.style = {numeric type, precision =
+      0, preproc/expr={##1/180},fixed, fixed zerofill}
+      ]{results/cache_analysis.csv}}
   \caption{Approximated MEE overhead}
   \label{tab:mem2}
 \end{table}
