@@ -3,11 +3,11 @@
 \begin{document}
 \label{sec:perfmodel}
 To model the performance of our prototype we implemented a second version of
-the \enclaveprogram, that we call \busywait~or \enclavemodel, which
-has no dependencies on OpenSGX. For our model, we make the same assumptions
-as~\cite{Baumann14}, namely we assume that:
+the \enclaveprogram, that we called \busywait~or \enclavemodel, which
+has no dependencies on OpenSGX. For our model, we made the same assumptions
+as~\cite{Baumann14}, namely:
 \begin{enumerate}
-  \item The CPU used in testing performs the same as an SGX-enabled CPU for
+  \item The CPU used in testing, performs the same as an SGX-enabled CPU for
     all non-SGX instructions.
   \item The EPC is large enough to accommodate the entirety of the trusted
     component and any data structures created after program start-up.
@@ -20,7 +20,7 @@ only once, at startup, and therefore have no effect on runtime performance. As
 a result, we only simulate the overhead of instructions used to switch to and
 from the \enclaveprogram, i.e.\ EENTER, ERESUME and EEXIT.
 
-Simulating the slow down in memory accesses due to the need for decrypting
+Simulating the slow down in memory accesses, due to the need for decrypting
 DRAM contents before being able to access them in processors cache was carried
 out by reducing the memory's clock in~\cite{Baumann14}. Such a proxy works for
 their system because it executes within an enclave in its entirety. Clearly,
@@ -28,7 +28,7 @@ this approach would underestimate the performance of our system because only
 the trusted component incurs the overhead of memory encryption. This issue is
 addressed in Section~\ref{sec:mem-analysis}.
 
-We leave the overhead incurred by asynchronous enclave exits unaccounted for.
+We left the overhead incurred by asynchronous enclave exits, unaccounted for.
 \end{document}
 
 %%% Local Variables:
