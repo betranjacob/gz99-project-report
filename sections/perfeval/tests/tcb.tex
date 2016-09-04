@@ -29,11 +29,10 @@ The columns in tables \ref{tab:libressl-diff} and~\ref{tab:nginx-diff} have the 
 \begin{table}[H]
   \center
   \footnotesize
-  PLACEHOLDER
-  % \pgfplotstabletypeset[assign column
-  %   name/.style={/pgfplots/table/column name={\textbf{#1}}},col
-  %   sep=comma, header=has colnames]{results/sgx_detail_instruction_count_s.csv}
-  \caption{TCB estimation based on the SLOC}
+  \pgfplotstabletypeset[assign column
+    name/.style={/pgfplots/table/column name={\textbf{#1}}},col
+    sep=comma, header=has colnames]{results/tcb_analysis.csv}
+  \caption{TCB size estimation based on the SLOC}
   \label{tab:tcb-estimate}
 \end{table}
 
