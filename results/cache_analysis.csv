@@ -1,4 +1,4 @@
-Cipher-Design, Number of Cycles Waiting on LLC misses ,Total CPU Cycles,CPU Cycles Wasted
+Cipher-Design-Size, Number of Cycles Waiting on LLC misses ,Total CPU Cycles,CPU Cycles Wasted
 RSA-Session Keys Outside-1K,0,5568008352,0.00
 RSA-Session Keys Outside-32M,0,5822008733,0.00
 ECDHE-Session Keys Outside-1K,0,11320016980,0.00
