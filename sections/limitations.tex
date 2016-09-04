@@ -6,22 +6,22 @@ Our design does not provide protection against Denial of Service
 attacks and we consider this attack vector as being out of scope. We
 were initially concerned that our use of blocking I/O operations on
 the named pipe interface exposes a DoS vulnerability. In case the
-non-enclave process gets owned, an adversary can launch a DoS attack
+non-enclave process gets compromised, an adversary can launch a DoS attack
 by writing arbitrary bytes in the named pipe used for interprocess
-communication. This would cause the enclave or non-enclave process to
+communication. This would cause the enclave or the non-enclave process to
 either block on read(), if less than the expected bytes exist in the
-pipe, or exit due to a logical error introduced by the arbitrary bytes
+pipe; or exit due to a logical error introduced by the arbitrary bytes
 read. A more sophisticated implementation of the named pipe interface
 would be to use asynchronous I/O operations with timeouts as signals
 to proceed with serving the next request. This would only make our
 design a bit more resilient to such attacks, though still not
 invulnerable. The threat model we are considering implies that
-everything running outside the enclave can be potentially owned. Thus,
+everything running outside the enclave can be potentially compromised. Thus,
 an adversary that takes control of the hypervisor or the host OS, has
 way more trivial choices on how to launch a DoS attack such as
 blocking the NIC from incoming packets or even shutting down the
 machine itself, than writing an exploit destined for our named pipe
-interface. It is clear, our compartmentalization of the openssl
+interface. It is clear, our compartmentalisation of the openssl
 library does not provide any additional conveniences for the attacker
 to launch a DoS attack. Also, a DoS attack only constitutes a liveness
 threat, rather a privacy threat, which fully complies with SGX's
