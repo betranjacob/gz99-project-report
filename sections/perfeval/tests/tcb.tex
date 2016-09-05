@@ -5,10 +5,10 @@
 To estimate the size of the TCB of the \enclaveprogram~after our partitioning,
 we generated a dynamic call graph (using callgrind) under one RSA and one ECDHE
 request, separately for session keys inside and outside the enclave as well as
-stoc NGINX + LibreSSL. We then crawled the source files in search for lines
+stock NGINX + LibreSSL. We then crawled the source files in search for lines
 between the function names obtained from callgrind and ``\}'' using
 \textit{sed} and \textit{grep}. We excluded syscalls, libc functions,
-functions defined in multiple files and functions which names are
+functions defined in multiple files and functions whose names are
 declared with preprocessor macros. The resulting list is not fully accurate
 but rather gives a rough estimate. Rest of the functions were copied into a
 separate C file for each of the designs and the resulting SLOC was counted
