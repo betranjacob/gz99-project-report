@@ -21,12 +21,12 @@ a result, we only simulate the overhead of instructions used to switch to and
 from the \enclaveprogram, i.e.\ EENTER, ERESUME and EEXIT.
 
 Simulating the slow down in memory accesses, due to the need for decrypting
-DRAM contents before being able to access them in processors cache was carried
-out by reducing the memory's clock in~\cite{Baumann14}. Such a proxy works for
-their system because it executes within an enclave in its entirety. Clearly,
-this approach would underestimate the performance of our system because only
-the trusted component incurs the overhead of memory encryption. This issue is
-addressed in Section~\ref{sec:mem-analysis}.
+DRAM contents before being able to access them in processor's cache, was
+carried out by reducing the memory's clock in~\cite{Baumann14}. Such a proxy
+works for their system because it executes within an enclave in its entirety.
+Clearly, this approach would underestimate the performance of our system
+because only the trusted component incurs the overhead of memory encryption.
+This issue is addressed in Section~\ref{sec:mem-analysis}.
 
 We left the overhead incurred by asynchronous enclave exits, unaccounted for.
 \end{document}
