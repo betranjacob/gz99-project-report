@@ -14,7 +14,7 @@ hypervisor, without the need to trust the cloud provider, operating
 system, and/or hypervisor. 
 
 To this end, we designed a system that adopts the principle-of-least
-privelege, the idea that each component of a system should have access
+privilege, the idea that each component of a system should have access
 to the minimum resources required for its functioning, and a
 technology from \Intel~called Software Guard Extensions (SGX) to
 isolate the private key. SGX is an extension to \Intel's ISA which
@@ -23,15 +23,15 @@ enclave, that may only be accessed by the program that initialised it,
 the \textit{enclave program}. We also developed a second design
 that secures the symmetric session key.
 
-We split a legacy web server into two components, a low privelege,
+We split a legacy web server into two components, a low privilege,
 untrusted component that cannot access the private key directly, and a
-high privelege component that has ownership of the private key. The
-high privelege component is an \textit{enclave program}, and we use
+high privilege component that has ownership of the private key. The
+high privilege component is an \textit{enclave program}, and we use
 SGX to create an enclave where we place the private key via a process
 called remote-attestation, which permits the developer to place
 secrets in an enclave, present on a remote machine, in a secure
 fashion. We carefully define an interface between the untrusted
-componenet and the \textit{enclave program}, to permit the
+component and the \textit{enclave program}, to permit the
 establishment of SSL/TLS sessions while maintaining the integrity of
 the private key. The private key is only used to establish a session
 in SSL/TLS. Communications between a client and the server are secured
