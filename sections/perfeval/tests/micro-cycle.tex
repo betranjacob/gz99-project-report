@@ -74,7 +74,9 @@ request.
 \begin{table}[H]
   \resizebox{\linewidth}{!}{ \pgfplotstabletypeset[assign column
     name/.style={/pgfplots/table/column name={\textbf{#1}}},col
-    sep=comma, header=has colnames]{results/instruction_count.csv}}
+    sep=comma, header=has colnames, columns/{Change over
+      Stock}/.style={column name= {Change Over Stock
+        (\%)}}]{results/instruction_count.csv}}
   \caption{CPU Instruction Count Analysis}
   \label{tab:cpu-instr-count}
 \end{table}
