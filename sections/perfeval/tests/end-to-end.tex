@@ -103,10 +103,12 @@ point's.
 
 \subsubsection*{Analysis of Figure~\ref{fig:cycles-requests}}
 As discussed in Section \ref{sec:cpu-instr-analysis}, we add an
-overhead of \textasciitilde15\% in additional instructions. This,
-however, does not account for the total overhead we observe in
-Figure~\ref{fig:cycles-requests} when the number of busywait cycles is
-set to 0. The remaining overhead is a result of context switches.
+overhead to the server's performance in the form of additional
+instructions. This, however, does not account for the total overhead
+we observe in Figure~\ref{fig:cycles-requests} when the number of
+busywait cycles is set to 0 (this result represents the overhead of
+our prototype, without any SGX instructions). The discrepancy is a
+result of context switches.
 
 Every invocation of ERESUME and EEXIT implies switching from the
 \textit{enclave program} to the untrusted component and from the
@@ -114,35 +116,48 @@ untrusted component to the \textit{enclave program} respectively. A
 context switch causes a TLB flush, which in turn results in slower
 execution until the TLB is repopulated. This is emulated in our
 \enclavemodel~ by the system calls \texttt{read()}/\texttt{write()}
-which are used to communicated via the named pipe.
+which are used to communicate via the named pipe.
 
-From Section~\ref{sec:cpu-instr-analysis} we see that the number of
-context switches are as follows:
-\begin{itemize}
-  \item 12200 context switches per second, in
-    the case of ciphers lacking forward secrecy, where session keys are
-    outside the enclave
-  \item 11046 context switches per second, in the case of ciphers offering
-    forward secrecy and session keys are outside the enclave
-  \item 38164 context switches per second, in the case of ciphers lacking
-    forward secrecy and session keys are inside the enclave
-  \item 26510 context switches per second, in the case of ciphers offering
-    forward secrecy and session keys are inside the enclave
-\end{itemize}
+We theorised that the number of context switches would add a
+significant overhead to the handshake step for both cipher suitesThis
+follows from observing that the \enclaveprogram~does not perform a
+great deal of computation for the handshake operations, as a result,
+the cost of the context switches will be a substantial portion of the
+total overhead incurred. However, for cipher suites that offer forward
+secrecy, the handshake operations for computing the \texttt{Premaster
+  Secret} are computationally more expensive, ameliorating the cost of
+the context switches.
 
-The overhead for the various scenarios when compard to the stock implementation is
-as follows:
-\begin{itemize}
-  \item Session keys outside \textit{RSA} is 19\%, leaving 4\%
-    attributed to context switching
-  \item Session keys inside \textit{RSA} is 30\%, leaving 15\%
-    attributed to context switches
-  \item Session keys outside \textit{ECDHE} is 29\%, leaving 13\%
-    attributed to context switches
-  \item Session keys inside \textit{ECDHE} is 37\%, leaving 21\%
-    attributed to context switches
-\end{itemize}
+Moreover, we expect to see the context switches added for the session
+keys inside design to be less expensive than those for the handshake.
+The encrypt/decrypt operations are computationally more expensive than
+those for the handshake, ameliorating the cost of the additional
+context switches.
 
+Table~\ref{tab:overhead} summarises the decomposition of the total
+overhead observed in Figure~\ref{fig:cycles-requests}. Notice that
+these results agree with our hypothesis.
+
+\begin{table}[H]
+  \resizebox{\linewidth}{!}{ \pgfplotstabletypeset[assign column
+    name/.style={/pgfplots/table/column name={\textbf{#1}}},col
+    sep=comma, header=has colnames, columns/ohimpl/.style = {numeric
+      type, precision = 2,column name = {Overhead of Implementation
+        (\%)}}, columns/ohctx/.style = {numeric type, precision =
+      2,column name = {Overhead of Context Switches (\%)}},
+    columns/ohtotal/.style = {numeric type, precision = 2, column name
+      = {Total Overhead (\%)}}, ]{results/overhead-analysis.csv}}
+  \caption{Analysis of Overhead}
+  \label{tab:overhead}
+\end{table}
+
+With regards to the effect of increasing the number of busywait cycles
+on the end-to-end throughput of the web server. We see that the
+performance degrades as we increase the number of busywait cycles.
+Notice that the decrease in performance for RSA is more pronounced
+than that of ECDHE. This is because the handhshake operations for
+ECDHE are more expensive than those for RSA, lessening the severity of
+the added busywait cycles.
 \subsubsection*{Analysis of Figure~\ref{fig:sizreqs}}
 As the response size increases, we expect to see slight degradation in
 the performance of the prototype where session keys are held inside

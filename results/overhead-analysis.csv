@@ -1,0 +1,5 @@
+Mode Of Operation,Context Switches Per Second,ohimpl,ohctx,ohtotal
+Session Keys Outside - RSA,12220,5.49,12.6284669,18.1184669
+Session Keys Inside - RSA,38164,7.83,21.4156446,29.2456446
+Session Keys Outside - ECDHE,11046,20.59,10.11214728,30.70214728
+Session Keys Inside - ECDHE,26510,22,14.3614807,36.3614807
