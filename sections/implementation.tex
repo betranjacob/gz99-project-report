@@ -207,25 +207,31 @@ Section~\ref{sec:perfeval}).
 \subsection{SGXBridge}
 \label{subsec:sgxbridge}
 
-SGXBridge is a Named Pipe IPC interface developed for exchanging data between
-the trusted and untrusted process. It declares all the functions and data
-structures required by the two components for data serialization. Each operation
-that goes through SGXBridge requires two memcpy() and two I/O operations on the
-named pipe\footnote{Note that, all I/O operations on a named pipe occur on
-kernel buffers whose size may vary from 4K to 64K depending on the kernel
-distribution and do not incur any actual disk I/O.}. It is worth mentioning
-that in the current version of OpenSGX (v1.0), the interface will read/write
-data to/from the stub (shared memory) in buffers of 512 bytes. This immediately
-cancels a pipe buffer larger than this size, thus we designed SGXBridge to
-follow this assumption. We mention though, this does not affect our performance
-results, as our evaluation environment executes outside of OpenSGX's
-runtime. For simplicity, we designed SGXBridge read()/write() operations to
-follow a similar API to UNIX's I/O interface. For brevity reasons, we omit the
-implementation details and we refer the reader to the documented code.
+SGXBridge is a IPC interface, using named pipes, developed for
+exchanging data between the trusted and untrusted process. It declares
+all the functions and data structures required by the two components
+for data serialisation. Each operation that goes through SGXBridge
+requires two \texttt{memcpy()}s and two I/O operations on the named
+pipe\footnote{All I/O operations on a named pipe occur on kernel
+  buffers whose size may vary from 4K to 64K depending on the kernel
+  distribution, and do not incur any actual disk I/O.}. It is worth
+mentioning that in the current version of OpenSGX (v1.0), the
+interface will read/write data to/from the stub (shared memory) in
+buffers of 512 bytes. This immediately negates a pipe buffer larger
+than this size, thus we designed SGXBridge to follow this assumption.
+We mention though, this does not affect our performance results, as
+our evaluation environment executes outside of OpenSGX's runtime. For
+simplicity, we designed SGXBridge \texttt{read()}/\texttt{write()}
+operations to follow a similar API to UNIX's I/O interface. For
+brevity reasons, we omit the implementation details and we refer the
+reader to the code.
 
-In real SGX hardware, the enclave will exist within a single process's virtual
-memory and can be accessed directly without the requirement of an IPC
-mechanism. We decided to use these interfaces for our project as it was an IPC
+Using real SGX hardware, the \textit{enclave program} could exist
+within a single process's virtual memory (OpenSGX does not provide a
+way to programmatically invoke an \textit{enclave program} from an
+untrusted process, leading to our implementation with two processes),
+and accessed directly without the requirement of an IPC mechanism. We
+decided to use these interfaces for our project as it was an IPC
 facility already available within the OpenSGX library.
 
 \subsection{Implementation Phases and Tools used}
