@@ -32,16 +32,16 @@
 
 \begin{document}
 
-In this section, we discuss the system components along with their
-necessary modifications. We also emphasize on the challenges and the rationale
-leading to a particular design approach that we have taken. We built a 
-prototype of our design which consists of the following parts: NGINX, 
-which is an event-driven web server achieving state-of-the-art performance,
-LibreSSL as an implementation of the SSL/TLS protocol, OpenSGX as an emulation
-environment of \Intel's SGX hardware and SGXBridge, a narrow interface that
-utilizes UNIX named pipes to achieve IPC between the trusted and untrusted
-components. Figure \ref{fig:implementation-overview} depicts an overview of our
-prototype system.
+In this section, we discuss the componenets of the system we
+implemented and the modifications we made to each. We built a
+prototype of our design which consists of the following parts: NGINX,
+an event-driven web server achieving state-of-the-art performance,
+LibreSSL, an implementation of the SSL/TLS protocol, OpenSGX, an
+emulation environment of \Intel's SGX hardware, and SGXBridge, an
+interface that enables communication between an \textit{enclave
+  program} and the untrusted component using. Figure
+\ref{fig:implementation-overview} depicts an overview of our prototype
+system.
 
 \begin{figure}[H]
   \centering
@@ -52,49 +52,61 @@ prototype system.
 
 \subsection{NGINX}
 
-NGINX is an open source web server that uses an asynchronous event-driven
-approach for handling requests from the clients. The rationale behind choosing
-NGINX over Apache is the performance improvement it offers with the event
-driven architecture. In NGINX, each worker process handles thousands of
-connections simultaneously as opposed to Apache's thread per connection
-approach. Furthermore, NGINX is lightweight, scalable and also gaining lot of
-market share compared to Apache.
+NGINX is an open source web server that uses an asynchronous
+event-driven approach for handling requests from the clients. The
+rationale behind choosing NGINX over Apache is the performance
+improvement it offers with its event-driven architecture. In NGINX,
+each worker process handles thousands of connections simultaneously as
+opposed to Apache's thread per connection approach. Furthermore, NGINX
+is lightweight, scalable and also gaining lot of market share compared
+to Apache.
 
-The NGINX server process can manage multiple clients simultaneously and the
-request events are handled individually as they arrive. The server is capable
-to offload the tasks to multiple worker processes in case of heavy incoming
-traffic. This architecture introduced two implications in our design regarding
-handling concurrent SSL handshakes and therefore concurrent connections.
+The NGINX server process can manage multiple clients simultaneously
+and the request events are handled individually as they arrive. The
+server is capable to offload the tasks to multiple worker processes in
+case of heavy incoming traffic. This architecture introduced two
+implications in our design regarding handling concurrent SSL
+handshakes and therefore concurrent connections.
 
-First, OpenSGX comes without multi-threading support, fact that immediately
-renders the enclave incapable of handling concurrent requests. We initially
-considered an alternative design to provide multi-core support, in which an
-enclave is launched for each worker and each enclave communicates with a shared
-enclave to store/retrieve state specific to an active SSL handshake/session.
-Though such a design would enable our system to support multiple NGINX workers,
-it does not present a realistic approach for a production system with real SGX
-hardware where multi-threading is natively supported. Thus we limit our current
-model to a single core, and in the lack of possession of real SGX hardware we
-leave multi-core support as future work.
+First, OpenSGX does not support multi-threading, a fact that
+immediately renders the enclave incapable of handling concurrent
+requests. We initially considered an alternative design to provide
+multi-core support, in which an enclave is launched for each worker
+and each enclave communicates with a shared enclave to store/retrieve
+state specific to an active SSL handshake/session. Though such a
+design would enable our system to support multiple NGINX workers, it
+does not present a realistic approach for a production system with
+real SGX hardware where multi-threading is natively supported. Thus we
+limit our current model to a single core, and in the lack of
+possession of real SGX hardware we leave multi-core support as future
+work.
 
-Second, the SSL session ID is established only after the SSL handshake successfully completes. It posed a challenge how to distinguish a connection
-specific data within the enclave when multiple concurrent handshakes are
-proceeding \footnote{In order to maximise performance, a web server will try
-to switch between ongoing connections while it waits for network I/O, which
-immediately poses the requirement for an enclave to be aware of multiple SSL
-sessions. Regarding our design, not dealing with concurrent connections, would
-mean that the  enclave would only be able to handle a single connection at
-a time which would have severe performance impact to our design.}.
-To circumvent this, we assigned an SGX specific identifier to an on-going
-handshake and used this ID as a mapping key to distinguish between connections
-within the enclave, where we used a dynamic hash-table data structure to store
-the state specific to every connection. Upon successful completion of the SSL
-handshake the mapping key of the hash table is switched to the SSL session ID.
-Figure \ref{fig:session-management} depicts an overview of this process. Note
-that this mechanism not only enables the enclave to deal with concurrent SSL
-handshakes, but also lets us support SSL session resumption through session ID.
-However, due to lack of time, we left support of Session Tickets as future
-work. 
+Second, to maximise performance, a web server, even on a single core
+machine, will try to switch between ongoing connections while it waits
+for network I/O. As a result, to acheive good performance, the
+\enclaveprogram~must support multipe, concurrent SSL/TLS conncetions.
+Consequently, the \enclaveprogram~ must maintian a mappint beetween an
+identifier and SSL/TLS connections, and the untrusted component can
+use the identifier to indicate to the \enclaveprogram~which session an
+operation corresponds to. A natural choice for the identifier would be
+the SSL/TLS session ID which is established after the SSL/TLS
+handshake completes. However, we also required an identifier to
+distinguish between SSL/TLS sessions that are still in the handshake
+phase; a consequence of the \textit{enclave program} performing
+operations \textit{during} session establishment.
+
+To resolve this issue, we assigned a temporary identifier to an
+on-going handshake, and used this ID as a mapping key to distinguish
+between connections within the \textit{enclave program}. We used a
+dynamic hash-table to store state specific to every connection. Upon
+successful completion of the SSL/TLS handshake the mapping key of the
+hash table is switched to the SSL/TLS session ID. Figure
+\ref{fig:session-management} illustrates this process. Note that this
+mechanism not only enables the enclave to deal with concurrent SSL
+handshakes, but also lets us support SSL/TLS session resumption
+through session ID. Due to time constraints, we left support of
+Session Tickets, another mechanism used for session resumption, as
+future work.
 
 \begin{figure}[H]
   \centering
@@ -105,33 +117,36 @@ work.
 
 \subsection{LibreSSL}
 \label{subsec:libressl}
-We used LibreSSL as the SSL/TLS protocol library of choice for our system. It
-is a fork of OpenSSL aiming to provide a more secure implementation and it has
-undergone major code pruning. Most of the changes compared to legacy OpenSSL
-are related to the security vulnerabilities found in the latter. In our
-prototype system, both NGINX and SGX runtime are linked to this library.
+We used LibreSSL as the SSL/TLS protocol library of choice for our
+system. It is a fork of OpenSSL aiming to provide a more secure
+implementation and it has undergone major code pruning. Most of the
+changes compared to legacy OpenSSL are related to the security
+vulnerabilities found in the latter. In our prototype system, both
+NGINX and SGX runtime are linked to this library.
 
 % TODO: proof read this paragraph and fix. i.e. not all crypto operations are
 % replaced (think of the session keys outside case), some non crypto are
 % replcaed too (server random generation). is it correct to say we assume
 % untrusted code contains voulnerabilities and is compromised? maybe its just
 % not the right place to mention this in the implementation section?
-The LibreSSL variant attached to the NGINX process has been modified, such that
-the implementation of all crypto operations are replaced with IPC
-read()/write() stubs to SGXBridge (Section~\ref{subsec:sgxbridge}). That is,
-all the secure operations of an SSL handshake such as signing, verification,
-key generation, encryption or decryption, will invoke an IPC request to the SGX
-counterpart. We made careful cuts in LibreSSL's code in order to minimise the
-code executed within the trusted component, thus effectively reducing the size
-of the TCB. Most of the code executing within the enclave includes
-cryptographic operations, except for a small volume of code responsible for
-SSL state bookkeeping reasons\footnote{As mentioned in Section
-\ref{sec:design}, upon exchange of the \texttt{ChangeCipherSpec} messages the
-enclave prepares the environment for handling crypto operations specific to
-the selected cipher.}. The rest of LibreSSL's code that handles tasks such as
-connection establishment/termination and state manipulation, executes outside
-of the enclave and is assumed to contain vulnerabilities and be potentially
-compromised.
+The LibreSSL variant attached to the NGINX process has been modified,
+such that the implementation of all crypto operations are replaced
+with IPC read()/write() stubs to SGXBridge
+(Section~\ref{subsec:sgxbridge}). That is, all the secure operations
+of an SSL handshake such as signing, verification, key generation,
+encryption or decryption, will invoke an IPC request to the SGX
+counterpart. We made careful cuts in LibreSSL's code in order to
+minimise the code executed within the trusted component, thus
+effectively reducing the size of the TCB. Most of the code executing
+within the enclave includes cryptographic operations, except for a
+small volume of code responsible for SSL state bookkeeping
+reasons\footnote{As mentioned in Section \ref{sec:design}, upon
+  exchange of the \texttt{ChangeCipherSpec} messages the enclave
+  prepares the environment for handling crypto operations specific to
+  the selected cipher.}. The rest of LibreSSL's code that handles
+tasks such as connection establishment/termination and state
+manipulation, executes outside of the enclave and is assumed to
+contain vulnerabilities and be potentially compromised.
 
 \subsection{OpenSGX}
 \label{subsec:opensgx}
