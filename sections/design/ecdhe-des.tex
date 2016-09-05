@@ -45,13 +45,12 @@ shared secret; hence, compromising a single session's ``secret
 paints'' does not affect any other session (new ``secret paints'' are
 used for new sessions).
 
-For our project, we concentrated on Elliptic Curves DHE (ECDHE).
-This is a variant of DHE that utilises Elliptic Curves to ``mix''
-the ``paints''. The mathematics behind ECDHE is beyond the scope of
-this report, but the interested reader may refer to [CITATION] for
-further details. The steps in the SSL/TLS handshake when using an
-ECDHE cipher (``ECDHE handshake'') are presented in
-Figure~\ref{fig:ecdhe-pristine}.
+For our project, we concentrated on Elliptic Curves DHE (ECDHE).  This is a
+variant of DHE that utilises Elliptic Curves to ``mix'' the ``paints''. The
+mathematics behind ECDHE is beyond the scope of this report, but the interested
+reader may refer to \cite{barker2007recommendation} for further details. The
+steps in the SSL/TLS handshake when using an ECDHE cipher (``ECDHE handshake'')
+are presented in Figure~\ref{fig:ecdhe-pristine}.
 
 \begin{figure}[H]
   \centering
