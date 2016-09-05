@@ -236,17 +236,17 @@ facility already available within the OpenSGX library.
 
 \subsection{Implementation Phases and Tools used}
 % \label{subsec:Implementation Phases and Tools used}
-Our primary goal during the course of implementating our prototype was
-understaning the code flow in LibreSSL, and identifying the specific
+Our primary goal during the course of implementing our prototype was
+understanding the code flow in LibreSSL, and identifying the specific
 functions and data structures that handled the server's long-term
 private key. We used a tool called Callgrind to uncover the flow of
 execution in NGINX and LibreSSL when an SSL/TLS session is negotiated.
 Callgrind dynamically records the sequence of function calls and
 provides a snapshot of the runtime behaviour of an application. We
-alose used a tool called KCachegrind, which presents Callgrind's output
+also used a tool called KCachegrind, which presents Callgrind's output
 in a graphical manner, making it easier to understand.
  
-Using Callgrinds output, we determined that LibreSSL holds a data
+Using Callgrind's output, we determined that LibreSSL holds a data
 structure called \texttt{SSL\_CTX} which is used to create an
 \texttt{SSL} object for each connection. The \texttt{SSL_CTX}
 structure is the one that holds the long-term private key. The
