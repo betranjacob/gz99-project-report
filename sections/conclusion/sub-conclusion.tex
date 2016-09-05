@@ -2,20 +2,29 @@
  
 \begin{document}
 
-Legacy web servers follow a monolithic design which once compromized, lets
-sensitive data that reside in plaintext form in memory, exposed to an
-adversary.  We proposed a design for web servers that are deployed on the cloud
-environment, under the assumption that the cloud provider is malicious and/or
-the undelying operating system is untrusted. Our design utilizes \Intel~SGX to
-provide isolation guarantees for the server's private key for both ciphers that
-lack or offer forward secrecy support. It splits legacy monolithic web server
-designs into a trusted and an untrusted component, while its trusted component
-comprises a minimal TCB instead of an entire application. We augmented the
-baseline design to further secure the SSL/TLS session keys, hardening the
-attack environment for an adversary that wishes to decrypt recorded sessions at
-its leisure. We developed a prototype implementation using NGINX and LibreSSL
-and evaluated the overhead \Intel~SGX introduces to the web server's end-to-end
-performance. The results verify our initial hypothesis and show that the
-overhead is large, which may discourage people from using our system in
-production environments under heavy workloads.
+Legacy web servers follow a monolithic design, where SSL/TLS's
+long-term private key is accessible to all of the application's
+components. As a result, if an assailant can compromise any of the web
+server's unprivileged components, the operating system, the
+hypervisor, or is a malicious cloud provider, they can obtain the
+long-term private key. If the long-term private key is compromised,
+SSL/TLS's guarantees of confidentiality and integrity are negated. We
+proposed a design for web servers that are deployed on the cloud
+environment, under the assumption that the cloud provider is malicious
+and/or the underlying operating system and hypervisor are untrusted.
+Our design uses \Intel~SGX to provide isolation guarantees for the
+server's private key for both cipher suites that lack or offer forward
+secrecy support. We partitioned a legacy, monolithic web server into a
+trusted and an untrusted component. The trusted component was secured
+in an SGX container, minimising the TCB to include the trusted
+component and the CPU, instead of the entire application, OS,
+hypervisor and cloud provider. We augmented the baseline design to
+further secure the SSL/TLS session keys, hardening the server against
+an adversary that wishes to decrypt recorded sessions at their
+leisure. We developed a prototype implementation using NGINX and
+LibreSSL and evaluated the overhead \Intel~SGX introduces to the web
+server's end-to-end performance. The results verify our initial
+hypothesis and show that the overhead is large, which may discourage
+people from using our system in production environments under heavy
+workloads.
 \end{document}
