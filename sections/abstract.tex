@@ -21,11 +21,11 @@ isolate the private key. SGX is an extension to \Intel's ISA which
 enables a developer to create protected regions of memory, called an
 enclave, that may only be accessed by the program that initialised it,
 the \textit{enclave program}. We also developed a second design
-that secures the symmetric session key
+that secures the symmetric session key.
 
-We split a legacy web server into two components a, low privelege,
+We split a legacy web server into two components, a low privelege,
 untrusted component that cannot access the private key directly, and a
-high privelege componenet that has ownership of the private key. The
+high privelege component that has ownership of the private key. The
 high privelege component is an \textit{enclave program}, and we use
 SGX to create an enclave where we place the private key via a process
 called remote-attestation, which permits the developer to place
