@@ -17,7 +17,7 @@ enclave termination.
 \subsubsection*{Test Setup}
 This benchmark consists of multiple parts: (1) we count the number of
 instructions executed for vanilla NGINX + LibreSSL; (2) we measure the
-instruction counts, of modified NGINX and \enclavemodel~(untrusted and trusted
+instruction counts of modified NGINX and \enclavemodel~(untrusted and trusted
 components) separately; (3) we capture the number and type of SGX instructions
 executed by the \enclaveprogram~during:
 \begin{enumerate}[label=3\alph*)]
@@ -25,20 +25,19 @@ executed by the \enclaveprogram~during:
   \item Normal operation.
 \end{enumerate}
 
-For parts (1) and (2), we capture the instruction counts using \textit{perf},
+For parts (1) and (2) we capture the instruction counts using \textit{perf},
 a standard linux tool for program profiling.
 
-For part (3a), we launch the \enclaveprogram~under OpenSGX and instrumented
-NGINX as usual, wait for 30 seconds to ensure the startup has fully completed
-and terminate the NGINX which also terminates the \enclaveprogram.
+For part (3a) we launch the \enclaveprogram~under OpenSGX, launch NGINX, wait
+for 30 seconds to ensure the startup has fully completed and terminate the
+NGINX, which also terminates the \enclaveprogram.
 
-For part (3b), we run the same workload as for parts (1) and~(2), executing
+For part (3b) we run the same workload as for parts (1) and~(2), executing
 the \enclaveprogram~under OpenSGX.
 
-The requests for (1), (2) and (3b) are generated using \Apache~Benchmark. Due
-to limitation of OpenSGX performance (very long encryption/decrypton times),
-we only run 50 requests with 2 concurrent connections, for both of our
-designs, for each of the following ciphers:
+The requests for (1), (2) and (3b) are generated using \Apache~Benchmark. We
+run 1000 requests with 2 concurrent connections for both of our designs, for
+each of the following ciphers:
 \begin{enumerate}
   \item AES256-GCM-SHA384
   \item ECDHE-AES256-GCM-SHA384
@@ -46,11 +45,10 @@ designs, for each of the following ciphers:
 
 \subsubsection*{Results}
 Table~\ref{tab:cpu-instr-count} combines the results obtained from parts (1),
-(2) and (3b). It shows the sum of instructions executed over 50 requests for
-both isolation designs, separately for RSA and ECDHE ciphers.  The SGX
-instructions reported exclude the the instructions executed at enclave
+(2) and (3b). It shows the sum of instructions executed over 1000 requests for
+both isolation designs, separately for RSA and ECDHE ciphers. The SGX
+instructions reported include the the instructions executed at enclave
 start-up.
-% TODO: the sgx column should probably include the startup sgx instructions
 
 The SGX instruction counts detailed in Table~\ref{tab:sgx-encls} are executed
 only once during start-up and are the result of part (3a) of the benchmark.
@@ -60,13 +58,6 @@ was obtained by subtracting the values in Table~\ref{tab:sgx-encls} from the
 values obtained from part (3b) and dividing the result by number of requests.
 We also verified that these match the values reported when executing only one
 request.
-
-% TODO: i think all of that was already mentioned, but maybe it'll still be
-% useful
-% When reporting the instructions executed per request, we ignore the cost of
-% the SGX instructions executed during enclave startup, because the latter are
-% executed only once, to prepare the SGX environment, and do not affect the
-% application's response rate.
 
 % TODO: i think it would be clearer if we show the instructions in millions
 % need to add `%` to the change over stock column
@@ -108,10 +99,10 @@ executed instructions regarding the design where the session keys reside
 outside of the enclave for RSA ciphers, and 20\% for the same design but for
 ECDHE ciphers. Regarding the design where the session keys reside inside the
 enclave our implementation added 7.8\% of executed instructions for RSA ciphers
-and 22\% for the same design but for ECDHE ciphers. Note that, there could be a
-performance impact on the key-inside compared to the key-outside
-implementations, because of the effect of memory encryption in the enclave, as
-discussed in Section~\ref{sec:mem-analysis}.
+and 22\% for the same design but for ECDHE ciphers. Note that, there could be
+an additional performance impact on the keys inside compared to the keys
+outside implementation, because of the effect of memory encryption in the
+enclave, as discussed in Section~\ref{sec:mem-analysis}.
 
 % ECDHE requires 8 pairs of context switch more than RSA regardless of the keys outside / inside -> does it agree with the design section?
 

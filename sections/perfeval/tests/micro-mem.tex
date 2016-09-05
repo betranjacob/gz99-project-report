@@ -1,5 +1,7 @@
 \documentclass[../../../main.tex]{subfiles}
 
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+
 \begin{document}
 \label{sec:mem-analysis}
 SGX incorporates a hardware memory encryption engine (MEE) that
@@ -31,8 +33,8 @@ below~\cite{intel-eqn} (according to \Intel, each memory load from DRAM
 on an i5-2520M processor consumes approximately 180 CPU cycles).
 
 \begin{align*}
-  \text{Fraction of CPU Cycles Wasted} = 
-  \frac{\text{Number of LLC Misses} * 180}
+  \text{Fraction of CPU Cycles Wasted} = \numberthis \label{eqn1}
+  \frac{\text{Number of LLC Misses} * 180} 
   {\text{Total CPU Cycles}}
 \end{align*}
 
@@ -80,18 +82,26 @@ tests are reported in Table~\ref{tab:mem}. Note that these concern
 only the \enclavemodel~execution and do not include the execution of
 untrusted component, because only the \enclaveprogram~suffers from the
 MEE overhead. The CPU Cycles Wasted column is calculated according to
-the full equation.
+the equation~\eqref{eqn1} above.
 
 \begin{table}[H]
-  \resizebox{\linewidth}{!}{ \pgfplotstabletypeset[assign column
-    name/.style={/pgfplots/table/column name={\textbf{#1}}},col
-    sep=comma, header=has colnames, columns/{CPU Cycles Wasted}/.style
-    = {numeric type,precision=3,column name = {CPU Cycles Wasted
-        (\%)}}, columns/{Number of LLC misses}/.style = {numeric type,
-      precision = 0, preproc/expr={##1/180},fixed, fixed
-      zerofill}]{results/cache_analysis.csv}}
-  \caption{Proportion of CPU cycles wasted on \texttt{load}
-    instructions}
+  \resizebox{\linewidth}{!}{
+    \pgfplotstabletypeset[
+     assign column name/.style={/pgfplots/table/column name={\textbf{#1}}},
+     col sep=comma,
+     header=has colnames,
+     columns/{CPU Cycles Wasted}/.style = {
+       numeric type,
+       precision=3,
+       column name = {CPU Cycles Wasted(\%)}
+     },
+     columns/{Number of LLC misses}/.style = {
+       numeric type,
+       precision = 0,
+       preproc/expr={##1/180},fixed, fixed zerofill}
+    ]{results/cache_analysis.csv}
+  }
+  \caption{Proportion of CPU cycles wasted on \texttt{load} instructions}
   \label{tab:mem}
 \end{table}
 

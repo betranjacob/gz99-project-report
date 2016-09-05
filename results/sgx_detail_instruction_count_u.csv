@@ -1,1 +1,1 @@
-Test,EENTER,ERESUME,EEXIT,EGETKEY,EREPORT,EACCEPT,Mode Switch,TLB Flush,TotalKeyoutside-RSA,0,13,13,0,0,0,26,26,26Keyoutside-ECDHE,0,21,21,0,0,0,42,42,42keyinside-RSA,0,47,47,0,0,0,94,94,94keyinside-ECDHE,0,55,55,0,0,0,110,110,110
+Test,EENTER,ERESUME,EEXIT,EGETKEY,EREPORT,EACCEPT,Mode Switch,TLB Flush,TotalSession Keys Outside - RSA,0,13,13,0,0,0,26,26,26Session Keys Outside - ECDHE,0,21,21,0,0,0,42,42,42Session Keys Inside - RSA,0,47,47,0,0,0,94,94,94Session Keys Inside - ECDHE,0,55,55,0,0,0,110,110,110

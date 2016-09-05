@@ -3,16 +3,23 @@
 \begin{document}
 \label{sec:tcb-analysis}
 To estimate the size of the TCB of the \enclaveprogram~after our partitioning,
-we generated a dynamic call graph (using callgrind) under one RSA and one ECDHE
-request, separately for session keys inside and outside the enclave as well as
-stock NGINX + LibreSSL. We then crawled the source files in search for lines
-between the function names obtained from callgrind and ``\}'' using
-\textit{sed} and \textit{grep}. We excluded syscalls, libc functions,
-functions defined in multiple files and functions whose names are
-declared with preprocessor macros. The resulting list is not fully accurate
-but rather gives a rough estimate. Rest of the functions were copied into a
-separate C file for each of the designs and the resulting SLOC was counted
-with cloc. The results are presented in Table~\ref{tab:tcb-estimate}.
+we generated a dynamic call graph (using Valgrind's
+Callgrind~\cite{weidendorfer2004tool}) under one RSA and one ECDHE request,
+separately for session keys inside and outside the enclave, as well as stock
+NGINX + LibreSSL. From the call graph we obtained a list of functions
+(separate for each design) executed during the tests. From these lists we
+excluded syscalls, libc functions, functions defined in multiple files and
+functions whose names are declared with preprocessor macros. The resulting list is not fully accurate but rather gives a rough estimate.
+
+We then crawled the source files in search for the source code of the
+remaining functions. It was performed by obtaining the (source) lines between
+a line that starts with a ``\textit{function\_name(}'' and a line that starts
+with ``\textit{\}}''. This process was automated with the help of \textit{sed}
+and \textit{grep}.
+
+The source code found with the above process was copied into a separate C file
+for each of the designs and the resulting SLOC was counted with
+cloc~\cite{cloc}. The results are presented in Table~\ref{tab:tcb-estimate}.
 
 Using cloc, we also compared the modified source code of LibreSSL and NGINX to
 their stock versions. We report these results in Table~\ref{tab:libressl-diff}

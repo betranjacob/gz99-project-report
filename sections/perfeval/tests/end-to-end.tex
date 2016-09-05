@@ -39,8 +39,8 @@ of the server. We consider the following four scenarios:
 
 For each of the above scenarios we run the test while varying the
 number of busywait cycles from 0 to 50,000 and keeping the response
-size constant at 1 KB. Next, we removed the busywaits and varied the
-response sizes from 1 KB to 4 MB. We setup NGINX with a single worker
+size constant at 1~KB. Next, we removed the busywaits and varied the
+response sizes from 1~KB to 4~MB. We setup NGINX with a single worker
 process due to the limitations mentioned in Section
 \ref{sec:implementation}.
 
@@ -112,14 +112,14 @@ result of context switches.
 
 Every invocation of ERESUME and EEXIT implies switching from the
 \textit{enclave program} to the untrusted component and from the
-untrusted component to the \textit{enclave program} respectively. A
-context switch causes a TLB flush, which in turn results in slower
+untrusted component to the \textit{enclave program} respectively.
+Context switch causes a TLB flush, which in turn results in slower
 execution until the TLB is repopulated. This is emulated in our
 \enclavemodel~ by the system calls \texttt{read()}/\texttt{write()}
 which are used to communicate via the named pipe.
 
 We theorised that the number of context switches would add a
-significant overhead to the handshake step for both cipher suites.This
+significant overhead to the handshake step for both cipher suites. This
 follows from observing that the \enclaveprogram~does not perform a
 great deal of computation for the handshake operations, as a result,
 the cost of the context switches will be a substantial portion of the
@@ -131,7 +131,7 @@ switches.
 Moreover, we expect to see the context switches added for the session
 keys inside design to be less expensive than those for the handshake.
 The encrypt/decrypt operations are computationally more expensive than
-those for the handshake, ameliorating the cost of the additional
+those for the handshake, alleviating the cost of the additional
 context switches.
 
 Table~\ref{tab:overhead} summarises the decomposition of the total
@@ -169,7 +169,7 @@ expect to see that penalty.
 From Figure~\ref{fig:sizreqs}, we see that, for session keys outside,
 the line is flatter than for session keys inside confirming our
 hypothesis. Yet, the performance of our prototype and the stock
-implementation begins to decrease significantly for as we increase
+implementation begins to decrease significantly as we increase
 response size past 128 KB. This is due to the network becoming
 saturated with outgoing responses. The network bandwidth on the
 machine we used is approximately 560Mb/sec which is 70MB/sec. At 128
