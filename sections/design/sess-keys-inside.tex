@@ -19,7 +19,7 @@ user programs that require plain-text as part of the \textit{enclave
   program} and, by extension, the TCB. As a result, session keys may
 reside within the enclave, and, aside from packets that are plain-text
 in the SSL/TLS handshake, all output from the \textit{enclave program}
-to the unpriveleged/untrusted network facing component would be
+to the unprivileged/untrusted network facing component would be
 encrypted. This design, however, introduces a large TCB that
 incorporates all of the user-written code, making it difficult to
 reason about its security.
@@ -47,11 +47,11 @@ packets received to allow for the generation of
 \texttt{MasterSecret}. It is at this step that new design elements
 appear. First, \texttt{MasterSecret} is no longer returned to the
 untrusted component. Second, the \texttt{Change\-CipherSpec} message
-is passed to the \textit{encalve program}. This is because
-\texttt{ChangeCipherSpec} indicates to the recepient the transition to
+is passed to the \textit{enclave program}. This is because
+\texttt{ChangeCipherSpec} indicates to the recipient the transition to
 using the just-negotiated keys. As a result, the message is forwarded
 to the \textit{enclave program}, signalling the need for generating
-the session key block, and initializing a cipher specific
+the session key block, and initialising a cipher specific
 context\footnote{\texttt{ChangeCipherSpec} signals the transition to
   the symmetric cipher, indicating that all packets exchanged beyond
   this point are encrypted in the just-negotiated keys. The most
