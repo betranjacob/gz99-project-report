@@ -1,15 +1,82 @@
 \documentclass[../main.tex]{subfiles} 
 \begin{document}   
 
-\noindent 
-Web Servers are now often deployed in the cloud environment. To
-secure communications in the middle of the network between clients and web
-servers, the Internet community has come to rely on the SSL/TLS protocol which
-requires a strong secret (private key) to be stored with the server. However,
-the server administrator in this model is forced to trust the cloud provider
-to not disclose their private key. We propose a modification to legacy web
-servers and cryptographic libraries which secures the sensitive key material
-in the face of a malicious provider, or a compromised operating system, without
-the need to trust the cloud provider and/or operating system.
+Web Servers are now often deployed in the cloud environment. To secure
+communications in the middle of the network between clients and web
+servers, the Internet community has come to rely on the SSL/TLS
+protocol which requires a strong secret (private key) to be stored
+with the server. However, the server administrator in this model is
+forced to trust the cloud provider to not disclose their private key.
+We propose a modification to legacy web servers and cryptographic
+libraries which secures the sensitive key material in the face of a
+malicious provider, a compromised operating system, or a compromised
+hypervisor, without the need to trust the cloud provider, operating
+system, and/or hypervisor. 
+
+To this end, we designed a system that adopts the principle-of-least
+privelege, the idea that each component of a system should have access
+to the minimum resources required for its functioning, and a
+technology from \Intel~called Software Guard Extensions (SGX) to
+isolate the private key. SGX is an extension to \Intel's ISA which
+enables a developer to create protected regions of memory, called an
+enclave, that may only be accessed by the program that initialised it,
+the \textit{enclave program}. We also developed a second design
+that secures the symmetric session key
+
+We split a legacy web server into two components a, low privelege,
+untrusted component that cannot access the private key directly, and a
+high privelege componenet that has ownership of the private key. The
+high privelege component is an \textit{enclave program}, and we use
+SGX to create an enclave where we place the private key via a process
+called remote-attestation, which permits the developer to place
+secrets in an enclave, present on a remote machine, in a secure
+fashion. We carefully define an interface between the untrusted
+componenet and the \textit{enclave program}, to permit the
+establishment of SSL/TLS sessions while maintaining the integrity of
+the private key. The private key is only used to establish a session
+in SSL/TLS. Communications between a client and the server are secured
+by a symmetric session key that is negotiated in the session
+establishment step. Consequently, the interface we define is only
+invoked when establishing a session.
+
+Note, however, the aforementioned design only isolates the private
+key. In fact, the symmetric session keys are left to the untrusted
+component in that design. An attacker, by exploiting the untrusted
+component, can obtain the session keys for all on-going sessions and
+store them for later use. Additionally, by eavesdropping on the
+communication between the client and the server, he can capture all
+the encrypted payloads exchanged. The assailant can then decrypt, on
+another machine, all of these stored payloads, using the session keys
+acquired, and access sensitive user information. We came up with a
+second design that makes this attack more difficult.
+
+The second design places the session keys inside the enclave, and
+allows the untrusted component to access them through an
+encrypt/decrypt interface. While this is an \textit{oracle} for the
+session keys, it is no longer possible for an attacker to acquire the
+session keys and store them to decrypt prior, stored communication.
+The attacker must now actively exploit the server to decrypt payloads,
+and may only decrypt payloads for currently ongoing sessions, a more
+challenging task when compared to the attack described above.
+
+In creating these designs, we aimed to minimise the performance
+penalty incurred due to the execution of additional SGX instructions
+and the partitioning of the web server application. We conducted an
+evaluation of a prototype that we implemented using NGINX, a modern
+web server, LibreSSL, an SSL/TLS library, and OpenSGX, an emulator for
+the SGX instruction set (we used an emulator because we could not
+obtain SGX hardware). Our end-to-end performance evaluation
+demonstrates that the performance penalty exhibited by our prototype
+is 18\% for SSL/TLS cipher suites that do not offer forward secrecy,
+and 30\% for cipher suites that provide forward secrecy for the design
+where session keys are in the untrusted component. When session keys
+are held by the \textit{enclave program}, the performance pelt is 29\%
+for cipher suites that do not offer forward secrecy, and 37\% for
+cipher suites that provide forward secrecy. While the performance
+overhead due to the added security, according to our evaluation, is
+significant, it may be a lucrative trade-off for web server
+administrators who wish to secure their long-term private key against
+the threats mentioned above.
+
 
 \end{document}
