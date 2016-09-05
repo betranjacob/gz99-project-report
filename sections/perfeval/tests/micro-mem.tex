@@ -27,7 +27,7 @@ required to execute a program and the number of LLC misses when
 executing a \texttt{load} instruction. Given those two numbers, the
 fraction of the \enclaveprogram~execution (in CPU cycles) wasted on
 accessing the main memory can be calculated using the equation
-below~\cite{intel-eqn}(According to \Intel, each memory load from DRAM
+below~\cite{intel-eqn} (according to \Intel, each memory load from DRAM
 on an i5-2520M processor consumes approximately 180 CPU cycles).
 
 \begin{align*}
@@ -99,7 +99,7 @@ the full equation.
 Given the results in Table~\ref{tab:mem} we can extrapolate the MEE's
 overhead by making the following assumptions:
 \begin{itemize}
-  \item Each \texttt{load} instruction causes the MEE to decrypt data
+  \item Each \texttt{load} instruction causes the MEE to decrypt data.
   \item We assume that the MEE requires 0.77 cycles to decrypt a byte of data.
     This assumption comes from \cite{cyclesaes} where it was found that
     AES in GCM mode consumes 0.77 cycles per byte of data, and, according to
