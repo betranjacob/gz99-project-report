@@ -14,7 +14,7 @@ to a client's request.
 We run our tests on two Amazon EC2 m4.large instances, one for the
 server and the other for the client, located on different virtual
 machines within the same data center. These machines are comprised of
-2 virtual CPUs with 8 GB RAM and and, according to \textit{iperf} (a
+2 virtual CPUs with 8 GB RAM and, according to \textit{iperf} (a
 network diagnostics tool), the network bandwidth between the two
 machines was 500 Mbits/s. The underlying hardware is an Intel Xeon
 E5-2676 v3 clocked @ 2.4 GHz with 30MB of CPU cache
@@ -119,14 +119,14 @@ execution until the TLB is repopulated. This is emulated in our
 which are used to communicate via the named pipe.
 
 We theorised that the number of context switches would add a
-significant overhead to the handshake step for both cipher suitesThis
+significant overhead to the handshake step for both cipher suites.This
 follows from observing that the \enclaveprogram~does not perform a
 great deal of computation for the handshake operations, as a result,
 the cost of the context switches will be a substantial portion of the
 total overhead incurred. However, for cipher suites that offer forward
-secrecy, the handshake operations for computing the \texttt{Premaster
-  Secret} are computationally more expensive, ameliorating the cost of
-the context switches.
+secrecy, the handshake operations for computing the \texttt{PremasterSecret}
+are computationally more expensive, ameliorating the cost of the context
+switches.
 
 Moreover, we expect to see the context switches added for the session
 keys inside design to be less expensive than those for the handshake.
@@ -152,7 +152,7 @@ these results agree with our hypothesis.
 \end{table}
 
 With regards to the effect of increasing the number of busywait cycles
-on the end-to-end throughput of the web server. We see that the
+on the end-to-end throughput of the web server, we see that the
 performance degrades as we increase the number of busywait cycles.
 Notice that the decrease in performance for RSA is more pronounced
 than that of ECDHE. This is because the handhshake operations for
