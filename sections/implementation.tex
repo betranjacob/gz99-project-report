@@ -236,31 +236,36 @@ facility already available within the OpenSGX library.
 
 \subsection{Implementation Phases and Tools used}
 % \label{subsec:Implementation Phases and Tools used}
-Our primary goal in implementation part was to understand the code
-flow in LibreSSL engine and identify the specific functions and data
-structures that handle server's private key. We used a tool called
-Callgrind to discover the dynamic flow of execution (in NGINX and
-LibreSSL). Callgrind dynamically records the sequence of function
-calls and provides a snapshot of the runtime behaviour of an
-application. We further used a tool called KCachegrind, which
-graphically represents the large amount of data Callgrind produces and
-hence made the navigation easier.
+Our primary goal during the course of implementating our prototype was
+understaning the code flow in LibreSSL, and identifying the specific
+functions and data structures that handled the server's long-term
+private key. We used a tool called Callgrind to uncover the flow of
+execution in NGINX and LibreSSL when an SSL/TLS session is negotiated.
+Callgrind dynamically records the sequence of function calls and
+provides a snapshot of the runtime behaviour of an application. We
+alose used a tool called KCachegrind, which presents Callgrind's output
+in a graphical manner, making it easier to understand.
  
-LibreSSL holds an SSL factory (SSL\_CTX) which can be used to create
-separate SSL objects to identify each individual connection. SSL
-connection object holds the entire data structures related to any
-particular connection and are used to do SSL handshakes routines,
-reads, and writes. In the enclave we created a new SSL\_CTX factory
-and loaded private key and certificate. Furthermore, we maintain a
-separate SSL connection object (SSL) to isolate the data specific to a
-connection.
+Using Callgrinds output, we determined that LibreSSL holds a data
+structure called \texttt{SSL\_CTX} which is used to create an
+\texttt{SSL} object for each connection. The \texttt{SSL_CTX}
+structure is the one that holds the long-term private key. The
+\texttt{SSL} connection object holds all of the data structures
+pertaining to a particular connection, and is used to carry out
+SSL/TLS handshakes routines, reads, and writes. In the \textit{enclave
+  program} we created a \texttt{SSL\_CTX} data structure, initialising
+it with the long-term private key and corresponding public
+certificate. We replaced the private key in LibreSSL's
+\texttt{SSL_CTX} with a dummy value to prevent crashes. Furthermore,
+we maintain an \texttt{SSL} connection object in the \textit{enclave
+  program} for each on-going connection.
  
 Most of the abstract level functions pertaining to private/session key
 isolation were defined in following source files from Libressl
-library.
+library:
 \begin{enumerate}
-  \item s3\_srvr.c
-  \item t1\_enc.c
+  \item \texttt{s3\_srvr.c}
+  \item \texttt{t1\_enc.c}
 \end{enumerate}
  
 When NGINX receives a new HTTPS connection request after a classic
