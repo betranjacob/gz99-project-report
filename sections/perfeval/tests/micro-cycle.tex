@@ -20,7 +20,7 @@ instructions executed for vanilla NGINX + LibreSSL; (2) we measure the
 instruction counts, of modified NGINX and \enclavemodel~(untrusted and trusted
 components) separately; (3) we capture the number and type of SGX instructions
 executed by the \enclaveprogram~during:
-\begin{enumerate}
+\begin{enumerate}[label=3\alph*)]
   \item The enclave startup.
   \item Normal operation.
 \end{enumerate}
@@ -116,3 +116,8 @@ Section~\ref{sec:mem-analysis}.
 % ECDHE requires 8 pairs of context switch more than RSA regardless of the keys outside / inside -> does it agree with the design section?
 
 \end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../../main"
+%%% End:

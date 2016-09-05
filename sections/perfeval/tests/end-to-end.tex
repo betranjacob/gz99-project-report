@@ -72,7 +72,7 @@ point's.
       \addlegendentry{Session Keys Inside \textit{ECDHE}};
     \end{axis}
   \end{tikzpicture}
-  \caption{Rrequests per second vs. busywait cycles}
+  \caption{Requests per second vs. busywait cycles}
   \label{fig:cycles-requests}
 \end{figure}
 
@@ -101,7 +101,7 @@ point's.
   \label{fig:sizreqs}
 \end{figure}
 
-\subsubsection*{Analysis}
+\subsubsection*{Analysis of Figure~\ref{fig:cycles-requests}}
 As discussed in Section \ref{sec:cpu-instr-analysis}, we add an
 overhead of \textasciitilde15\% in additional instructions. This,
 however, does not account for the total overhead we observe in
@@ -142,27 +142,27 @@ as follows:
   \item Session keys inside \textit{ECDHE} is 37\%, leaving 21\%
     attributed to context switches
 \end{itemize}
-We expected the performance penalty to be around 15\%, because each
-context switch causes a TLB flush, which in turn results in slower
-execution until the TLB is repopulated. Figure
-\ref{fig:cycles-requests} validates our hypothesis. It shows a
-performance penalty of \textasciitilde18\% for RSA ciphers and
-\textasciitilde33\% for ECDHE ciphers. Note that, the performance
-degradation between the two isolation scenarios is not linear, as one
-might expect by only observing the increase in the number of context
-switches (+28\%). The overhead is actually not only related
-to the extra number of context switches, but is also related to the
-number of instructions being executed after each context switch
-as well. As shown in Table \ref{tab:cpu-instr-count}, there is
-a fixed 15\% overhead of instructions up to decryption of the
-\premaster. The remaining \textasciitilde13\% overhead originates
-from the extra context switches and executed instructions that occur
-in the design where the session keys reside within the enclave. This
-overhead is not linear because our design only delegates the
-execution of instructions, that were previously executed in the
-untrusted component, to the trusted component. Thus, the cost
-originates only from the extra instructions introduced by SGXBridge
-and not by the instructions required by the SSL/TLS protocol itself.
+
+\subsubsection*{Analysis of Figure~\ref{fig:sizreqs}}
+As the response size increases, we expect to see slight degradation in
+the performance of the prototype where session keys are held inside
+the enclave because the payload has to be copied from the untrusted
+componenet to the \textit{enclave program}. Since this cost is not
+incured by the prototype where session keys are outisde, we do not
+expect to see that penalty.
+
+From Figure~\ref{fig:sizreqs}, we see that, for session keys outside,
+the line is flatter than for session keys inside confirming our
+hypothesis. Yet, the performance of our prototype and the stock
+implementation begins to decrease significantly for as we increase
+response size past 128 KB. This is due to the network becoming
+saturated with outgoing responses. The network bandwidth on the
+machine we used is approximately 560Mb/sec which is 70MB/sec. At 128
+KB, the stock implementation creates 500 responses/sec, sending 64
+MB/sec to clients which is very close to the maximum link capacity.
+Since our prototype generates a lesser number of requests in
+comparison to the stock implementations, this also explains why the
+decrease is not as fast, initially, for our prototype. 
 
 % TODO: document keys inside/outside for the first graph TODO:
 % document the second graph
