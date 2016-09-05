@@ -248,7 +248,7 @@ in a graphical manner, making it easier to understand.
  
 Using Callgrind's output, we determined that LibreSSL holds a data
 structure called \texttt{SSL\_CTX} which is used to create an
-\texttt{SSL} object for each connection. The \texttt{SSL_CTX}
+\texttt{SSL} object for each connection. The \texttt{SSL\_CTX}
 structure is the one that holds the long-term private key. The
 \texttt{SSL} connection object holds all of the data structures
 pertaining to a particular connection, and is used to carry out
@@ -256,7 +256,7 @@ SSL/TLS handshakes routines, reads, and writes. In the \textit{enclave
   program} we created a \texttt{SSL\_CTX} data structure, initialising
 it with the long-term private key and corresponding public
 certificate. We replaced the private key in LibreSSL's
-\texttt{SSL_CTX} with a dummy value to prevent crashes. Furthermore,
+\texttt{SSL\_CTX} with a dummy value to prevent crashes. Furthermore,
 we maintain an \texttt{SSL} connection object in the \textit{enclave
   program} for each on-going connection.
  
@@ -270,7 +270,7 @@ library:
  
 When NGINX receives a new HTTPS connection, it invokes the
 \texttt{SSL\_accept()} which causes the LibreSSL to perform the server
-side of the SSL/TLS handshake.\texttt{SSL_accept()} blocks until the
+side of the SSL/TLS handshake.\texttt{SSL\_accept()} blocks until the
 handshake is complete. We performed a comprehensive review of every
 switch-case within this API, and identified various internal functions
 (and associated data structures) invoked during the different steps
